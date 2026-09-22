@@ -6,9 +6,11 @@ Raw ideas as they come, unfiltered — this is a scratchpad, not the build spec.
 
 ## Updates
 
-### Character customization
-- Want players to be able to customize their Tamagotchi character
-- Claude's proposal (not yet decided): quick color-swatch picker (4-6 options) + optional name, on the Start screen before hatching — keep it a few seconds, not a full creator screen, since booth throughput matters. Combines with the existing care-quality evolution branch (form) for a two-axis "your pick + your care" combo per run.
+### Character customization — done
+- **Built:** a 5-swatch color picker + optional 10-character pet name on the Start screen, before hatching.
+- The chosen color is the pet's base identity through Baby/Child; at the ~40s branch point, the locked-in form (Glimmerling/Wobblet/Grumplet) tints that same base color — brighter/more saturated for Glimmerling, desaturated for Wobblet, desaturated-and-darker for Grumplet — so the result is genuinely "your pick + your care," not just a fixed color per form.
+- The pet's name shows during play and on the result screen ("SPARKLES the GLIMMERLING"); it's separate from the leaderboard name entry (player identity vs. pet identity).
+- Selection persists across "go again" (defaults to your last pick) rather than resetting each run.
 
 ### More interactive care (again)
 - Wants the caretaking part even more interactive than the current drag/tap/hold gesture set — see Talking Angela note below, likely the main lever for this.
@@ -21,10 +23,9 @@ Raw ideas as they come, unfiltered — this is a scratchpad, not the build spec.
   - Reward: bigger than a normal tap — e.g. +15-20 happy on success, small +2 consolation on a miss
   - **Decided:** everything else pauses during the bonus round — no-risk reward, hunger/poop/discipline/sickness decay all hold while it's active
 
-### Instructions displayed longer
-- Wants the icon legend (currently spec'd at ~2s during Hatching) shown longer so first-time players can actually read it
-- Claude's proposal: extend the fixed duration to ~5s as the direct fix. Worth considering instead/also: make it **tap-to-continue** rather than a hard timer — auto-advance after ~6-8s as a fallback, but let anyone who already knows the icons (repeat players over the course of the day) tap through immediately. Serves both first-timers and repeat players better than one fixed number can.
-- **Open — which approach (fixed 5s vs. tap-to-continue) does Toni want?**
+### Instructions displayed longer — done
+- **Decided (2026-09-22):** tap-to-continue, not a fixed duration.
+- **Built:** the icon legend now advances the moment the player taps anywhere on it, with a 7s auto-advance fallback (~8.5s total from hatch) for anyone who doesn't tap. Serves first-timers (who get the longer fallback if they need it) and repeat players (who can skip through instantly) without picking one fixed number for everyone.
 
 ### Pet visibly gets dirty (poop feedback)
 - Wants the pet itself to visibly get dirty so it's obvious cleaning is needed, not just the poop icon sitting next to it

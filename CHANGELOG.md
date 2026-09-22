@@ -2,6 +2,24 @@
 
 All notable changes to the `tamagotchi-speedrun.html` booth game are logged here.
 
+## 2026-09-22 — Customization + legend timing
+
+Two items from `tamagotchi-speedrun-updates.md`, built after confirming scope.
+
+**Added**
+- Character customization on the Start screen: a 5-color swatch picker plus an
+  optional pet name (10 chars). The picked color carries through as the pet's
+  base identity at Baby/Child, then gets tinted by the locked-in evolution
+  form at the ~40s branch point (brighter/more saturated for Glimmerling,
+  desaturated for Wobblet, desaturated-and-darker for Grumplet) — a two-axis
+  "your pick + your care" result per run. The pet's name shows during play
+  and on the result screen, separate from the leaderboard's player-name entry.
+
+**Changed**
+- The hatching icon legend no longer auto-advances on a fixed timer. It now
+  advances on tap (repeat players can skip through immediately) with a 7s
+  fallback (~8.5s total from hatch) for anyone who doesn't tap.
+
 ## 2026-09-22 — Authenticity pass
 
 Rebuilt the mechanics to track the real 1997 Tamagotchi's actual systems, replacing
