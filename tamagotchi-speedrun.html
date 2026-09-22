@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Tamagotchi Speedrun</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐣</text></svg>">
+<style>
+  :root {
+    --pink: #FFD6E8;
+    --lavender: #E3D4FF;
+    --baby-blue: #CFEFFF;
+    --cream: #FFF8F2;
+    --accent: #FF5FA2;
+    --gold: #FFD873;
+    --ink: #4A2E55;
+    --font-display: "Baloo 2", "Trebuchet MS", "Comic Sans MS", cursive, sans-serif;
+    --font-body: "Quicksand", "Trebuchet MS", "Segoe UI", sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--ink);
+    background: linear-gradient(135deg, var(--pink), var(--lavender) 50%, var(--baby-blue));
+    background-size: 260% 260%;
+    animation: bgShift 16s ease infinite;
+  }
+
+  @keyframes bgShift {
+    0% { background-position: 0% 40%; }
+    50% { background-position: 100% 60%; }
+    100% { background-position: 0% 40%; }
+  }
+
+  #app {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .bg-blobs {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background-image:
+      radial-gradient(circle, rgba(255,255,255,0.6) 2px, transparent 2.5px),
+      radial-gradient(circle, rgba(255,255,255,0.5) 1.5px, transparent 2px);
+    background-size: 110px 110px, 70px 70px;
+    background-position: 0 0, 35px 50px;
+    opacity: 0.5;
+  }
+
+  .screen {
+    display: none;
+    position: absolute;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .screen.active { display: flex; }
+
+  .panel {
+    background: var(--cream);
+    border-radius: 32px;
+    box-shadow: 0 20px 50px rgba(74, 46, 85, 0.25);
+    padding: 36px 32px;
+    max-width: 520px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 2rem;
+    margin: 12px 0 6px;
+    color: var(--accent);
+  }
+
+  .subtitle {
+    font-size: 1.05rem;
+    line-height: 1.5;
+    margin-bottom: 22px;
+  }
+
+  .btn {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 1.15rem;
+    padding: 14px 30px;
+    min-height: 48px;
+    min-width: 44px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .btn-primary {
+    background: linear-gradient(90deg, var(--accent), #ff8fc0);
+    color: white;
+    box-shadow: 0 6px 0 rgba(255, 95, 162, 0.35);
+  }
+
+  .btn-primary:active { transform: translateY(3px); box-shadow: 0 3px 0 rgba(255, 95, 162, 0.35); }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--ink);
+    border: 2px solid var(--lavender);
+  }
+
+  .btn:focus-visible, input:focus-visible, .mute-btn:focus-visible {
+    outline: 3px solid var(--gold);
+    outline-offset: 2px;
+  }
+
+  .privacy-line {
+    margin-top: 20px;
+    font-size: 0.8rem;
+    color: #8a7391;
+  }
+
+  /* ---------- start / egg ---------- */
+
+  .egg-wrap { margin-bottom: 8px; }
+
+  .egg { transform-origin: 50% 90%; }
+
+  [data-screen="start"].active .egg {
+    animation: eggWobble 2.6s ease-in-out infinite;
+  }
+
+  @keyframes eggWobble {
+    0%, 100% { transform: rotate(-4deg); }
+    50% { transform: rotate(4deg); }
+  }
+
+  .egg-sparkles text { opacity: 0.8; }
+
+  /* ---------- hatching ---------- */
+
+  .hatching-panel .egg {
+    animation: eggShake 0.18s linear infinite;
+  }
+
+  .hatching-panel .egg.egg-flash {
+    animation: eggFlash 0.3s ease-out forwards;
+  }
+
+  @keyframes eggShake {
+    0%, 100% { transform: rotate(-3deg) translateX(0); }
+    50% { transform: rotate(3deg) translateX(3px); }
+  }
+
+  @keyframes eggFlash {
+    0% { transform: scale(1); }
+    60% { transform: scale(1.25); filter: brightness(1.6); }
+    100% { transform: scale(1.4); opacity: 0; }
+  }
+
+  .hatching-text {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    margin-top: 8px;
+    color: var(--accent);
+  }
+
+  /* ---------- play screen ---------- */
+
+  #screen-play {
+    justify-content: flex-start;
+    padding-top: 12px;
+  }
+
+  .hud {
+    width: 100%;
+    max-width: 520px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,248,242,0.9);
+    border-radius: 20px;
+    padding: 10px 14px;
+    box-shadow: 0 8px 24px rgba(74,46,85,0.18);
+  }
+
+  .stat-bars {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .stat-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .stat-icon { font-size: 1rem; width: 20px; text-align: center; }
+
+  .bar-track {
+    flex: 1;
+    height: 12px;
+    border-radius: 999px;
+    background: rgba(74,46,85,0.12);
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    width: 100%;
+    border-radius: 999px;
+    transition: width 0.25s ease, background 0.25s ease;
+  }
+
+  .bar-hunger { background: linear-gradient(90deg, #ff8fc0, var(--accent)); }
+  .bar-happy { background: linear-gradient(90deg, #ffc2de, #ff5fa2); }
+  .bar-energy { background: linear-gradient(90deg, #b9f0ff, #5fc9ff); }
+  .bar-fill.low { background: linear-gradient(90deg, #ff9d9d, #ff4d4d); }
+
+  .timer {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--ink);
+    min-width: 64px;
+    text-align: center;
+  }
+
+  .mute-btn {
+    font-size: 1.2rem;
+    min-width: 44px;
+    min-height: 44px;
+    border-radius: 999px;
+    border: none;
+    background: var(--lavender);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .stage {
+    position: relative;
+    width: 100%;
+    max-width: 520px;
+    flex: 1;
+    min-height: 320px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 14px;
+  }
+
+  .pet-wrap {
+    position: relative;
+    touch-action: none;
+    user-select: none;
+    animation: petBob 3.2s ease-in-out infinite;
+  }
+
+  @keyframes petBob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  .pet-body { fill: #ffb3d6; transition: fill 0.4s ease; }
+  .pet-gloss { fill: #ffffff; opacity: 0.55; }
+  .pet-shadow { fill: rgba(74,46,85,0.15); }
+  .pet-eye { fill: var(--ink); transition: transform 0.15s ease; transform-origin: center; }
+  .pet-mouth { fill: none; stroke: var(--ink); stroke-width: 3; stroke-linecap: round; }
+  .pet-sparkle { opacity: 0; transition: opacity 0.4s ease; }
+
+  .pet--stage2 .pet-body { fill: #ff9bcb; }
+  .pet--stage2 .pet-wrap-svg { transform: scale(1.08); }
+  .pet--stage3 .pet-body { fill: #ff7fbd; }
+  .pet--stage3 .pet-sparkle { opacity: 1; }
+
+  .pet-wrap.pet--stage2 svg { transform: scale(1.1); }
+  .pet-wrap.pet--stage3 svg { transform: scale(1.22); }
+
+  .pet-wrap.pet--pressed .pet-eye { transform: scale(1.35); }
+
+  .pet-wrap.pet--glance .pet-eye {
+    animation: glance 0.4s ease;
+  }
+
+  @keyframes glance {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(3px); }
+  }
+
+  .pet-wrap.pet--levelup svg {
+    animation: levelPop 0.5s ease;
+  }
+
+  @keyframes levelPop {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.3) rotate(-4deg); }
+    70% { transform: scale(1.15) rotate(3deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+
+  .mouth-target {
+    position: absolute;
+    left: 50%;
+    top: 66%;
+    width: 34px;
+    height: 34px;
+    border: 2px dashed rgba(74,46,85,0.25);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .combo-pop {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%) scale(0.6);
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--gold);
+    text-shadow: 0 2px 0 var(--accent);
+    font-size: 1.3rem;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .combo-pop.show {
+    animation: comboPop 0.8s ease forwards;
+  }
+
+  @keyframes comboPop {
+    0% { opacity: 0; transform: translateX(-50%) translateY(0) scale(0.6); }
+    25% { opacity: 1; transform: translateX(-50%) translateY(-20px) scale(1.15); }
+    70% { opacity: 1; transform: translateX(-50%) translateY(-28px) scale(1); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-40px) scale(1); }
+  }
+
+  .food-item {
+    position: absolute;
+    left: 50%;
+    bottom: 6%;
+    transform: translate(-50%, 0);
+    font-size: 2.4rem;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    filter: drop-shadow(0 4px 6px rgba(74,46,85,0.25));
+    transition: left 0.25s ease, top 0.25s ease, transform 0.25s ease;
+    z-index: 5;
+  }
+
+  .food-item.dragging {
+    transition: none;
+    cursor: grabbing;
+  }
+
+  .food-item.eaten {
+    opacity: 0;
+    transform: translate(-50%, 0) scale(0.3);
+  }
+
+  .food-pop {
+    position: absolute;
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--accent);
+    font-size: 1rem;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 6;
+  }
+
+  .food-pop.show {
+    animation: foodPop 0.7s ease forwards;
+  }
+
+  @keyframes foodPop {
+    0% { opacity: 0; transform: translateY(0); }
+    20% { opacity: 1; }
+    100% { opacity: 0; transform: translateY(-30px); }
+  }
+
+  /* ---------- result screen ---------- */
+
+  .result-panel { max-width: 480px; }
+
+  .verdict {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    color: var(--accent);
+    margin: 4px 0 6px;
+  }
+
+  .result-meta {
+    font-size: 0.95rem;
+    margin-bottom: 18px;
+    color: var(--ink);
+  }
+
+  .name-entry {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+
+  #name-input {
+    font-family: var(--font-body);
+    font-size: 1rem;
+    padding: 12px 16px;
+    min-height: 44px;
+    border-radius: 999px;
+    border: 2px solid var(--lavender);
+    text-align: center;
+  }
+
+  .name-entry-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .leaderboard {
+    background: rgba(227, 212, 255, 0.35);
+    border-radius: 20px;
+    padding: 14px 16px;
+    margin-bottom: 20px;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+
+  .leaderboard h3 {
+    font-family: var(--font-display);
+    margin: 0 0 8px;
+    font-size: 1.1rem;
+    cursor: default;
+  }
+
+  #leaderboard-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    text-align: left;
+    font-size: 0.9rem;
+  }
+
+  #leaderboard-list li {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 2px;
+    border-bottom: 1px dashed rgba(74,46,85,0.15);
+  }
+
+  #leaderboard-list li:last-child { border-bottom: none; }
+
+  .lb-empty { color: #8a7391; font-size: 0.85rem; }
+
+  .sr-only {
+    position: absolute;
+    width: 1px; height: 1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="bg-blobs" aria-hidden="true"></div>
+
+  <section class="screen active" data-screen="start" id="screen-start">
+    <div class="panel start-panel">
+      <div class="egg-wrap" aria-hidden="true">
+        <svg class="egg" viewBox="0 0 120 140" width="110" height="128">
+          <ellipse cx="60" cy="72" rx="50" ry="60" fill="#fff" stroke="#FF5FA2" stroke-width="4"/>
+          <ellipse cx="42" cy="46" rx="13" ry="8" fill="#fff" opacity="0.9"/>
+          <g class="egg-sparkles">
+            <text x="8" y="34" font-size="16">✨</text>
+            <text x="90" y="106" font-size="14">✨</text>
+          </g>
+        </svg>
+      </div>
+      <h1 class="title">Tamagotchi Speedrun</h1>
+      <p class="subtitle">Feed it. Play with it. Let it sleep.<br>Keep it alive for 2 minutes.</p>
+      <button class="btn btn-primary" id="hatch-btn">Hatch! 🐣</button>
+      <p class="privacy-line">🔒 Nothing leaves this device — fully offline.</p>
+    </div>
+  </section>
+
+  <section class="screen" data-screen="hatching" id="screen-hatching">
+    <div class="panel hatching-panel">
+      <svg class="egg" id="hatch-egg" viewBox="0 0 120 140" width="130" height="150">
+        <ellipse cx="60" cy="72" rx="50" ry="60" fill="#fff" stroke="#FF5FA2" stroke-width="4"/>
+        <ellipse cx="42" cy="46" rx="13" ry="8" fill="#fff" opacity="0.9"/>
+      </svg>
+      <p class="hatching-text">hatching...</p>
+    </div>
+  </section>
+
+  <section class="screen" data-screen="play" id="screen-play">
+    <header class="hud">
+      <div class="stat-bars">
+        <div class="stat-row">
+          <span class="stat-icon" aria-hidden="true">🍓</span>
+          <div class="bar-track"><div class="bar-fill bar-hunger" id="bar-hunger"></div></div>
+        </div>
+        <div class="stat-row">
+          <span class="stat-icon" aria-hidden="true">💗</span>
+          <div class="bar-track"><div class="bar-fill bar-happy" id="bar-happy"></div></div>
+        </div>
+        <div class="stat-row">
+          <span class="stat-icon" aria-hidden="true">⭐</span>
+          <div class="bar-track"><div class="bar-fill bar-energy" id="bar-energy"></div></div>
+        </div>
+      </div>
+      <div class="timer" id="timer">0:00.0</div>
+      <button class="mute-btn" id="mute-btn" aria-label="Mute sound" aria-pressed="false">🔊</button>
+    </header>
+
+    <div class="stage" id="stage">
+      <div class="pet-wrap pet--stage1" id="pet-wrap">
+        <svg id="pet-svg" viewBox="0 0 200 200" width="180" height="180">
+          <ellipse class="pet-shadow" cx="100" cy="182" rx="55" ry="10"></ellipse>
+          <ellipse class="pet-body" cx="100" cy="105" rx="70" ry="65"></ellipse>
+          <ellipse class="pet-gloss" cx="72" cy="75" rx="20" ry="13"></ellipse>
+          <circle class="pet-eye pet-eye-l" cx="78" cy="100" r="7"></circle>
+          <circle class="pet-eye pet-eye-r" cx="122" cy="100" r="7"></circle>
+          <path class="pet-mouth" d="M 86 122 Q 100 132 114 122"></path>
+          <g class="pet-sparkle">
+            <text x="148" y="55" font-size="22">✨</text>
+          </g>
+        </svg>
+        <div class="mouth-target" id="mouth-target" aria-hidden="true"></div>
+        <div class="combo-pop" id="combo-pop">combo!</div>
+      </div>
+
+      <div class="food-item" id="food-item" aria-label="Food, drag onto the pet's mouth" role="img">🍓</div>
+    </div>
+  </section>
+
+  <section class="screen" data-screen="result" id="screen-result">
+    <div class="panel result-panel">
+      <h2 class="verdict" id="verdict-text">STARVING FOR ATTENTION</h2>
+      <p class="result-meta" id="result-meta"></p>
+
+      <div class="name-entry" id="name-entry">
+        <label for="name-input" class="sr-only">Your name</label>
+        <input type="text" id="name-input" maxlength="12" placeholder="enter your name" autocomplete="off">
+        <div class="name-entry-actions">
+          <button class="btn btn-primary" id="save-score-btn">Save score</button>
+          <button class="btn btn-ghost" id="skip-score-btn">Skip</button>
+        </div>
+      </div>
+
+      <div class="leaderboard">
+        <h3 id="leaderboard-title">🏆 Leaderboard</h3>
+        <ol id="leaderboard-list"></ol>
+      </div>
+
+      <button class="btn btn-primary btn-again" id="again-btn">Go again</button>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // ============================================================
+  // STATE
+  // ============================================================
+
+  const DECAY_PER_SEC = { hunger: 1.15, happy: 1.05, energy: 0.95 };
+  const HOLD_THRESHOLD_MS = 200;
+  const SLEEP_ENERGY_GAIN_PER_SEC = 8;
+  const SLEEP_HUNGER_DRAIN_PER_SEC = 1;
+  const TAP_HAPPY_DELTA = 4;
+  const TAP_ENERGY_DELTA = -1;
+  const COMBO_WINDOW_MS = 1000;
+  const COMBO_TAP_COUNT = 3;
+  const COMBO_HAPPY_BONUS = 2;
+  const FEED_HUNGER_DELTA = 15;
+  const FEED_HAPPY_DELTA = 3;
+  const FOOD_RESPAWN_MS = 400;
+  const CHECK_IN_INTERVAL_S = 15;
+  const WIN_TIME_S = 120;
+  const LB_KEY = "tamagotchi-leaderboard";
+  const LB_MAX = 10;
+
+  const state = {
+    screen: "start",
+    stats: { hunger: 100, happy: 100, energy: 100 },
+    stage: 1,
+    survivalTime: 0,
+    endReason: null,
+    currentVerdict: "",
+    input: {
+      pressStart: null,
+      holding: false,
+      tapTimestamps: [],
+      draggingFoodId: null,
+    },
+    audio: { muted: false },
+  };
+
+  let lastPulseBucket = 0;
+
+  const VERDICTS = {
+    hunger: ["STARVING FOR ATTENTION", "FORGOT TO FEED IT — CLASSIC"],
+    happy: ["TOO SAD TO CONTINUE", "NEEDED MORE HUGS"],
+    energy: ["RAN OUT OF JUICE", "CRASHED HARDER THAN YOUR LAPTOP"],
+    win: ["THRIVING!", "CERTIFIED GOOD BLOOMSTER", "MAIN CHARACTER ENERGY"],
+  };
+
+  const STAGE_LABELS = { 1: "Baby", 2: "Growing", 3: "Thriving" };
+
+  function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
+  function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+  // ============================================================
+  // AUDIO  (Web Audio oscillators only — no files, no network)
+  // ============================================================
+
+  const audio = { ctx: null, masterGain: null, settleOsc: null, settleGain: null };
+
+  function ensureAudioContext() {
+    if (audio.ctx) return;
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    audio.ctx = new Ctx();
+    audio.masterGain = audio.ctx.createGain();
+    audio.masterGain.gain.value = state.audio.muted ? 0 : 0.2;
+    audio.masterGain.connect(audio.ctx.destination);
+  }
+
+  function setMuted(muted) {
+    state.audio.muted = muted;
+    if (!audio.masterGain) return;
+    const target = muted ? 0 : 0.2;
+    audio.masterGain.gain.linearRampToValueAtTime(target, audio.ctx.currentTime + 0.08);
+  }
+
+  function tone(freq, durationMs, opts) {
+    if (!audio.ctx) return;
+    opts = opts || {};
+    const type = opts.type || "sine";
+    const delayMs = opts.delayMs || 0;
+    const peakGain = opts.peakGain != null ? opts.peakGain : 0.5;
+    const endFreq = opts.endFreq;
+
+    const t0 = audio.ctx.currentTime + delayMs / 1000;
+    const dur = durationMs / 1000;
+
+    const osc = audio.ctx.createOscillator();
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, t0);
+    if (endFreq) osc.frequency.linearRampToValueAtTime(endFreq, t0 + dur);
+
+    const g = audio.ctx.createGain();
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(peakGain, t0 + Math.min(0.015, dur / 3));
+    g.gain.linearRampToValueAtTime(0, t0 + dur);
+
+    osc.connect(g);
+    g.connect(audio.masterGain);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.02);
+  }
+
+  function sfxChomp() { tone(300, 90, { type: "sine", endFreq: 500, peakGain: 0.5 }); }
+  function sfxBounce() { tone(600, 60, { type: "square", peakGain: 0.3 }); }
+  function sfxCombo() {
+    [523, 659, 784].forEach((f, i) => tone(f, 100, { type: "triangle", delayMs: i * 90, peakGain: 0.4 }));
+  }
+  function sfxLevelUp() {
+    tone(784, 110, { type: "sine", peakGain: 0.4 });
+    tone(1046, 160, { type: "sine", delayMs: 100, peakGain: 0.45 });
+  }
+  function sfxCheckIn() { tone(1000, 30, { type: "sine", peakGain: 0.12 }); }
+  function sfxGameOver() { tone(440, 500, { type: "sawtooth", endFreq: 200, peakGain: 0.35 }); }
+  function sfxWin() {
+    [523, 659, 784, 1046].forEach((f, i) => tone(f, 140, { type: "triangle", delayMs: i * 100, peakGain: 0.45 }));
+  }
+
+  function settleStart() {
+    if (!audio.ctx) return;
+    settleStop();
+    const osc = audio.ctx.createOscillator();
+    osc.type = "sine";
+    osc.frequency.value = 220;
+    const g = audio.ctx.createGain();
+    g.gain.setValueAtTime(0, audio.ctx.currentTime);
+    g.gain.linearRampToValueAtTime(0.15, audio.ctx.currentTime + 0.15);
+    osc.connect(g);
+    g.connect(audio.masterGain);
+    osc.start();
+    audio.settleOsc = osc;
+    audio.settleGain = g;
+  }
+
+  function settleStop() {
+    if (!audio.settleOsc) return;
+    const osc = audio.settleOsc;
+    const g = audio.settleGain;
+    const now = audio.ctx.currentTime;
+    g.gain.cancelScheduledValues(now);
+    g.gain.setValueAtTime(g.gain.value, now);
+    g.gain.linearRampToValueAtTime(0, now + 0.2);
+    osc.stop(now + 0.25);
+    audio.settleOsc = null;
+    audio.settleGain = null;
+  }
+
+  // ============================================================
+  // LEADERBOARD
+  // ============================================================
+
+  function loadLeaderboard() {
+    try {
+      const raw = localStorage.getItem(LB_KEY);
+      const list = raw ? JSON.parse(raw) : [];
+      return Array.isArray(list) ? list : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  function saveLeaderboard(list) {
+    try { localStorage.setItem(LB_KEY, JSON.stringify(list)); } catch (e) { /* storage unavailable */ }
+  }
+
+  function addLeaderboardEntry(entry) {
+    const list = loadLeaderboard();
+    list.push(entry);
+    list.sort((a, b) => b.survivalTime - a.survivalTime);
+    const capped = list.slice(0, LB_MAX);
+    saveLeaderboard(capped);
+    return capped;
+  }
+
+  function formatTime(seconds) {
+    const m = Math.floor(seconds / 60);
+    const s = seconds - m * 60;
+    return m + ":" + (s < 10 ? "0" : "") + s.toFixed(1);
+  }
+
+  function renderLeaderboard() {
+    const list = loadLeaderboard();
+    const el = document.getElementById("leaderboard-list");
+    el.innerHTML = "";
+    if (list.length === 0) {
+      const li = document.createElement("li");
+      li.className = "lb-empty";
+      li.textContent = "No runs yet — be the first!";
+      el.appendChild(li);
+      return;
+    }
+    list.forEach((entry, i) => {
+      const li = document.createElement("li");
+      const left = document.createElement("span");
+      left.textContent = (i + 1) + ". " + entry.name;
+      const right = document.createElement("span");
+      right.textContent = formatTime(entry.survivalTime) + " · " + (STAGE_LABELS[entry.stage] || "");
+      li.appendChild(left);
+      li.appendChild(right);
+      el.appendChild(li);
+    });
+  }
+
+  // ============================================================
+  // SCREEN MANAGEMENT
+  // ============================================================
+
+  const screens = {
+    start: document.getElementById("screen-start"),
+    hatching: document.getElementById("screen-hatching"),
+    play: document.getElementById("screen-play"),
+    result: document.getElementById("screen-result"),
+  };
+
+  function showScreen(name) {
+    state.screen = name;
+    Object.values(screens).forEach((s) => s.classList.remove("active"));
+    screens[name].classList.add("active");
+  }
+
+  // ============================================================
+  // DOM REFS
+  // ============================================================
+
+  const petWrap = document.getElementById("pet-wrap");
+  const petSvg = document.getElementById("pet-svg");
+  const stageEl = document.getElementById("stage");
+  const foodEl = document.getElementById("food-item");
+  const mouthTarget = document.getElementById("mouth-target");
+  const comboPopEl = document.getElementById("combo-pop");
+  const barHunger = document.getElementById("bar-hunger");
+  const barHappy = document.getElementById("bar-happy");
+  const barEnergy = document.getElementById("bar-energy");
+  const timerEl = document.getElementById("timer");
+  const muteBtn = document.getElementById("mute-btn");
+  const hatchEgg = document.getElementById("hatch-egg");
+  const nameInput = document.getElementById("name-input");
+  const nameEntry = document.getElementById("name-entry");
+  const verdictText = document.getElementById("verdict-text");
+  const resultMeta = document.getElementById("result-meta");
+  const leaderboardTitle = document.getElementById("leaderboard-title");
+
+  // ============================================================
+  // RUN LIFECYCLE
+  // ============================================================
+
+  let foodSpawn = { left: "50%", bottom: "6%" };
+
+  function resetRunState() {
+    state.stats = { hunger: 100, happy: 100, energy: 100 };
+    state.stage = 1;
+    state.survivalTime = 0;
+    state.endReason = null;
+    state.input = { pressStart: null, holding: false, tapTimestamps: [], draggingFoodId: null };
+    lastPulseBucket = 0;
+
+    petWrap.classList.remove("pet--stage2", "pet--stage3", "pet--pressed", "pet--glance", "pet--levelup");
+    petWrap.classList.add("pet--stage1");
+
+    foodEl.classList.remove("eaten", "dragging");
+    foodEl.style.left = foodSpawn.left;
+    foodEl.style.bottom = foodSpawn.bottom;
+    foodEl.style.top = "";
+    foodEl.style.transform = "translate(-50%, 0)";
+
+    renderStatBars();
+    renderTimer();
+  }
+
+  function applyDeltas(deltas) {
+    for (const k in deltas) {
+      state.stats[k] = clamp(state.stats[k] + deltas[k], 0, 100);
+    }
+  }
+
+  function renderStatBars() {
+    [["hunger", barHunger], ["happy", barHappy], ["energy", barEnergy]].forEach(([key, el]) => {
+      const v = state.stats[key];
+      el.style.width = v + "%";
+      el.classList.toggle("low", v <= 25);
+    });
+  }
+
+  function renderTimer() {
+    timerEl.textContent = formatTime(state.survivalTime);
+  }
+
+  function updateStageForTime() {
+    const t = state.survivalTime;
+    const newStage = t < 20 ? 1 : t < 50 ? 2 : 3;
+    if (newStage !== state.stage) {
+      state.stage = newStage;
+      petWrap.classList.remove("pet--stage1", "pet--stage2", "pet--stage3");
+      petWrap.classList.add("pet--stage" + newStage);
+      petWrap.classList.remove("pet--levelup");
+      void petWrap.offsetWidth;
+      petWrap.classList.add("pet--levelup");
+      sfxLevelUp();
+    }
+  }
+
+  function checkCheckInPulse() {
+    const bucket = Math.floor(state.survivalTime / CHECK_IN_INTERVAL_S);
+    if (bucket > lastPulseBucket && bucket > 0) {
+      lastPulseBucket = bucket;
+      petWrap.classList.remove("pet--glance");
+      void petWrap.offsetWidth;
+      petWrap.classList.add("pet--glance");
+      sfxCheckIn();
+    }
+  }
+
+  function checkEndConditions() {
+    const order = ["hunger", "happy", "energy"];
+    for (let i = 0; i < order.length; i++) {
+      if (state.stats[order[i]] <= 0) {
+        triggerLoss(order[i]);
+        return;
+      }
+    }
+    if (state.survivalTime >= WIN_TIME_S) {
+      triggerWin();
+    }
+  }
+
+  function triggerLoss(reason) {
+    settleStop();
+    sfxGameOver();
+    state.endReason = reason;
+    state.currentVerdict = pickRandom(VERDICTS[reason]);
+    finishRun();
+  }
+
+  function triggerWin() {
+    settleStop();
+    sfxWin();
+    state.endReason = "win";
+    state.currentVerdict = pickRandom(VERDICTS.win);
+    finishRun();
+  }
+
+  function finishRun() {
+    verdictText.textContent = state.currentVerdict;
+    resultMeta.textContent =
+      STAGE_LABELS[state.stage] + " · survived " + formatTime(state.survivalTime);
+    nameInput.value = "";
+    nameEntry.style.display = "";
+    renderLeaderboard();
+    showScreen("result");
+  }
+
+  function commitScore(name) {
+    addLeaderboardEntry({
+      name: name,
+      survivalTime: state.survivalTime,
+      stage: state.stage,
+      verdict: state.currentVerdict,
+      timestamp: Date.now(),
+    });
+    renderLeaderboard();
+    nameEntry.style.display = "none";
+  }
+
+  // ============================================================
+  // INPUT HANDLING — pet tap vs. hold
+  // ============================================================
+
+  function registerTap() {
+    sfxBounce();
+    applyDeltas({ happy: TAP_HAPPY_DELTA, energy: TAP_ENERGY_DELTA });
+    renderStatBars();
+
+    const now = performance.now();
+    state.input.tapTimestamps.push(now);
+    state.input.tapTimestamps = state.input.tapTimestamps.filter((t) => now - t <= COMBO_WINDOW_MS);
+    if (state.input.tapTimestamps.length >= COMBO_TAP_COUNT) {
+      applyDeltas({ happy: COMBO_HAPPY_BONUS });
+      renderStatBars();
+      sfxCombo();
+      comboPopEl.classList.remove("show");
+      void comboPopEl.offsetWidth;
+      comboPopEl.classList.add("show");
+      state.input.tapTimestamps = [];
+    }
+  }
+
+  function beginSleepGain() {
+    settleStart();
+  }
+
+  function endSleepGain() {
+    settleStop();
+  }
+
+  petWrap.addEventListener("pointerdown", (e) => {
+    if (state.screen !== "play") return;
+    if (state.input.draggingFoodId) return;
+    ensureAudioContext();
+    e.preventDefault();
+    petWrap.setPointerCapture(e.pointerId);
+    state.input.pressStart = performance.now();
+    state.input.holding = false;
+    petWrap.classList.add("pet--pressed");
+  });
+
+  function releasePetPress() {
+    if (state.input.holding) {
+      endSleepGain();
+    } else if (state.input.pressStart !== null) {
+      registerTap();
+    }
+    state.input.pressStart = null;
+    state.input.holding = false;
+    petWrap.classList.remove("pet--pressed");
+  }
+
+  petWrap.addEventListener("pointerup", (e) => {
+    if (state.screen !== "play") return;
+    releasePetPress();
+  });
+
+  petWrap.addEventListener("pointercancel", () => {
+    if (state.screen !== "play") return;
+    state.input.pressStart = null;
+    state.input.holding = false;
+    petWrap.classList.remove("pet--pressed");
+    settleStop();
+  });
+
+  // ============================================================
+  // INPUT HANDLING — food drag
+  // ============================================================
+
+  let dragOffset = { x: 0, y: 0 };
+
+  foodEl.addEventListener("pointerdown", (e) => {
+    if (state.screen !== "play") return;
+    ensureAudioContext();
+    e.preventDefault();
+    foodEl.setPointerCapture(e.pointerId);
+    state.input.draggingFoodId = "food";
+    foodEl.classList.add("dragging");
+    const rect = foodEl.getBoundingClientRect();
+    dragOffset.x = e.clientX - (rect.left + rect.width / 2);
+    dragOffset.y = e.clientY - (rect.top + rect.height / 2);
+  });
+
+  foodEl.addEventListener("pointermove", (e) => {
+    if (!state.input.draggingFoodId) return;
+    const stageRect = stageEl.getBoundingClientRect();
+    const x = e.clientX - dragOffset.x - stageRect.left;
+    const y = e.clientY - dragOffset.y - stageRect.top;
+    foodEl.style.left = x + "px";
+    foodEl.style.top = y + "px";
+    foodEl.style.bottom = "";
+    foodEl.style.transform = "translate(-50%, -50%)";
+  });
+
+  function spawnFoodPop(text, x, y) {
+    const pop = document.createElement("div");
+    pop.className = "food-pop show";
+    pop.textContent = text;
+    pop.style.left = x + "px";
+    pop.style.top = y + "px";
+    stageEl.appendChild(pop);
+    setTimeout(() => pop.remove(), 750);
+  }
+
+  foodEl.addEventListener("pointerup", (e) => {
+    if (!state.input.draggingFoodId) return;
+    state.input.draggingFoodId = null;
+    foodEl.classList.remove("dragging");
+
+    const foodRect = foodEl.getBoundingClientRect();
+    const foodCenter = { x: foodRect.left + foodRect.width / 2, y: foodRect.top + foodRect.height / 2 };
+    const mouthRect = mouthTarget.getBoundingClientRect();
+    const mouthCenter = { x: mouthRect.left + mouthRect.width / 2, y: mouthRect.top + mouthRect.height / 2 };
+    const dist = Math.hypot(foodCenter.x - mouthCenter.x, foodCenter.y - mouthCenter.y);
+    const hitRadius = Math.max(mouthRect.width, mouthRect.height) / 2 + 14;
+
+    if (dist <= hitRadius && state.screen === "play") {
+      sfxChomp();
+      applyDeltas({ hunger: FEED_HUNGER_DELTA, happy: FEED_HAPPY_DELTA });
+      renderStatBars();
+      const stageRect = stageEl.getBoundingClientRect();
+      spawnFoodPop("+", foodCenter.x - stageRect.left, foodCenter.y - stageRect.top);
+      foodEl.classList.add("eaten");
+      setTimeout(() => {
+        foodEl.classList.remove("eaten");
+        foodEl.style.left = foodSpawn.left;
+        foodEl.style.bottom = foodSpawn.bottom;
+        foodEl.style.top = "";
+        foodEl.style.transform = "translate(-50%, 0)";
+      }, FOOD_RESPAWN_MS);
+    } else {
+      foodEl.style.left = foodSpawn.left;
+      foodEl.style.bottom = foodSpawn.bottom;
+      foodEl.style.top = "";
+      foodEl.style.transform = "translate(-50%, 0)";
+    }
+  });
+
+  foodEl.addEventListener("pointercancel", () => {
+    state.input.draggingFoodId = null;
+    foodEl.classList.remove("dragging");
+    foodEl.style.left = foodSpawn.left;
+    foodEl.style.bottom = foodSpawn.bottom;
+    foodEl.style.top = "";
+    foodEl.style.transform = "translate(-50%, 0)";
+  });
+
+  // ============================================================
+  // GAME LOOP
+  // ============================================================
+
+  let lastFrameTime = null;
+
+  function frame(ts) {
+    if (lastFrameTime === null) lastFrameTime = ts;
+    const dt = Math.min((ts - lastFrameTime) / 1000, 0.25);
+    lastFrameTime = ts;
+
+    if (state.screen === "play") {
+      if (state.input.pressStart !== null && !state.input.holding) {
+        if (performance.now() - state.input.pressStart >= HOLD_THRESHOLD_MS) {
+          state.input.holding = true;
+          beginSleepGain();
+        }
+      }
+
+      const deltas = {
+        hunger: -DECAY_PER_SEC.hunger * dt,
+        happy: -DECAY_PER_SEC.happy * dt,
+        energy: -DECAY_PER_SEC.energy * dt,
+      };
+      if (state.input.holding) {
+        deltas.energy += SLEEP_ENERGY_GAIN_PER_SEC * dt;
+        deltas.hunger -= SLEEP_HUNGER_DRAIN_PER_SEC * dt;
+      }
+      applyDeltas(deltas);
+
+      state.survivalTime += dt;
+
+      renderStatBars();
+      renderTimer();
+      updateStageForTime();
+      checkCheckInPulse();
+      checkEndConditions();
+    }
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // ============================================================
+  // UI WIRING
+  // ============================================================
+
+  document.getElementById("hatch-btn").addEventListener("click", () => {
+    ensureAudioContext();
+    hatchEgg.classList.remove("egg-flash");
+    showScreen("hatching");
+    setTimeout(() => hatchEgg.classList.add("egg-flash"), 1150);
+    setTimeout(() => {
+      resetRunState();
+      showScreen("play");
+    }, 1500);
+  });
+
+  document.getElementById("again-btn").addEventListener("click", () => {
+    resetRunState();
+    showScreen("start");
+  });
+
+  document.getElementById("save-score-btn").addEventListener("click", () => {
+    const raw = nameInput.value.trim().slice(0, 12);
+    commitScore(raw || "ANON");
+  });
+
+  document.getElementById("skip-score-btn").addEventListener("click", () => {
+    commitScore("ANON");
+  });
+
+  muteBtn.addEventListener("click", () => {
+    const next = !state.audio.muted;
+    ensureAudioContext();
+    setMuted(next);
+    muteBtn.textContent = next ? "🔇" : "🔊";
+    muteBtn.setAttribute("aria-pressed", String(next));
+  });
+
+  // Staff-only leaderboard reset: long-press the leaderboard title.
+  let clearTimer = null;
+  function startClearTimer() {
+    clearTimer = setTimeout(() => {
+      if (window.confirm("Clear the leaderboard? (staff only)")) {
+        saveLeaderboard([]);
+        renderLeaderboard();
+      }
+    }, 1500);
+  }
+  function cancelClearTimer() {
+    if (clearTimer) { clearTimeout(clearTimer); clearTimer = null; }
+  }
+  leaderboardTitle.addEventListener("pointerdown", startClearTimer);
+  leaderboardTitle.addEventListener("pointerup", cancelClearTimer);
+  leaderboardTitle.addEventListener("pointerleave", cancelClearTimer);
+
+  // ============================================================
+  // INIT
+  // ============================================================
+
+  resetRunState();
+  renderLeaderboard();
+  showScreen("start");
+})();
+</script>
+</body>
+</html>
