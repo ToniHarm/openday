@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Flappy Pet</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐦</text></svg>">
+<style>
+  @font-face {
+    font-family: "Press Start 2P";
+    src: url("fonts/PressStart2P-Regular.ttf") format("truetype");
+    font-display: swap;
+  }
+  :root {
+    --shell-pink:#FFD6E8; --shell-lavender:#E3D4FF; --shell-blue:#CFEFFF;
+    --cream:#FFF8F2; --accent:#FF5FA2; --gold:#FFD873; --ink:#4A2E55;
+    --screen-bg:#EAFBFF; --px-pink:#FF6FB5; --px-gold:#FFCB3D;
+    --px-purple:#B98AFF; --px-mint:#4DE0C4; --px-outline:#4A2E55;
+    --font-shell:"Baloo 2","Trebuchet MS","Comic Sans MS",cursive,sans-serif;
+    --font-screen:"Press Start 2P",monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden}
+  body{font-family:var(--font-shell);color:var(--ink);background:var(--cream);display:flex;align-items:center;justify-content:center}
+
+  #shell{
+    position:relative;width:min(94vw,480px);height:min(94vh,780px);
+    background:linear-gradient(160deg,var(--shell-pink),var(--shell-lavender) 55%,var(--shell-blue));
+    border-radius:46% 46% 40% 40%/30% 30% 24% 24%;
+    box-shadow:10px 10px 0 rgba(74,46,85,.28),0 0 0 6px rgba(255,255,255,.35) inset;
+    display:flex;flex-direction:column;align-items:center;padding:26px 20px 18px;isolation:isolate;
+  }
+  .shell-nameplate{
+    font-family:var(--font-shell);font-weight:700;font-size:1rem;letter-spacing:.04em;
+    color:var(--ink);text-align:center;margin-bottom:12px;text-shadow:1px 1px 0 rgba(255,255,255,.6);
+  }
+  #lcd-screen{
+    position:relative;flex:0 1 570px;min-height:0;width:min(78%,360px);
+    background:var(--screen-bg);border-radius:18px;
+    box-shadow:0 0 0 8px var(--ink),inset 0 0 14px rgba(74,46,85,.25);overflow:hidden;
+  }
+  .abc-buttons{display:flex;gap:22px;margin-top:16px}
+  .abc-btn{
+    width:34px;height:34px;border-radius:50%;background:var(--accent);
+    box-shadow:0 4px 0 rgba(74,46,85,.3);display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-shell);font-weight:700;font-size:.75rem;color:white;user-select:none;
+  }
+
+  .screen{display:none;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;padding:16px;text-align:center;font-family:var(--font-screen);color:var(--px-outline)}
+  .screen.active{display:flex}
+  .px-title{font-size:.85rem;line-height:1.6;margin:0 0 10px}
+  .px-body{font-size:.5rem;line-height:2;margin-bottom:12px}
+  .px-small{font-size:.4rem;line-height:1.8;margin-top:8px;opacity:.75}
+  .px-btn{
+    font-family:var(--font-screen);font-size:.58rem;padding:10px 16px;min-height:44px;min-width:44px;
+    border-radius:10px;border:3px solid var(--px-outline);background:var(--px-gold);
+    color:var(--px-outline);cursor:pointer;touch-action:manipulation;
+  }
+  .px-btn:active{transform:translateY(2px)}
+  .px-btn-ghost{background:var(--screen-bg)}
+  .px-btn:focus-visible{outline:3px solid var(--px-purple);outline-offset:2px}
+
+  /* pet pick */
+  #screen-pick{padding:10px 8px;justify-content:flex-start}
+  .pick-header{font-size:.52rem;margin:0 0 8px}
+  .pet-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;width:100%;margin-bottom:10px}
+  .pet-card{
+    display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 2px;
+    border:2px solid var(--px-outline);border-radius:8px;background:white;
+    cursor:pointer;touch-action:manipulation;font-size:.28rem;line-height:1.3;
+  }
+  .pet-card .pe{font-size:1.25rem}
+  .pet-card:hover,.pet-card:focus-visible{background:#FFF5B0}
+  .pet-card.selected{background:var(--px-gold);border-color:var(--px-pink);outline:3px solid var(--px-purple)}
+  .pet-card:active{transform:translateY(1px)}
+
+  /* game screen */
+  #screen-game{padding:0;justify-content:flex-start}
+  #game-hud{
+    width:100%;display:flex;justify-content:space-between;align-items:center;
+    font-size:.4rem;padding:5px 8px;flex-shrink:0;background:rgba(255,255,255,.6);
+  }
+  #game-canvas-wrap{position:relative;flex:1;width:100%;min-height:0;overflow:hidden;background:#87CEEB}
+  #game-canvas{width:100%;height:100%;display:block}
+
+  /* menu pet bounce */
+  #menu-pet{font-size:3rem;animation:petFly 1.4s ease-in-out infinite}
+  @keyframes petFly{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-12px) rotate(8deg)}}
+
+  /* result */
+  #screen-over .over-pet{font-size:2.5rem;margin-bottom:4px;animation:overBounce .6s ease infinite alternate}
+  @keyframes overBounce{0%{transform:rotate(-15deg)}100%{transform:rotate(15deg)}}
+  .stat-row{display:flex;justify-content:space-between;width:100%;max-width:200px;font-size:.42rem;padding:5px 0;border-bottom:1px dashed rgba(74,46,85,.25)}
+  .stat-row:last-of-type{border-bottom:none}
+  .new-best{color:var(--px-pink);font-size:.38rem;margin-top:4px}
+  .btn-row{display:flex;gap:8px;margin-top:10px}
+
+  @media(min-width:900px) and (min-height:800px){
+    #shell{width:min(90vw,560px);height:min(92vh,860px);padding:30px 26px 22px}
+    #lcd-screen{width:min(80%,420px);flex-basis:640px}
+  }
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+</style>
+</head>
+<body>
+<div id="shell">
+  <div class="shell-nameplate">✧ Flappy Pet ✧</div>
+  <div id="lcd-screen">
+
+    <!-- MENU -->
+    <div id="screen-menu" class="screen active">
+      <div id="menu-pet">🐦</div>
+      <p class="px-title">FLAPPY<br>PET</p>
+      <p class="px-body">Tap to flap!<br>Dodge the pipes.</p>
+      <button class="px-btn" id="btn-play">▶ PLAY</button>
+      <p class="px-small">SPACE · tap · click</p>
+    </div>
+
+    <!-- PET PICK -->
+    <div id="screen-pick" class="screen">
+      <p class="pick-header">PICK YOUR PET</p>
+      <div class="pet-grid" id="pet-grid"></div>
+      <button class="px-btn" id="btn-start">FLY! ▶</button>
+    </div>
+
+    <!-- GAME -->
+    <div id="screen-game" class="screen">
+      <div id="game-hud">
+        <span id="hud-score">0</span>
+        <span id="hud-pet">🐦</span>
+        <span id="hud-best">BEST: 0</span>
+      </div>
+      <div id="game-canvas-wrap">
+        <canvas id="game-canvas"></canvas>
+      </div>
+    </div>
+
+    <!-- GAME OVER -->
+    <div id="screen-over" class="screen">
+      <div class="over-pet" id="over-pet">💥</div>
+      <p class="px-title">GAME OVER</p>
+      <div class="stat-row"><span>SCORE</span><span id="over-score">0</span></div>
+      <div class="stat-row"><span>BEST</span><span id="over-best">0</span></div>
+      <div class="stat-row"><span>COINS</span><span id="over-coins">+0</span></div>
+      <p class="new-best" id="new-best" style="display:none">🏆 NEW BEST!</p>
+      <div class="btn-row">
+        <button class="px-btn" id="btn-retry">↺ RETRY</button>
+        <button class="px-btn px-btn-ghost" id="btn-menu">MENU</button>
+      </div>
+    </div>
+
+  </div>
+  <div class="abc-buttons">
+    <div class="abc-btn">A</div><div class="abc-btn">B</div><div class="abc-btn">C</div>
+  </div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+const PETS=[
+  {emoji:'🐶',name:'DOG'},{emoji:'🐱',name:'CAT'},{emoji:'🐰',name:'RABBIT'},
+  {emoji:'🐸',name:'FROG'},{emoji:'🐣',name:'CHICK'},{emoji:'🐻',name:'BEAR'},
+  {emoji:'🐼',name:'PANDA'},{emoji:'🦊',name:'FOX'},{emoji:'🐯',name:'TIGER'},
+  {emoji:'🦁',name:'LION'},{emoji:'🐧',name:'PENGUIN'},{emoji:'🐨',name:'KOALA'},
+  {emoji:'🦆',name:'DUCK'},{emoji:'🦄',name:'UNICORN'},{emoji:'🐢',name:'TURTLE'},
+];
+
+// ── Audio ──────────────────────────────────────────────────────────────────────
+let AC=null;
+function getAC(){
+  if(!AC) AC=new(window.AudioContext||window.webkitAudioContext)();
+  if(AC.state==='suspended') AC.resume();
+  return AC;
+}
+function tone(freq,type,dur,vol,delay=0){
+  try{
+    const a=getAC(),o=a.createOscillator(),g=a.createGain();
+    o.connect(g);g.connect(a.destination);
+    o.type=type; o.frequency.setValueAtTime(freq,a.currentTime+delay);
+    g.gain.setValueAtTime(vol,a.currentTime+delay);
+    g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+delay+dur);
+    o.start(a.currentTime+delay); o.stop(a.currentTime+delay+dur+.02);
+  }catch(_){}
+}
+function sfxFlap(){ tone(380,'square',.07,.15); }
+function sfxPoint(){ tone(660,'triangle',.12,.2); tone(880,'triangle',.1,.2,.08); }
+function sfxDie(){
+  tone(300,'sawtooth',.06,.3);
+  tone(200,'sawtooth',.12,.3,.06);
+  tone(100,'sawtooth',.25,.3,.16);
+}
+function sfxMilestone(){ // every 10 points
+  [[523,.0],[784,.12],[1047,.24]].forEach(([f,d])=>tone(f,'square',.15,.28,d));
+}
+
+// ── State ──────────────────────────────────────────────────────────────────────
+let chosenPet=PETS[0];
+let gs=null; // game state
+
+// ── DOM ────────────────────────────────────────────────────────────────────────
+const screens={
+  menu:  document.getElementById('screen-menu'),
+  pick:  document.getElementById('screen-pick'),
+  game:  document.getElementById('screen-game'),
+  over:  document.getElementById('screen-over'),
+};
+const menuPet    = document.getElementById('menu-pet');
+const petGrid    = document.getElementById('pet-grid');
+const hudScore   = document.getElementById('hud-score');
+const hudPet     = document.getElementById('hud-pet');
+const hudBest    = document.getElementById('hud-best');
+const canvas     = document.getElementById('game-canvas');
+const canvasWrap = document.getElementById('game-canvas-wrap');
+const ctx        = canvas.getContext('2d');
+
+function showScreen(n){Object.values(screens).forEach(s=>s.classList.remove('active'));screens[n].classList.add('active')}
+function getBest(){return parseInt(localStorage.getItem('flappy_best')||'0',10)}
+function setBest(v){try{localStorage.setItem('flappy_best',v)}catch(_){}}
+
+// ── Menu ───────────────────────────────────────────────────────────────────────
+document.getElementById('btn-play').addEventListener('click',()=>{
+  buildGrid(); showScreen('pick');
+});
+document.getElementById('btn-menu').addEventListener('click',()=>{
+  menuPet.textContent=chosenPet.emoji; showScreen('menu');
+});
+
+// ── Pet pick ───────────────────────────────────────────────────────────────────
+function buildGrid(){
+  petGrid.innerHTML='';
+  PETS.forEach((pet,i)=>{
+    const btn=document.createElement('button');
+    btn.className='pet-card'+(pet===chosenPet?' selected':'');
+    btn.innerHTML=`<span class="pe">${pet.emoji}</span>${pet.name}`;
+    btn.addEventListener('click',()=>{
+      chosenPet=pet;
+      Array.from(petGrid.children).forEach(c=>c.classList.remove('selected'));
+      btn.classList.add('selected');
+    });
+    petGrid.appendChild(btn);
+  });
+}
+
+document.getElementById('btn-start').addEventListener('click',()=>{
+  hudPet.textContent=chosenPet.emoji;
+  hudBest.textContent='BEST: '+getBest();
+  menuPet.textContent=chosenPet.emoji;
+  showScreen('game');
+  requestAnimationFrame(()=>{
+    resizeCanvas();
+    initGame();
+    requestAnimationFrame(loop);
+  });
+});
+
+document.getElementById('btn-retry').addEventListener('click',()=>{
+  showScreen('game');
+  requestAnimationFrame(()=>{
+    resizeCanvas();
+    initGame();
+    requestAnimationFrame(loop);
+  });
+});
+
+// ── Canvas ─────────────────────────────────────────────────────────────────────
+function resizeCanvas(){
+  const r=canvasWrap.getBoundingClientRect();
+  canvas.width =Math.round(r.width) ||260;
+  canvas.height=Math.round(r.height)||380;
+}
+window.addEventListener('resize',()=>{
+  if(screens.game.classList.contains('active')&&gs){resizeCanvas()}
+});
+
+// ── Game constants ─────────────────────────────────────────────────────────────
+const GRAVITY      = 0.38;
+const FLAP_VEL     = -7.2;
+const PIPE_W       = 38;
+const PIPE_GAP     = 110;
+const PIPE_SPEED   = 2.4;
+const PIPE_EVERY   = 88;   // frames between pipes
+const PET_X_FRAC   = 0.25; // pet is 25% from left
+const PET_R        = 18;   // collision radius
+const GROUND_H     = 28;
+const SKY_H        = 20;
+
+// ── Init ───────────────────────────────────────────────────────────────────────
+function initGame(){
+  const W=canvas.width, H=canvas.height;
+  gs={
+    pet:{
+      x: W*PET_X_FRAC,
+      y: H/2,
+      vy:0,
+      angle:0,
+      dead:false,
+      flapFrame:0,
+    },
+    pipes:[],
+    score:0,
+    frame:0,
+    started:false,   // first tap starts physics
+    flashFrames:0,
+    clouds:initClouds(W,H),
+    groundScroll:0,
+    particles:[],
+  };
+}
+
+function initClouds(W,H){
+  return Array.from({length:5},(_,i)=>({
+    x:W*(i/5+Math.random()*0.15),
+    y:SKY_H+Math.random()*(H*0.35),
+    w:40+Math.random()*40,
+    speed:0.3+Math.random()*0.3,
+  }));
+}
+
+// ── Flap ───────────────────────────────────────────────────────────────────────
+function flap(){
+  if(!gs||gs.pet.dead) return;
+  getAC(); // unlock audio
+  if(!gs.started){ gs.started=true; gs.frame=0; } // reset frame so first pipe spawns at a full interval
+  gs.pet.vy=FLAP_VEL;
+  gs.pet.flapFrame=10;
+  sfxFlap();
+}
+
+// input
+window.addEventListener('keydown',e=>{
+  if(e.code==='Space'||e.code==='ArrowUp'||e.code==='KeyW'){e.preventDefault();flap()}
+});
+canvas.addEventListener('pointerdown',e=>{e.preventDefault();flap()});
+canvas.style.touchAction='none';
+
+// ── Pipe helpers ───────────────────────────────────────────────────────────────
+function spawnPipe(){
+  const W=canvas.width, H=canvas.height;
+  const minY=SKY_H+30;
+  const maxY=H-GROUND_H-PIPE_GAP-30;
+  const gapY=minY+Math.random()*(maxY-minY);
+  gs.pipes.push({x:W+PIPE_W, gapY, scored:false});
+}
+
+// ── Main loop ──────────────────────────────────────────────────────────────────
+function loop(){
+  if(!gs||!screens.game.classList.contains('active')) return;
+  update();
+  draw();
+  if(!gs.pet.dead){
+    requestAnimationFrame(loop);
+  } else {
+    // keep animating so the flash + 💥 plays out, then show game over
+    let deathTick=0;
+    function deathLoop(){
+      deathTick++;
+      draw();
+      if(deathTick<30) requestAnimationFrame(deathLoop);
+      else setTimeout(showGameOver,400);
+    }
+    requestAnimationFrame(deathLoop);
+  }
+}
+
+function update(){
+  const W=canvas.width, H=canvas.height;
+  gs.frame++;
+
+  if(!gs.started){
+    // gentle hover before first tap
+    gs.pet.y=H/2+Math.sin(gs.frame*.06)*8;
+    gs.pet.angle=0;
+    return;
+  }
+
+  // physics
+  gs.pet.vy+=GRAVITY;
+  gs.pet.vy=Math.max(gs.pet.vy,-12); // cap rise speed
+  gs.pet.y+=gs.pet.vy;
+  gs.pet.angle=Math.min(Math.PI/2, gs.pet.vy*0.07);
+  if(gs.pet.flapFrame>0) gs.pet.flapFrame--;
+
+  // spawn pipes
+  if(gs.frame%PIPE_EVERY===0) spawnPipe();
+
+  // move pipes + score
+  for(const p of gs.pipes){
+    p.x-=PIPE_SPEED;
+    if(!p.scored && p.x+PIPE_W < gs.pet.x-PET_R){
+      p.scored=true;
+      gs.score++;
+      hudScore.textContent=gs.score;
+      if(gs.score%10===0) sfxMilestone();
+      else sfxPoint();
+      // score particles
+      for(let i=0;i<8;i++){
+        gs.particles.push({
+          x:gs.pet.x,y:gs.pet.y,
+          vx:(Math.random()-0.5)*3,vy:(Math.random()-0.5)*3,
+          life:1,color:['#FFCB3D','#FF6FB5','#4DE0C4','#B98AFF'][Math.floor(Math.random()*4)],
+        });
+      }
+    }
+  }
+  gs.pipes=gs.pipes.filter(p=>p.x+PIPE_W>0);
+
+  // particles
+  gs.particles=gs.particles.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.life-=.05;return p.life>0});
+
+  // scroll
+  gs.groundScroll=(gs.groundScroll+PIPE_SPEED)%(W*2);
+  gs.clouds.forEach(c=>{c.x-=c.speed;if(c.x+c.w<0)c.x=W+c.w});
+
+  // collision — pipes
+  const px=gs.pet.x, py=gs.pet.y;
+  for(const p of gs.pipes){
+    if(px+PET_R>p.x && px-PET_R<p.x+PIPE_W){
+      if(py-PET_R<p.gapY || py+PET_R>p.gapY+PIPE_GAP){ die(); return; }
+    }
+  }
+  // collision — ceiling / ground
+  if(py-PET_R<SKY_H || py+PET_R>H-GROUND_H){ die(); return; }
+}
+
+function die(){
+  gs.pet.dead=true;
+  sfxDie();
+  gs.flashFrames=8;
+}
+
+// ── Draw ───────────────────────────────────────────────────────────────────────
+const PIPE_GREEN   ='#5DB85D';
+const PIPE_DARK    ='#3D8C3D';
+const PIPE_CAP_CLR ='#4CAF4C';
+const GROUND_CLR   ='#8B6914';
+const GROUND_GRASS ='#5DBB5D';
+
+function draw(){
+  const W=canvas.width, H=canvas.height;
+
+  // sky gradient
+  const sky=ctx.createLinearGradient(0,0,0,H);
+  sky.addColorStop(0,'#87CEEB');
+  sky.addColorStop(1,'#c8ecff');
+  ctx.fillStyle=sky;
+  ctx.fillRect(0,0,W,H);
+
+  // clouds
+  ctx.fillStyle='rgba(255,255,255,.85)';
+  gs.clouds.forEach(c=>{
+    ctx.beginPath();
+    ctx.ellipse(c.x,c.y,c.w/2,c.w/5,0,0,Math.PI*2);
+    ctx.ellipse(c.x-c.w*.2,c.y+4,c.w/3.5,c.w/6,0,0,Math.PI*2);
+    ctx.ellipse(c.x+c.w*.2,c.y+4,c.w/3.5,c.w/6,0,0,Math.PI*2);
+    ctx.fill();
+  });
+
+  // pipes
+  for(const p of gs.pipes){
+    drawPipe(p.x, 0, H, p.gapY, p.gapY+PIPE_GAP);
+  }
+
+  // particles
+  gs.particles.forEach(p=>{
+    ctx.globalAlpha=p.life;
+    ctx.fillStyle=p.color;
+    ctx.fillRect(p.x-4,p.y-4,8,8);
+  });
+  ctx.globalAlpha=1;
+
+  // ground
+  ctx.fillStyle=GROUND_CLR;
+  ctx.fillRect(0,H-GROUND_H,W,GROUND_H);
+  ctx.fillStyle=GROUND_GRASS;
+  ctx.fillRect(0,H-GROUND_H,W,8);
+  // scrolling ground dashes
+  ctx.fillStyle='rgba(255,255,255,.25)';
+  const dashW=24,dashGap=16,total=dashW+dashGap;
+  for(let x=-(gs.groundScroll%total);x<W;x+=total){
+    ctx.fillRect(x,H-GROUND_H+1,dashW,6);
+  }
+
+  // pet
+  const p=gs.pet;
+  ctx.save();
+  ctx.translate(p.x,p.y);
+  ctx.rotate(p.angle);
+  if(p.flapFrame>0){
+    const fScale=1+p.flapFrame/10*.15;
+    ctx.scale(fScale,1/fScale);
+  }
+  ctx.font=`${PET_R*2.1}px serif`;
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  if(p.dead){
+    ctx.globalAlpha=0.7;
+    ctx.fillText('💥',0,0);
+  } else {
+    ctx.fillText(chosenPet.emoji,0,0);
+  }
+  ctx.restore();
+  ctx.globalAlpha=1;
+
+  // flash on death
+  if(gs.flashFrames>0){
+    ctx.fillStyle=`rgba(255,50,50,${gs.flashFrames/8*.4})`;
+    ctx.fillRect(0,0,W,H);
+    gs.flashFrames--;
+  }
+
+  // "TAP TO START" prompt
+  if(!gs.started&&!p.dead){
+    ctx.fillStyle='rgba(255,255,255,.85)';
+    ctx.fillRect(W/2-70,p.y-54,140,28);
+    ctx.fillStyle='#4A2E55';
+    ctx.font='bold 8px "Press Start 2P",monospace';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText('TAP TO START!',W/2,p.y-40);
+    // blinking arrow
+    if(Math.floor(gs.frame/18)%2===0){
+      ctx.font='12px serif';
+      ctx.fillText('👆',W/2,p.y-14);
+    }
+  }
+
+  // score overlay during play
+  if(gs.started&&!p.dead&&gs.score>0){
+    ctx.fillStyle='rgba(74,46,85,.6)';
+    ctx.font='bold 14px "Press Start 2P",monospace';
+    ctx.textAlign='center';
+    ctx.textBaseline='top';
+    ctx.fillText(gs.score,W/2,SKY_H+4);
+  }
+}
+
+function drawPipe(px,topY,botY,gapTop,gapBot){
+  const capW=PIPE_W+8, capH=14;
+
+  // top pipe body
+  ctx.fillStyle=PIPE_GREEN;
+  ctx.fillRect(px,topY,PIPE_W,gapTop-topY);
+  // top pipe shading
+  ctx.fillStyle=PIPE_DARK;
+  ctx.fillRect(px,topY,6,gapTop-topY);
+  ctx.fillStyle='rgba(255,255,255,.15)';
+  ctx.fillRect(px+8,topY,5,gapTop-topY);
+  // top pipe cap
+  ctx.fillStyle=PIPE_CAP_CLR;
+  ctx.fillRect(px-(capW-PIPE_W)/2,gapTop-capH,capW,capH);
+  ctx.fillStyle=PIPE_DARK;
+  ctx.fillRect(px-(capW-PIPE_W)/2,gapTop-capH,6,capH);
+
+  // bottom pipe body
+  ctx.fillStyle=PIPE_GREEN;
+  ctx.fillRect(px,gapBot,PIPE_W,botY-gapBot);
+  ctx.fillStyle=PIPE_DARK;
+  ctx.fillRect(px,gapBot,6,botY-gapBot);
+  ctx.fillStyle='rgba(255,255,255,.15)';
+  ctx.fillRect(px+8,gapBot,5,botY-gapBot);
+  // bottom pipe cap
+  ctx.fillStyle=PIPE_CAP_CLR;
+  ctx.fillRect(px-(capW-PIPE_W)/2,gapBot,capW,capH);
+  ctx.fillStyle=PIPE_DARK;
+  ctx.fillRect(px-(capW-PIPE_W)/2,gapBot,6,capH);
+}
+
+// ── Game over ──────────────────────────────────────────────────────────────────
+function showGameOver(){
+  const score=gs.score;
+  const prev=getBest();
+  const isNew=score>prev;
+  if(isNew) setBest(score);
+  const best=isNew?score:prev;
+  const coins=score*5;
+
+  document.getElementById('over-pet').textContent=chosenPet.emoji;
+  document.getElementById('over-score').textContent=score;
+  document.getElementById('over-best').textContent=best;
+  document.getElementById('over-coins').textContent='+'+coins;
+  const nb=document.getElementById('new-best');
+  nb.style.display=isNew?'block':'none';
+  hudBest.textContent='BEST: '+best;
+  showScreen('over');
+}
+
+})();
+</script>
+</body>
+</html>

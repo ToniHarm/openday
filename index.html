@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Pet Games — Open Day</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
+<style>
+  @font-face {
+    font-family: "Press Start 2P";
+    src: url("fonts/PressStart2P-Regular.ttf") format("truetype");
+    font-display: swap;
+  }
+  :root {
+    --shell-pink:#FFD6E8; --shell-lavender:#E3D4FF; --shell-blue:#CFEFFF;
+    --cream:#FFF8F2; --accent:#FF5FA2; --gold:#FFD873; --ink:#4A2E55;
+    --px-pink:#FF6FB5; --px-gold:#FFCB3D; --px-purple:#B98AFF; --px-mint:#4DE0C4;
+    --font-shell:"Baloo 2","Trebuchet MS","Comic Sans MS",cursive,sans-serif;
+    --font-screen:"Press Start 2P",monospace;
+  }
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0;min-height:100%;overflow-x:hidden}
+  body{
+    font-family:var(--font-shell);color:var(--ink);
+    background:linear-gradient(135deg,var(--shell-pink) 0%,var(--shell-lavender) 50%,var(--shell-blue) 100%);
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:24px 16px;
+  }
+
+  /* header */
+  .hub-header{text-align:center;margin-bottom:28px}
+  .hub-title{
+    font-family:var(--font-screen);font-size:clamp(.7rem,3vw,1.1rem);
+    color:var(--ink);line-height:1.8;margin:0 0 6px;
+    text-shadow:2px 2px 0 rgba(255,255,255,.5);
+  }
+  .hub-sub{font-size:clamp(.9rem,3.5vw,1.1rem);color:var(--ink);opacity:.7;margin:0}
+  .hub-emoji{font-size:clamp(2.5rem,8vw,3.5rem);display:block;margin-bottom:8px;animation:hubFloat 3s ease-in-out infinite}
+  @keyframes hubFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+  /* game grid */
+  .game-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:18px;width:100%;max-width:700px;
+  }
+
+  /* game card */
+  .game-card{
+    background:white;border-radius:24px;
+    border:4px solid var(--ink);
+    box-shadow:6px 6px 0 var(--ink);
+    padding:24px 16px;text-align:center;
+    text-decoration:none;color:var(--ink);
+    display:flex;flex-direction:column;align-items:center;gap:10px;
+    transition:transform .1s,box-shadow .1s;
+    cursor:pointer;
+  }
+  .game-card:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--ink)}
+  .game-card:active{transform:translate(4px,4px);box-shadow:2px 2px 0 var(--ink)}
+
+  .card-emoji{font-size:clamp(2.8rem,8vw,3.8rem);line-height:1;animation:cardBounce 2s ease-in-out infinite}
+  .game-card:nth-child(2) .card-emoji{animation-delay:.3s}
+  .game-card:nth-child(3) .card-emoji{animation-delay:.6s}
+  @keyframes cardBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+  .card-title{
+    font-family:var(--font-screen);font-size:clamp(.5rem,2.5vw,.7rem);
+    line-height:1.6;margin:0;
+  }
+  .card-desc{font-size:clamp(.8rem,2.5vw,.95rem);opacity:.7;margin:0;line-height:1.5}
+
+  .card-tag{
+    font-family:var(--font-screen);font-size:.45rem;
+    padding:4px 10px;border-radius:20px;border:2px solid var(--ink);
+    margin-top:4px;
+  }
+  .tag-solo{background:var(--px-mint)}
+  .tag-multi{background:var(--px-gold)}
+  .tag-classic{background:var(--px-pink);color:white}
+
+  /* footer */
+  .hub-footer{margin-top:24px;font-family:var(--font-screen);font-size:.38rem;opacity:.55;text-align:center;line-height:2}
+</style>
+</head>
+<body>
+
+<div class="hub-header">
+  <span class="hub-emoji">🎮</span>
+  <p class="hub-title">PET GAMES</p>
+  <p class="hub-sub">Choose a game to play!</p>
+</div>
+
+<div class="game-grid">
+
+  <a class="game-card" href="tamagotchi-speedrun.html">
+    <span class="card-emoji">🐣</span>
+    <p class="card-title">TAMAGOTCHI<br>SPEEDRUN</p>
+    <p class="card-desc">Hatch &amp; raise your pet.<br>Keep it alive for 2 mins!</p>
+    <span class="card-tag tag-solo">1 PLAYER</span>
+  </a>
+
+  <a class="game-card" href="pet-race.html">
+    <span class="card-emoji">🏆</span>
+    <p class="card-title">PET RACE</p>
+    <p class="card-desc">Mash to race! Tap fast<br>for TURBO boost 🔥</p>
+    <span class="card-tag tag-multi">1–2 PLAYERS</span>
+  </a>
+
+  <a class="game-card" href="flappy-pet.html">
+    <span class="card-emoji">🐦</span>
+    <p class="card-title">FLAPPY PET</p>
+    <p class="card-desc">Tap to flap through<br>the pipes. How far?</p>
+    <span class="card-tag tag-solo">1 PLAYER</span>
+  </a>
+
+</div>
+
+<p class="hub-footer">tap a game to start &nbsp;·&nbsp; open day 2026</p>
+
+</body>
+</html>
