@@ -919,72 +919,95 @@
     return { ".": T, O: "#4A2E55", P: bodyColor, W: "#FFFFFF", B: "#2E1A38" };
   }
 
-  const ROUND_BODY = [
-    "..OOOOOOOO..",
-    ".OPPPPPPPPO.",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    ".OPPPPPPPPO.",
-    "..OOOOOOOO..",
+  const BABY_BODY = [
+    "....OOO....",
+    "..OOPPPOO..",
+    ".OPPPPPPPO.",
+    "OPPPPPPPPPO",
+    "OPPPPPPPPPO",
+    "OPPPPPPPPPO",
+    "OPPPPPPPPPO",
+    ".OPPPPPPPO.",
+    "..OPPPPPO..",
+    "...OO.OO...",
+  ];
+
+  const CHILD_BODY = [
+    ".OO.......OO.",
+    "OPPO.....OPPO",
+    "OPPPOOOOOPPPO",
+    ".OPPPPPPPPPO.",
+    "OPPPPPPPPPPPO",
+    "OPPPPPPPPPPPO",
+    "OOPPPPPPPPPOO",
+    ".OPPPPPPPPPO.",
+    "..OPPPPPPPO..",
+    "...OO...OO...",
+  ];
+
+  const GLIMMERLING_BODY = [
+    ".OO.......OO.",
+    "OPPO.....OPPO",
+    "OPPPOOOOOPPPO",
+    ".OPPPPPPPPPO.",
+    "OPPPPPPPPPPPO",
+    "OOPPPPPPPPPOO",
+    "OOPPPPPPPPPOO",
+    ".OPPPPPPPPPO.",
+    "..OPPPPPPPO..",
+    "..OO.....OO..",
   ];
 
   const WOBBLET_BODY = [
-    "...OOOOOOO..",
-    "..OPPPPPPPO.",
-    ".OPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPO.",
-    "OPPPPPPPPPPO",
-    ".OPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    ".OPPPPPPPPO.",
-    "..OPPPPPPO..",
-    "...OOOOOO...",
+    "..OO......OO.",
+    ".OPPO....OPPO",
+    ".OPPPOOOOPPPO",
+    "OPPPPPPPPPPO.",
+    "OPPPPPPPPPPPO",
+    ".OPPPPPPPPPPO",
+    "OOPPPPPPPPPO.",
+    ".OPPPPPPPPPO.",
+    "..OPPPPPPPO..",
+    "...OO..OO....",
   ];
 
   const GRUMPLET_BODY = [
-    "..OOOOOOOO..",
-    ".OPPPPPPPPO.",
-    "OPPOO..OOPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPOOOOOOPPO",
-    "OPPPPPPPPPPO",
-    ".OPPPPPPPPO.",
-    "..OOOOOOOO..",
+    ".OO.......OO.",
+    "OPPO.....OPPO",
+    "OPPPOOOOOPPPO",
+    ".OPPPPPPPPPO.",
+    "OPPPPPPPPPPPO",
+    "OPPPPPPPPPPPO",
+    "OOPPPPPPPPPOO",
+    ".OPPOOOOOPPO.",
+    "..OPPPPPPPO..",
+    "...OO...OO...",
   ];
 
   const ICON_GRIDS = {
     meal: {
-      palette: { ".": T, O: "#4A2E55", G: "#FFCB3D", W: "#FFFFFF" },
+      palette: { ".": T, O: "#4A2E55", W: "#F7F1D0", G: "#65C466", R: "#FF8B4D", B: "#D85A8B" },
       rows: [
         "..OOOO..",
-        ".OGGGGO.",
-        "OGGGGGGO",
-        "OGGGGGGO",
-        "OGWWWWGO",
-        "OGGGGGGO",
-        ".OGGGGO.",
-        "..OOOO..",
+        ".OWWWWO.",
+        "OWGWGWRO",
+        "OWRWRGWO",
+        "OOOOOOOO",
+        ".OBBBBO.",
+        "..OBBO..",
+        "........",
       ],
     },
     snack: {
-      palette: { ".": T, O: "#4A2E55", M: "#4DE0C4", P: "#B98AFF", G: "#FFCB3D" },
+      palette: { ".": T, O: "#4A2E55", P: "#FF8FC7", M: "#D85A8B", R: "#E64B55", G: "#65C466", W: "#FFFFFF" },
       rows: [
-        ".OOOOOO.",
-        "OMMMMMMO",
-        "OMPMPMPO",
-        "OOOOOOOO",
-        ".OGGGGO.",
-        ".OGGGGO.",
-        ".OGGGGO.",
+        "...R....",
+        "..OGO...",
+        ".OPPPPO.",
+        "OPWPPWPO",
+        "OPPPPPPO",
+        ".OMMMMO.",
+        ".OMMMMO.",
         "..OOOO..",
       ],
     },
@@ -1002,16 +1025,18 @@
       ],
     },
     poop: {
-      palette: { ".": T, O: "#4A2E55", P: "#B98AFF", M: "#4DE0C4" },
+      palette: { ".": T, O: "#2E1A38", B: "#8B4A22", D: "#5A2B18", W: "#FFFFFF", P: "#FF9FCB" },
       rows: [
-        "........",
-        "..OOOO..",
-        ".OPPPPO.",
-        "OPPMPPPO",
-        "OPPPPMPO",
-        "OPMPPPPO",
-        ".OPPPPO.",
-        "..OOOO..",
+        "....OO....",
+        "...OBBO...",
+        "..OBBBBO..",
+        ".OBBBBBBO.",
+        "OBBBBBBBBO",
+        "OBOWBBWOBO",
+        "OBBOBBBOBO",
+        "OPBBBBBBPO",
+        ".OBBBBBBO.",
+        "..OOOOOO..",
       ],
     },
     heartFilled: {
@@ -1061,8 +1086,9 @@
   function drawIcon(canvas, key) {
     const spec = ICON_GRIDS[key];
     const ctx = clearCanvas(canvas);
-    const px = Math.floor(canvas.width / 8);
-    const gridW = spec.rows[0].length * px;
+    const cols = Math.max(...spec.rows.map((row) => row.length));
+    const px = Math.floor(Math.min(canvas.width / cols, canvas.height / spec.rows.length));
+    const gridW = cols * px;
     const gridH = spec.rows.length * px;
     const ox = Math.floor((canvas.width - gridW) / 2);
     const oy = Math.floor((canvas.height - gridH) / 2);
@@ -1075,9 +1101,10 @@
     if (stage === "form") {
       if (form === "wobblet") return { rows: WOBBLET_BODY };
       if (form === "grumplet") return { rows: GRUMPLET_BODY };
-      return { rows: ROUND_BODY }; // glimmerling
+      return { rows: GLIMMERLING_BODY };
     }
-    return { rows: ROUND_BODY }; // baby / child share the round shape
+    if (stage === "child") return { rows: CHILD_BODY };
+    return { rows: BABY_BODY };
   }
 
   // ---- customization: base color the player picked, tinted by care quality ----
@@ -1169,6 +1196,27 @@
     }
   }
 
+  function drawCuteFace(ctx, cx, cyRow, px, expression) {
+    drawEyes(ctx, cx, cyRow, px, expression);
+
+    const cheekY = (cyRow + 2.25) * px;
+    ctx.fillStyle = "#FF9FCB";
+    ctx.fillRect(cx - px * 4.2, cheekY, px * 1.15, px * 0.55);
+    ctx.fillRect(cx + px * 3.05, cheekY, px * 1.15, px * 0.55);
+
+    ctx.fillStyle = "#2E1A38";
+    const mouthY = (cyRow + 2.15) * px;
+    if (expression === "sickly") {
+      ctx.fillRect(cx - px * 0.7, mouthY + px * 0.45, px * 1.4, px * 0.45);
+    } else if (expression === "sleepy") {
+      ctx.fillRect(cx - px * 0.5, mouthY, px, px * 0.35);
+    } else {
+      ctx.fillRect(cx - px * 0.25, mouthY, px * 0.5, px * 0.65);
+      ctx.fillRect(cx - px * 0.8, mouthY + px * 0.35, px * 0.55, px * 0.35);
+      ctx.fillRect(cx + px * 0.25, mouthY + px * 0.35, px * 0.55, px * 0.35);
+    }
+  }
+
   const petCanvas = document.getElementById("pet-canvas");
   let petExpression = "normal";
 
@@ -1196,7 +1244,7 @@
     drawGrid(ctx, shape.rows, palette, ox, oy, scale);
 
     const expr = state.sick ? "sickly" : petExpression;
-    drawEyes(ctx, petCanvas.width / 2, oy / scale + 3, scale, expr);
+    drawCuteFace(ctx, petCanvas.width / 2, oy / scale + 3, scale, expr);
 
     // glimmerling sparkle accessory
     if (state.growthStage === "form" && state.form === "glimmerling") {
