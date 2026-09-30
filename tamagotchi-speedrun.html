@@ -409,7 +409,7 @@
     100% { opacity: 0; transform: translateX(-50%) translateY(-34px) scale(1); }
   }
 
-  .food-item, .poop-item {
+  .food-item, .sponge-item {
     position: absolute;
     width: 44px;
     height: 44px;
@@ -423,24 +423,8 @@
     transition: left 0.25s ease, top 0.25s ease;
   }
 
-  .food-item.dragging, .poop-item.dragging { transition: none; cursor: grabbing; }
-  .food-item.eaten, .poop-item.cleaned { opacity: 0; transform: scale(0.3); }
-
-  .toilet-zone {
-    position: absolute;
-    right: 4px;
-    bottom: 4px;
-    width: 40px;
-    height: 40px;
-    border: 2px dashed var(--px-outline);
-    border-radius: 10px;
-    opacity: 0.55;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.9rem;
-    pointer-events: none;
-  }
+  .food-item.dragging, .sponge-item.dragging { transition: none; cursor: grabbing; }
+  .food-item.eaten, .sponge-item.cleaned { opacity: 0; transform: scale(0.3); }
 
   .night-dim {
     position: absolute;
@@ -475,6 +459,100 @@
   }
 
   .bedtime-prompt.show { opacity: 1; animation: callBlink 0.9s steps(2) infinite; }
+
+  #pet-canvas { transform-origin: 50% 85%; }
+
+  @keyframes petSquish {
+    0% { transform: scale(1, 1); }
+    30% { transform: scale(1.15, 0.85); }
+    60% { transform: scale(0.9, 1.08); }
+    100% { transform: scale(1, 1); }
+  }
+
+  #pet-canvas.pet-squish { animation: petSquish 320ms ease; }
+
+  .bonus-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 248, 242, 0.9);
+    touch-action: none;
+    user-select: none;
+    cursor: pointer;
+  }
+
+  .bonus-overlay canvas {
+    border: 3px solid var(--px-outline);
+    border-radius: 10px;
+  }
+
+  .bonus-hint {
+    position: absolute;
+    top: 2px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.38rem;
+    background: var(--px-outline);
+    color: var(--px-white);
+    padding: 3px 7px;
+    border-radius: 6px;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 41;
+  }
+
+  .handtrack-toggle {
+    margin-top: 10px;
+    font-size: 0.45rem;
+    padding: 8px 12px;
+    min-height: 38px;
+    max-width: 90%;
+    white-space: normal;
+    line-height: 1.5;
+  }
+
+  .handtrack-preview {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 56px;
+    height: 42px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 2px solid var(--px-outline);
+    background: #000;
+    z-index: 30;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .handtrack-preview video,
+  .handtrack-preview canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transform: scaleX(-1);
+    object-fit: cover;
+  }
+
+  .handtrack-label {
+    position: absolute;
+    bottom: 1px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-family: var(--font-screen);
+    font-size: 0.3rem;
+    color: var(--px-white);
+    background: rgba(74,46,85,0.6);
+    line-height: 1.4;
+    pointer-events: none;
+    min-height: 0.5em;
+  }
 
   /* ---------- result screen ---------- */
 
@@ -575,7 +653,9 @@
       </div>
 
       <button class="px-btn" id="hatch-btn">HATCH</button>
-      <p class="px-small">nothing leaves<br>this device</p>
+      <button class="px-btn px-btn-ghost handtrack-toggle" id="handtrack-btn" type="button">🖐 HAND TRACKING (BETA)</button>
+      <p class="px-small" id="handtrack-status"></p>
+      <p class="px-small">your care data never leaves<br>this device · hand tracking<br>needs internet to load once</p>
     </section>
 
     <section class="screen" data-screen="hatching" id="screen-hatching">
@@ -588,7 +668,7 @@
         <div class="legend-grid">
           <div class="legend-item"><canvas class="legend-icon" data-icon="meal" width="32" height="32"></canvas>DRAG TO FEED</div>
           <div class="legend-item"><canvas class="legend-icon" data-icon="heartFilled" width="32" height="32"></canvas>TAP TO PLAY</div>
-          <div class="legend-item"><canvas class="legend-icon" data-icon="poop" width="32" height="32"></canvas>DRAG TO CLEAN</div>
+          <div class="legend-item"><canvas class="legend-icon" data-icon="sponge" width="32" height="32"></canvas>WIPE WITH SPONGE</div>
           <div class="legend-item"><canvas class="legend-icon" data-icon="medicine" width="32" height="32"></canvas>HOLD AT BEDTIME</div>
         </div>
         <p class="px-small legend-tap-prompt" id="legend-tap-prompt">tap to continue</p>
@@ -632,14 +712,23 @@
           <canvas id="food-canvas" width="32" height="32"></canvas>
         </div>
 
-        <div class="poop-item" id="poop-item" aria-label="Mess, drag to the cleanup zone" role="img" style="display:none;">
-          <canvas id="poop-canvas" width="32" height="32"></canvas>
+        <div class="sponge-item" id="sponge-item" aria-label="Sponge, drag onto the pet to clean it" role="img" style="display:none;">
+          <canvas id="sponge-canvas" width="32" height="32"></canvas>
         </div>
-
-        <div class="toilet-zone" id="toilet-zone" aria-hidden="true">✦</div>
 
         <div class="bedtime-prompt" id="bedtime-prompt">HOLD TO SLEEP</div>
         <div class="night-dim" id="night-dim">zzz...</div>
+
+        <div class="bonus-overlay" id="bonus-overlay" style="display:none;">
+          <p class="bonus-hint" id="bonus-hint">BONUS! TAP TO FLAP</p>
+          <canvas id="bonus-canvas" width="160" height="160"></canvas>
+        </div>
+
+        <div class="handtrack-preview" id="handtrack-preview" style="display:none;" title="Tap to stop hand tracking">
+          <video id="handtrack-video" muted playsinline autoplay></video>
+          <canvas id="handtrack-overlay" width="120" height="90"></canvas>
+          <span class="handtrack-label" id="handtrack-label"></span>
+        </div>
       </div>
     </section>
 
@@ -708,6 +797,22 @@
   const CHILD_START_S = 15;
   const WIN_TIME_S = 120;
 
+  // bonus round — a Flappy-style tap-to-flap interlude, triggered by landing
+  // a normal-play combo (see registerPlayTap). Everything else pauses while
+  // it's active: no decay, no schedulers ticking, no survival-time increment.
+  const BONUS_DURATION_MS = 7000;
+  const BONUS_COOLDOWN_MS = 6000;
+  const BONUS_GRAVITY = 420;
+  const BONUS_FLAP_VELOCITY = -145;
+  const BONUS_PIPE_GAP = 56;
+  const BONUS_PIPE_WIDTH = 18;
+  const BONUS_PIPE_SPEED = 62;
+  const BONUS_PIPE_INTERVAL_MS = 1400;
+  const BONUS_BIRD_X = 40;
+  const BONUS_BIRD_R = 8;
+  const BONUS_SUCCESS_HAPPY = 18;
+  const BONUS_FAIL_HAPPY = 2;
+
   const LB_KEY = "tamagotchi-leaderboard";
   const LB_MAX = 10;
 
@@ -768,6 +873,7 @@
     audio: { muted: false },
     petColor: COLOR_SWATCHES[0],
     petName: "",
+    bonusRound: { active: false, birdY: 80, birdVel: 0, pipes: [], elapsed: 0, nextPipeIn: 0 },
   };
 
   // scheduler bookkeeping (not part of the spec'd state shape, kept local)
@@ -775,6 +881,7 @@
   let nextPoopTime = null;
   let nextSicknessRollTime = null;
   let lastSampleSecond = -1;
+  let bonusCooldownUntil = 0;
 
   // ============================================================
   // PIXEL SPRITES  (canvas, no images, imageSmoothingEnabled=false)
@@ -785,6 +892,34 @@
   function buildPalette(bodyColor) {
     return { ".": T, O: "#4A2E55", P: bodyColor, W: "#FFFFFF", B: "#2E1A38" };
   }
+
+  // small, simple, no limbs — reads as "just hatched"
+  const BABY_BODY = [
+    ".OOOOOOOO.",
+    "OPPPPPPPPO",
+    "OPPPPPPPPO",
+    "OPPPPPPPPO",
+    "OPPPPPPPPO",
+    "OPPPPPPPPO",
+    "OPPPPPPPPO",
+    "OPPPPPPPPO",
+    ".OOOOOOOO.",
+  ];
+
+  // bigger, gains stubby limb-nubs — reads as "developing", not baby-but-scaled
+  const CHILD_BODY = [
+    "..OOOOOOOO..",
+    ".OPPPPPPPPO.",
+    "OPPPPPPPPPPO",
+    "PPPPPPPPPPPP",
+    "OPPPPPPPPPPO",
+    "OPPPPPPPPPPO",
+    "OPPPPPPPPPPO",
+    "OPPPPPPPPPPO",
+    "OPPPPPPPPPPO",
+    ".OPPPPPPPPO.",
+    "..OOOOOOOO..",
+  ];
 
   const ROUND_BODY = [
     "..OOOOOOOO..",
@@ -868,17 +1003,17 @@
         "..OOOO..",
       ],
     },
-    poop: {
-      palette: { ".": T, O: "#4A2E55", P: "#B98AFF", M: "#4DE0C4" },
+    sponge: {
+      palette: { ".": T, O: "#4A2E55", S: "#FFD873", B: "#B98AFF" },
       rows: [
         "........",
-        "..OOOO..",
-        ".OPPPPO.",
-        "OPPMPPPO",
-        "OPPPPMPO",
-        "OPMPPPPO",
-        ".OPPPPO.",
-        "..OOOO..",
+        ".OOOOOO.",
+        "OSSSSSSO",
+        "OSBSBSBO",
+        "OSSSSSSO",
+        "OSBSBSBO",
+        "OSSSSSSO",
+        ".OOOOOO.",
       ],
     },
     heartFilled: {
@@ -944,7 +1079,8 @@
       if (form === "grumplet") return { rows: GRUMPLET_BODY };
       return { rows: ROUND_BODY }; // glimmerling
     }
-    return { rows: ROUND_BODY }; // baby / child share the round shape
+    if (stage === "child") return { rows: CHILD_BODY };
+    return { rows: BABY_BODY };
   }
 
   // ---- customization: base color the player picked, tinted by care quality ----
@@ -1007,37 +1143,89 @@
 
   // eyes are drawn separately from the body grid so expression can change
   // per-frame (pressed / sleepy / normal) without needing a sprite per state
-  function drawEyes(ctx, cx, cyRow, px, expression) {
+  function drawEyes(ctx, cx, cyRow, px, expression, pupilOffset) {
     const eyeY = cyRow * px;
     const leftX = cx - px * 3.4;
     const rightX = cx + px * 1.6;
     ctx.fillStyle = "#2E1A38";
-    if (expression === "sleepy" || expression === "sickly") {
+    if (expression === "sleepy" || expression === "sickly" || expression === "blink") {
       ctx.fillRect(leftX, eyeY + px * 0.4, px * 1.8, px * 0.6);
       ctx.fillRect(rightX, eyeY + px * 0.4, px * 1.8, px * 0.6);
+    } else if (expression === "grossed") {
+      // scrunched, slightly downturned — "ugh, gross" squint
+      ctx.fillRect(leftX, eyeY + px * 0.55, px * 1.8, px * 0.5);
+      ctx.fillRect(rightX, eyeY + px * 0.35, px * 1.8, px * 0.5);
     } else {
+      const ex = pupilOffset ? pupilOffset.x : 0;
+      const ey = pupilOffset ? pupilOffset.y : 0;
       const scale = expression === "pressed" ? 1.4 : 1;
       const r = px * 0.9 * scale;
       ctx.beginPath();
-      ctx.arc(leftX + px * 0.9, eyeY + px * 0.9, r, 0, Math.PI * 2);
+      ctx.arc(leftX + px * 0.9 + ex, eyeY + px * 0.9 + ey, r, 0, Math.PI * 2);
       ctx.fill();
       ctx.beginPath();
-      ctx.arc(rightX + px * 0.9, eyeY + px * 0.9, r, 0, Math.PI * 2);
+      ctx.arc(rightX + px * 0.9 + ex, eyeY + px * 0.9 + ey, r, 0, Math.PI * 2);
       ctx.fill();
       if (expression !== "pressed") {
         ctx.fillStyle = "#FFFFFF";
         ctx.beginPath();
-        ctx.arc(leftX + px * 0.55, eyeY + px * 0.55, r * 0.3, 0, Math.PI * 2);
+        ctx.arc(leftX + px * 0.55 + ex, eyeY + px * 0.55 + ey, r * 0.3, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(rightX + px * 0.55, eyeY + px * 0.55, r * 0.3, 0, Math.PI * 2);
+        ctx.arc(rightX + px * 0.55 + ex, eyeY + px * 0.55 + ey, r * 0.3, 0, Math.PI * 2);
         ctx.fill();
       }
     }
   }
 
+  // small muddy smudges layered onto the pet once poop is uncleaned; a second,
+  // heavier tier kicks in at the same mark that already drains happy (see
+  // POOP_UNCLEANED_HAPPY_THRESHOLD_MS) so the visual escalation tracks the
+  // mechanical one instead of being its own separate timer
+  function drawDirt(ctx, ox, oy, gridW, gridH, scale, heavy) {
+    const s = scale * 0.6;
+    ctx.fillStyle = "#8B5A2B";
+    ctx.fillRect(ox + gridW * 0.16, oy + gridH * 0.74, s, s);
+    ctx.fillRect(ox + gridW * 0.6, oy + gridH * 0.8, s * 0.8, s * 0.8);
+    if (heavy) {
+      ctx.fillStyle = "#6B4423";
+      ctx.fillRect(ox + gridW * 0.34, oy + gridH * 0.54, s, s);
+      ctx.fillRect(ox + gridW * 0.48, oy + gridH * 0.88, s * 1.1, s * 0.8);
+      ctx.fillRect(ox + gridW * 0.74, oy + gridH * 0.44, s * 0.7, s * 0.7);
+    }
+  }
+
   const petCanvas = document.getElementById("pet-canvas");
   let petExpression = "normal";
+  let isBlinking = false;
+  let pointerScreenPos = null;
+
+  window.addEventListener("pointermove", (e) => {
+    pointerScreenPos = { x: e.clientX, y: e.clientY };
+  });
+
+  // idle personality: a small unscripted blink every few seconds, independent
+  // of the game loop so it keeps ticking even across screen changes
+  function scheduleBlink() {
+    setTimeout(() => {
+      if (state.screen === "play" && !state.bonusRound.active) {
+        isBlinking = true;
+        setTimeout(() => { isBlinking = false; }, 140);
+      }
+      scheduleBlink();
+    }, jitter(2500, 5500));
+  }
+  scheduleBlink();
+
+  // precedence: sickness > an active gesture state (pressed/sleepy) > the
+  // uncleaned-poop squint > an idle blink > normal
+  function currentExpression() {
+    if (state.sick) return "sickly";
+    if (petExpression !== "normal") return petExpression;
+    if (state.poopPresent && (performance.now() - state.poopSpawnedAt) >= POOP_UNCLEANED_HAPPY_THRESHOLD_MS) return "grossed";
+    if (isBlinking) return "blink";
+    return "normal";
+  }
 
   function renderPet() {
     const shape = petShapeFor(state.growthStage, state.form);
@@ -1062,8 +1250,22 @@
     const palette = buildPalette(color);
     drawGrid(ctx, shape.rows, palette, ox, oy, scale);
 
-    const expr = state.sick ? "sickly" : petExpression;
-    drawEyes(ctx, petCanvas.width / 2, oy / scale + 3, scale, expr);
+    const expr = currentExpression();
+
+    let pupilOffset = null;
+    if (expr === "normal" && pointerScreenPos) {
+      const rect = petCanvas.getBoundingClientRect();
+      const dx = pointerScreenPos.x - (rect.left + rect.width / 2);
+      const dy = pointerScreenPos.y - (rect.top + rect.height / 2);
+      const maxOffset = scale * 0.4;
+      pupilOffset = { x: clamp(dx * 0.04, -maxOffset, maxOffset), y: clamp(dy * 0.04, -maxOffset, maxOffset) };
+    }
+    drawEyes(ctx, petCanvas.width / 2, oy / scale + 3, scale, expr, pupilOffset);
+
+    if (state.poopPresent) {
+      const heavy = (performance.now() - state.poopSpawnedAt) >= POOP_UNCLEANED_HAPPY_THRESHOLD_MS;
+      drawDirt(ctx, ox, oy, gridW, gridH, scale, heavy);
+    }
 
     // glimmerling sparkle accessory
     if (state.growthStage === "form" && state.form === "glimmerling") {
@@ -1148,6 +1350,9 @@
   }
   function sfxGameOver() { tone(440, 500, { type: "sawtooth", endFreq: 200, peakGain: 0.35 }); }
   function sfxWin() { [523, 659, 784, 1046].forEach((f, i) => tone(f, 140, { type: "triangle", delayMs: i * 100, peakGain: 0.45 })); }
+  function sfxBonusStart() { tone(660, 90, { type: "triangle", peakGain: 0.4 }); }
+  function sfxBonusWin() { [523, 659, 784, 988].forEach((f, i) => tone(f, 110, { type: "triangle", delayMs: i * 80, peakGain: 0.4 })); }
+  function sfxBonusMiss() { tone(260, 220, { type: "sawtooth", endFreq: 160, peakGain: 0.3 }); }
 
   function sickAmbientStart() {
     if (!audio.ctx || audio.sickOsc) return;
@@ -1264,9 +1469,8 @@
   const petStageArea = document.getElementById("pet-stage-area");
   const foodEl = document.getElementById("food-item");
   const foodCanvas = document.getElementById("food-canvas");
-  const poopEl = document.getElementById("poop-item");
-  const poopCanvas = document.getElementById("poop-canvas");
-  const toiletZone = document.getElementById("toilet-zone");
+  const spongeEl = document.getElementById("sponge-item");
+  const spongeCanvas = document.getElementById("sponge-canvas");
   const callFlashEl = document.getElementById("call-flash");
   const comboPopEl = document.getElementById("combo-pop");
   const approvePopEl = document.getElementById("approve-pop");
@@ -1283,6 +1487,9 @@
   const leaderboardTitle = document.getElementById("leaderboard-title");
   const bedtimePrompt = document.getElementById("bedtime-prompt");
   const nightDim = document.getElementById("night-dim");
+  const bonusOverlay = document.getElementById("bonus-overlay");
+  const bonusCanvas = document.getElementById("bonus-canvas");
+  const bonusHint = document.getElementById("bonus-hint");
   const eggCanvasStart = document.getElementById("egg-canvas-start");
   const eggCanvasHatch = document.getElementById("egg-canvas-hatch");
   const hatchCrackView = document.getElementById("hatching-crack-view");
@@ -1327,7 +1534,7 @@
   // ============================================================
 
   let foodSpawnPos = null;
-  let poopSpawnPos = null;
+  let spongeSpawnPos = null;
 
   function placeInstantly(el, left, top) {
     el.style.transition = "none";
@@ -1343,10 +1550,10 @@
     placeInstantly(foodEl, foodSpawnPos.left, foodSpawnPos.top);
   }
 
-  function positionPoopAtSpawn() {
+  function positionSpongeAtSpawn() {
     const rect = petStageArea.getBoundingClientRect();
-    poopSpawnPos = { left: rect.width * 0.72, top: rect.height * 0.18 };
-    placeInstantly(poopEl, poopSpawnPos.left, poopSpawnPos.top);
+    spongeSpawnPos = { left: rect.width * 0.72, top: rect.height * 0.18 };
+    placeInstantly(spongeEl, spongeSpawnPos.left, spongeSpawnPos.top);
   }
 
   function nextFoodType() {
@@ -1380,24 +1587,34 @@
       nightBeatUntil: null,
     };
     state.input = { pressStart: null, holding: false, tapTimestamps: [], draggingItemId: null };
+    state.bonusRound = { active: false, birdY: 80, birdVel: 0, pipes: [], elapsed: 0, nextPipeIn: 0 };
+    bonusCooldownUntil = 0;
+    handTrack.pressEngaged = false;
+    handTrack.openDwellStart = null;
+    handTrack.wasPinching = false;
+    handTrack.wasFist = false;
+    handTrack.wasPointing = false;
+    handTrack.history = [];
 
     nextCallTime = performance.now() + jitter(CALL_MIN_MS, CALL_MAX_MS);
     nextPoopTime = performance.now() + POOP_FIRST_MS;
     nextSicknessRollTime = performance.now() + SICKNESS_ROLL_INTERVAL_MS;
     lastSampleSecond = -1;
     petExpression = "normal";
+    isBlinking = false;
 
     petWrap.classList.remove("sick-tint");
     callFlashEl.classList.remove("show");
     bedtimePrompt.classList.remove("show");
     nightDim.classList.remove("show");
-    poopEl.style.display = "none";
-    poopEl.classList.remove("cleaned", "dragging");
+    bonusOverlay.style.display = "none";
+    spongeEl.style.display = "none";
+    spongeEl.classList.remove("cleaned", "dragging");
     foodEl.classList.remove("eaten", "dragging");
 
     refreshFoodSlot();
     positionFoodAtSpawn();
-    positionPoopAtSpawn();
+    positionSpongeAtSpawn();
 
     petNameLabel.textContent = state.petName || "MYSTERY PET";
 
@@ -1520,10 +1737,9 @@
     if (now < nextPoopTime) return;
     state.poopPresent = true;
     state.poopSpawnedAt = now;
-    positionPoopAtSpawn();
-    poopEl.style.display = "";
-    poopEl.classList.remove("cleaned");
-    drawIcon(poopCanvas, "poop");
+    positionSpongeAtSpawn();
+    spongeEl.style.display = "";
+    spongeEl.classList.remove("cleaned");
     sfxPoopAppear();
   }
 
@@ -1532,8 +1748,12 @@
     applyDeltas({ happy: 1 });
     renderMeters();
     sfxPoopCleaned();
-    poopEl.classList.add("cleaned");
-    setTimeout(() => { poopEl.style.display = "none"; }, 250);
+    spongeEl.classList.add("cleaned");
+    setTimeout(() => {
+      spongeEl.style.display = "none";
+      spongeEl.classList.remove("cleaned");
+      positionSpongeAtSpawn();
+    }, 250);
     nextPoopTime = performance.now() + jitter(POOP_MIN_MS, POOP_MAX_MS);
   }
 
@@ -1691,6 +1911,12 @@
   // INPUT HANDLING — pet tap / hold / scold
   // ============================================================
 
+  function squishPet() {
+    petCanvas.classList.remove("pet-squish");
+    void petCanvas.offsetWidth;
+    petCanvas.classList.add("pet-squish");
+  }
+
   function registerPlayTap() {
     sfxBounce();
     applyDeltas({ happy: TAP_HAPPY_DELTA });
@@ -1705,19 +1931,30 @@
       sfxCombo();
       popText(comboPopEl, "COMBO!");
       state.input.tapTimestamps = [];
+      if (!eventsBlocked()) startBonusRound();
     }
+  }
+
+  // shared by real pointer input and gesture-simulated input (see HAND TRACKING)
+  function beginPetPress() {
+    if (state.screen !== "play") return;
+    if (state.bonusRound.active) return;
+    if (state.input.draggingItemId) return;
+    state.input.pressStart = performance.now();
+    state.input.holding = false;
+    if (!state.events.bedtimeActive) petExpression = "pressed";
+    squishPet();
+    renderPet();
   }
 
   petWrap.addEventListener("pointerdown", (e) => {
     if (state.screen !== "play") return;
+    if (state.bonusRound.active) return;
     if (state.input.draggingItemId) return;
     ensureAudioContext();
     e.preventDefault();
     petWrap.setPointerCapture(e.pointerId);
-    state.input.pressStart = performance.now();
-    state.input.holding = false;
-    if (!state.events.bedtimeActive) petExpression = "pressed";
-    renderPet();
+    beginPetPress();
   });
 
   function releasePetPress() {
@@ -1748,7 +1985,7 @@
   });
 
   // ============================================================
-  // INPUT HANDLING — drag (food/medicine, poop)
+  // INPUT HANDLING — drag (food/medicine, sponge)
   // ============================================================
 
   let dragOffset = { x: 0, y: 0 };
@@ -1794,14 +2031,43 @@
     return { x: rect.left + rect.width / 2, y: rect.top + rect.height * 0.62, radius: rect.width * 0.16 };
   }
 
+  // generous full-body hit zone — the sponge cleans as soon as it's dragged
+  // over the pet, it doesn't need to land on the dirt pixels precisely
+  function petCleanZoneCenter() {
+    const rect = petWrap.getBoundingClientRect();
+    return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, radius: rect.width * 0.55 };
+  }
+
   function snapFoodBack() {
     foodEl.style.left = foodSpawnPos.left + "px";
     foodEl.style.top = foodSpawnPos.top + "px";
   }
 
-  function snapPoopBack() {
-    poopEl.style.left = poopSpawnPos.left + "px";
-    poopEl.style.top = poopSpawnPos.top + "px";
+  function snapSpongeBack() {
+    spongeEl.style.left = spongeSpawnPos.left + "px";
+    spongeEl.style.top = spongeSpawnPos.top + "px";
+  }
+
+  // shared by the food-drag drop zone and the gesture pinch action (see HAND TRACKING)
+  function resolveFoodEaten() {
+    const type = state.foodSlot.type;
+    sfxChomp();
+    if (type === "meal") {
+      applyDeltas({ hunger: MEAL_HUNGER, happy: MEAL_HAPPY });
+    } else if (type === "snack") {
+      applyDeltas({ hunger: SNACK_HUNGER, happy: SNACK_HAPPY });
+      state.weight = clamp(state.weight + SNACK_WEIGHT, 0, 100);
+      renderHudTags();
+    } else if (type === "medicine") {
+      cureSickness();
+    }
+    renderMeters();
+    foodEl.classList.add("eaten");
+    setTimeout(() => {
+      foodEl.classList.remove("eaten");
+      refreshFoodSlot();
+      positionFoodAtSpawn();
+    }, FOOD_RESPAWN_MS);
   }
 
   setupDrag(foodEl, () => {
@@ -1811,42 +2077,452 @@
     const dist = Math.hypot(foodCenter.x - mouth.x, foodCenter.y - mouth.y);
 
     if (dist <= mouth.radius + 14 && state.screen === "play") {
-      const type = state.foodSlot.type;
-      sfxChomp();
-      if (type === "meal") {
-        applyDeltas({ hunger: MEAL_HUNGER, happy: MEAL_HAPPY });
-      } else if (type === "snack") {
-        applyDeltas({ hunger: SNACK_HUNGER, happy: SNACK_HAPPY });
-        state.weight = clamp(state.weight + SNACK_WEIGHT, 0, 100);
-        renderHudTags();
-      } else if (type === "medicine") {
-        cureSickness();
-      }
-      renderMeters();
-      foodEl.classList.add("eaten");
-      setTimeout(() => {
-        foodEl.classList.remove("eaten");
-        refreshFoodSlot();
-        positionFoodAtSpawn();
-      }, FOOD_RESPAWN_MS);
+      resolveFoodEaten();
     } else {
       snapFoodBack();
     }
   }, snapFoodBack);
 
-  setupDrag(poopEl, () => {
-    const poopRect = poopEl.getBoundingClientRect();
-    const poopCenter = { x: poopRect.left + poopRect.width / 2, y: poopRect.top + poopRect.height / 2 };
-    const toiletRect = toiletZone.getBoundingClientRect();
-    const toiletCenter = { x: toiletRect.left + toiletRect.width / 2, y: toiletRect.top + toiletRect.height / 2 };
-    const dist = Math.hypot(poopCenter.x - toiletCenter.x, poopCenter.y - toiletCenter.y);
+  // the sponge cleans mid-drag, the moment it passes over the pet — it
+  // doesn't need to be dropped there like food does at the mouth
+  spongeEl.addEventListener("pointerdown", (e) => {
+    if (state.screen !== "play") return;
+    ensureAudioContext();
+    e.preventDefault();
+    spongeEl.setPointerCapture(e.pointerId);
+    state.input.draggingItemId = spongeEl.id;
+    spongeEl.classList.add("dragging");
+    const rect = spongeEl.getBoundingClientRect();
+    dragOffset.x = e.clientX - (rect.left + rect.width / 2);
+    dragOffset.y = e.clientY - (rect.top + rect.height / 2);
+  });
 
-    if (dist <= toiletRect.width / 2 + 20 && state.screen === "play") {
-      cleanPoop();
-    } else {
-      snapPoopBack();
+  spongeEl.addEventListener("pointermove", (e) => {
+    if (state.input.draggingItemId !== spongeEl.id) return;
+    const stageRect = petStageArea.getBoundingClientRect();
+    const x = e.clientX - dragOffset.x - stageRect.left;
+    const y = e.clientY - dragOffset.y - stageRect.top;
+    spongeEl.style.left = x + "px";
+    spongeEl.style.top = y + "px";
+
+    if (state.poopPresent && state.screen === "play") {
+      const spongeRect = spongeEl.getBoundingClientRect();
+      const spongeCenter = { x: spongeRect.left + spongeRect.width / 2, y: spongeRect.top + spongeRect.height / 2 };
+      const zone = petCleanZoneCenter();
+      const dist = Math.hypot(spongeCenter.x - zone.x, spongeCenter.y - zone.y);
+      if (dist <= zone.radius) {
+        state.input.draggingItemId = null;
+        spongeEl.classList.remove("dragging");
+        cleanPoop();
+      }
     }
-  }, snapPoopBack);
+  });
+
+  spongeEl.addEventListener("pointerup", () => {
+    if (state.input.draggingItemId !== spongeEl.id) return;
+    state.input.draggingItemId = null;
+    spongeEl.classList.remove("dragging");
+    snapSpongeBack();
+  });
+
+  spongeEl.addEventListener("pointercancel", () => {
+    if (state.input.draggingItemId !== spongeEl.id) return;
+    state.input.draggingItemId = null;
+    spongeEl.classList.remove("dragging");
+    snapSpongeBack();
+  });
+
+  // ============================================================
+  // BONUS ROUND — Flappy-style interlude, triggered by landing a combo
+  // ============================================================
+
+  function startBonusRound() {
+    if (state.bonusRound.active) return;
+    if (performance.now() < bonusCooldownUntil) return;
+    const br = state.bonusRound;
+    br.active = true;
+    br.birdY = 80;
+    br.birdVel = 0;
+    br.pipes = [];
+    br.elapsed = 0;
+    br.nextPipeIn = 900;
+    bonusHint.textContent = "BONUS! TAP TO FLAP";
+    bonusOverlay.style.display = "";
+    sfxBonusStart();
+    renderBonusRound();
+  }
+
+  function flapBonusBird() {
+    if (!state.bonusRound.active) return;
+    state.bonusRound.birdVel = BONUS_FLAP_VELOCITY;
+    sfxBounce();
+  }
+
+  function endBonusRound(success) {
+    state.bonusRound.active = false;
+    bonusOverlay.style.display = "none";
+    bonusCooldownUntil = performance.now() + BONUS_COOLDOWN_MS;
+    const bonus = success ? BONUS_SUCCESS_HAPPY : BONUS_FAIL_HAPPY;
+    applyDeltas({ happy: bonus });
+    renderMeters();
+    if (success) sfxBonusWin(); else sfxBonusMiss();
+    popText(comboPopEl, success ? "+" + bonus + " BONUS!" : "NICE TRY +" + bonus);
+  }
+
+  function tickBonusRound(dt) {
+    const br = state.bonusRound;
+    br.elapsed += dt * 1000;
+    br.birdVel += BONUS_GRAVITY * dt;
+    br.birdY += br.birdVel * dt;
+
+    br.nextPipeIn -= dt * 1000;
+    if (br.nextPipeIn <= 0) {
+      br.nextPipeIn = BONUS_PIPE_INTERVAL_MS;
+      br.pipes.push({ x: bonusCanvas.width, gapCenter: jitter(40, bonusCanvas.height - 40) });
+    }
+    br.pipes.forEach((p) => { p.x -= BONUS_PIPE_SPEED * dt; });
+    br.pipes = br.pipes.filter((p) => p.x > -BONUS_PIPE_WIDTH);
+
+    let hit = br.birdY - BONUS_BIRD_R < 0 || br.birdY + BONUS_BIRD_R > bonusCanvas.height;
+    br.pipes.forEach((p) => {
+      if (BONUS_BIRD_X + BONUS_BIRD_R > p.x && BONUS_BIRD_X - BONUS_BIRD_R < p.x + BONUS_PIPE_WIDTH) {
+        if (br.birdY < p.gapCenter - BONUS_PIPE_GAP / 2 || br.birdY > p.gapCenter + BONUS_PIPE_GAP / 2) hit = true;
+      }
+    });
+
+    renderBonusRound();
+
+    if (hit) { endBonusRound(false); return; }
+    if (br.elapsed >= BONUS_DURATION_MS) { endBonusRound(true); }
+  }
+
+  function renderBonusRound() {
+    const ctx = clearCanvas(bonusCanvas);
+    const br = state.bonusRound;
+    ctx.fillStyle = "#CFEFFF";
+    ctx.fillRect(0, 0, bonusCanvas.width, bonusCanvas.height);
+    ctx.fillStyle = "#4DE0C4";
+    br.pipes.forEach((p) => {
+      ctx.fillRect(p.x, 0, BONUS_PIPE_WIDTH, p.gapCenter - BONUS_PIPE_GAP / 2);
+      ctx.fillRect(p.x, p.gapCenter + BONUS_PIPE_GAP / 2, BONUS_PIPE_WIDTH, bonusCanvas.height - (p.gapCenter + BONUS_PIPE_GAP / 2));
+    });
+    ctx.fillStyle = state.petColor;
+    ctx.strokeStyle = "#4A2E55";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(BONUS_BIRD_X, br.birdY, BONUS_BIRD_R, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
+
+  bonusOverlay.addEventListener("pointerdown", (e) => {
+    ensureAudioContext();
+    e.preventDefault();
+    flapBonusBird();
+  });
+
+  // ============================================================
+  // HAND TRACKING — optional additive input layer (webcam gestures)
+  //
+  // Touch stays the default, reliable input; this only ever runs after the
+  // player opts in on the Start screen, and any failure (no camera, no
+  // internet, model load error) just leaves hand tracking off — it never
+  // blocks or degrades the touch game. Gestures call the exact same action
+  // functions touch uses (resolveFoodEaten, registerPlayTap, beginPetPress/
+  // releasePetPress, resolveDisciplineCall, cleanPoop, flapBonusBird) so
+  // there's one source of truth for what each action does.
+  //
+  // Simplification vs. the brainstormed spatial mapping (pinch-and-carry-
+  // to-mouth, wipe-across-the-poop): with no on-screen crosshair for a
+  // booth player to aim a webcam hand with, gestures here are recognized by
+  // *shape and motion* alone, not by where on screen the hand appears.
+  // ============================================================
+
+  const HAND_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
+  const HAND_VISION_BASE = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+
+  const PINCH_RATIO_THRESHOLD = 0.62;
+  const FINGER_EXTENDED_RATIO = 1.15;
+  const OPEN_PALM_MIN_FINGERS = 3;
+  const GESTURE_COOLDOWN_MS = 500;
+  const PINCH_COOLDOWN_MS = 700;
+  const WIPE_COOLDOWN_MS = 500;
+  const FLICK_COOLDOWN_MS = 180;
+  const OPEN_PRESS_MIN_DWELL_MS = 120;
+  const STROKE_MIN_PATH = 0.035;
+  const WIPE_VX_THRESHOLD = 2.4;
+  const FLICK_VY_THRESHOLD = -2.2;
+  const HAND_HISTORY_WINDOW_MS = 400;
+
+  const handTrack = {
+    enabled: false,
+    loading: false,
+    video: null,
+    stream: null,
+    landmarker: null,
+    lastVideoTs: -1,
+    history: [],
+    wasPinching: false,
+    wasFist: false,
+    wasPointing: false,
+    pressEngaged: false,
+    openDwellStart: null,
+    lastGestureAt: { feed: 0, play: 0, scold: 0, clean: 0, flap: 0 },
+  };
+
+  const handtrackBtn = document.getElementById("handtrack-btn");
+  const handtrackStatus = document.getElementById("handtrack-status");
+  const handtrackPreview = document.getElementById("handtrack-preview");
+  const handtrackOverlay = document.getElementById("handtrack-overlay");
+  const handtrackLabel = document.getElementById("handtrack-label");
+
+  function setHandTrackStatus(text) { handtrackStatus.textContent = text; }
+  function setGestureLabel(text) { if (handtrackLabel.textContent !== text) handtrackLabel.textContent = text; }
+
+  // classify one hand's 21 landmarks into the shapes gestures are built from
+  function classifyHandGesture(landmarks) {
+    const wrist = landmarks[0];
+    const dist2 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+    const scale = Math.max(dist2(landmarks[0], landmarks[9]), 0.001);
+
+    const fingerJoints = { index: [6, 8], middle: [10, 12], ring: [14, 16], pinky: [18, 20] };
+    const extended = {};
+    Object.keys(fingerJoints).forEach((name) => {
+      const [pip, tip] = fingerJoints[name];
+      extended[name] = dist2(wrist, landmarks[tip]) > dist2(wrist, landmarks[pip]) * FINGER_EXTENDED_RATIO;
+    });
+    const opennessCount = Object.values(extended).filter(Boolean).length;
+
+    const pinchRatio = dist2(landmarks[4], landmarks[8]) / scale;
+
+    const palm = {
+      x: (landmarks[0].x + landmarks[5].x + landmarks[9].x + landmarks[13].x + landmarks[17].x) / 5,
+      y: (landmarks[0].y + landmarks[5].y + landmarks[9].y + landmarks[13].y + landmarks[17].y) / 5,
+    };
+
+    return {
+      palm,
+      opennessCount,
+      isPinching: pinchRatio < PINCH_RATIO_THRESHOLD,
+      isFist: opennessCount === 0,
+      isOpenPalm: opennessCount >= OPEN_PALM_MIN_FINGERS,
+      isPointing: extended.index && !extended.middle && !extended.ring && !extended.pinky,
+    };
+  }
+
+  function endGesturePressIfActive() {
+    if (!handTrack.pressEngaged) return;
+    handTrack.pressEngaged = false;
+    handTrack.openDwellStart = null;
+    if (state.screen === "play") releasePetPress();
+  }
+
+  function onHandResult(landmarks, nowMs) {
+    if (!landmarks) {
+      handTrack.history = [];
+      handTrack.wasPinching = false;
+      handTrack.wasFist = false;
+      handTrack.wasPointing = false;
+      endGesturePressIfActive();
+      setGestureLabel("");
+      return;
+    }
+
+    const g = classifyHandGesture(landmarks);
+    handTrack.history.push({ t: nowMs, x: g.palm.x, y: g.palm.y });
+    handTrack.history = handTrack.history.filter((s) => nowMs - s.t <= HAND_HISTORY_WINDOW_MS);
+
+    let vx = 0, vy = 0, pathLen = 0;
+    if (handTrack.history.length >= 2) {
+      const first = handTrack.history[0];
+      const last = handTrack.history[handTrack.history.length - 1];
+      const dt = Math.max((last.t - first.t) / 1000, 0.001);
+      vx = (last.x - first.x) / dt;
+      vy = (last.y - first.y) / dt;
+      for (let i = 1; i < handTrack.history.length; i++) {
+        pathLen += Math.hypot(
+          handTrack.history[i].x - handTrack.history[i - 1].x,
+          handTrack.history[i].y - handTrack.history[i - 1].y
+        );
+      }
+    }
+
+    let label = "";
+
+    // during the bonus round, only the upward-flick "flap" gesture matters
+    if (state.screen === "play" && state.bonusRound.active) {
+      if (vy < FLICK_VY_THRESHOLD && nowMs - handTrack.lastGestureAt.flap > FLICK_COOLDOWN_MS) {
+        flapBonusBird();
+        handTrack.lastGestureAt.flap = nowMs;
+        label = "FLAP";
+      }
+      setGestureLabel(label);
+      handTrack.wasPinching = g.isPinching;
+      handTrack.wasFist = g.isFist;
+      handTrack.wasPointing = g.isPointing;
+      return;
+    }
+
+    if (state.screen === "play" && !state.bonusRound.active) {
+      // FEED — a fresh pinch (thumb+index come together)
+      if (g.isPinching && !handTrack.wasPinching && !state.input.draggingItemId &&
+          nowMs - handTrack.lastGestureAt.feed > PINCH_COOLDOWN_MS) {
+        resolveFoodEaten();
+        handTrack.lastGestureAt.feed = nowMs;
+        label = "FEED";
+      }
+
+      // PLAY — a fresh fist (quick clench, not mid open-palm press)
+      if (!label && g.isFist && !handTrack.wasFist && !handTrack.pressEngaged &&
+          nowMs - handTrack.lastGestureAt.play > GESTURE_COOLDOWN_MS) {
+        registerPlayTap();
+        handTrack.lastGestureAt.play = nowMs;
+        label = "PLAY";
+      }
+
+      // DISCIPLINE — a fresh pointing finger, only meaningful during an active call
+      if (!label && g.isPointing && !handTrack.wasPointing && state.events.callActive &&
+          nowMs - handTrack.lastGestureAt.scold > GESTURE_COOLDOWN_MS) {
+        resolveDisciplineCall();
+        handTrack.lastGestureAt.scold = nowMs;
+        label = "SCOLD";
+      }
+
+      // CLEAN — a fast lateral wipe with an open-ish hand, poop present
+      if (!label && state.poopPresent && g.opennessCount >= 2 && Math.abs(vx) > WIPE_VX_THRESHOLD &&
+          nowMs - handTrack.lastGestureAt.clean > WIPE_COOLDOWN_MS) {
+        cleanPoop();
+        handTrack.lastGestureAt.clean = nowMs;
+        label = "CLEAN";
+      }
+
+      // SLEEP — open palm held with a little stroking wiggle; reuses the exact
+      // press/hold machinery touch uses, so tap-vs-hold timing stays identical
+      if (g.isOpenPalm) {
+        if (handTrack.openDwellStart === null) handTrack.openDwellStart = nowMs;
+        if (!handTrack.pressEngaged &&
+            nowMs - handTrack.openDwellStart >= OPEN_PRESS_MIN_DWELL_MS &&
+            pathLen >= STROKE_MIN_PATH) {
+          handTrack.pressEngaged = true;
+          beginPetPress();
+        }
+        if (handTrack.pressEngaged && !label) label = "PET";
+      } else {
+        handTrack.openDwellStart = null;
+        endGesturePressIfActive();
+      }
+    }
+
+    handTrack.wasPinching = g.isPinching;
+    handTrack.wasFist = g.isFist;
+    handTrack.wasPointing = g.isPointing;
+    setGestureLabel(label);
+  }
+
+  function drawHandOverlay(landmarks) {
+    const ctx = handtrackOverlay.getContext("2d");
+    ctx.clearRect(0, 0, handtrackOverlay.width, handtrackOverlay.height);
+    if (!landmarks) return;
+    ctx.fillStyle = "#FF6FB5";
+    landmarks.forEach((lm) => {
+      ctx.beginPath();
+      ctx.arc(lm.x * handtrackOverlay.width, lm.y * handtrackOverlay.height, 2, 0, Math.PI * 2);
+      ctx.fill();
+    });
+  }
+
+  function handTrackLoop() {
+    if (!handTrack.enabled) return;
+    const video = handTrack.video;
+    if (video && video.readyState >= 2 && video.currentTime !== handTrack.lastVideoTs) {
+      handTrack.lastVideoTs = video.currentTime;
+      const nowMs = performance.now();
+      let landmarks = null;
+      try {
+        const result = handTrack.landmarker.detectForVideo(video, nowMs);
+        landmarks = result && result.landmarks && result.landmarks[0] ? result.landmarks[0] : null;
+      } catch (err) { /* a stray detection failure shouldn't kill the loop */ }
+      drawHandOverlay(landmarks);
+      onHandResult(landmarks, nowMs);
+    }
+    requestAnimationFrame(handTrackLoop);
+  }
+
+  async function enableHandTracking() {
+    if (handTrack.loading || handTrack.enabled) return;
+    handTrack.loading = true;
+    setHandTrackStatus("starting camera...");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: "user", width: 320, height: 240 }, audio: false,
+      });
+      const video = document.getElementById("handtrack-video");
+      video.srcObject = stream;
+      await video.play();
+
+      setHandTrackStatus("loading hand model...");
+      const visionModule = await import(HAND_VISION_BASE + "/vision_bundle.mjs");
+      const filesetResolver = await visionModule.FilesetResolver.forVisionTasks(HAND_VISION_BASE + "/wasm");
+      let landmarker;
+      try {
+        landmarker = await visionModule.HandLandmarker.createFromOptions(filesetResolver, {
+          baseOptions: { modelAssetPath: HAND_MODEL_URL, delegate: "GPU" },
+          runningMode: "VIDEO",
+          numHands: 1,
+        });
+      } catch (gpuErr) {
+        // some booth hardware won't have GPU delegate support — fall back to CPU
+        landmarker = await visionModule.HandLandmarker.createFromOptions(filesetResolver, {
+          baseOptions: { modelAssetPath: HAND_MODEL_URL, delegate: "CPU" },
+          runningMode: "VIDEO",
+          numHands: 1,
+        });
+      }
+
+      stream.getTracks().forEach((track) => { track.onended = disableHandTracking; });
+
+      handTrack.stream = stream;
+      handTrack.video = video;
+      handTrack.landmarker = landmarker;
+      handTrack.enabled = true;
+      handTrack.loading = false;
+
+      handtrackPreview.style.display = "";
+      handtrackBtn.textContent = "🖐 HAND TRACKING: ON";
+      setHandTrackStatus("pinch=feed · palm=pet · fist=play · point=scold (during a call) · swipe=clean");
+      requestAnimationFrame(handTrackLoop);
+    } catch (err) {
+      handTrack.loading = false;
+      handTrack.enabled = false;
+      setHandTrackStatus("unavailable (needs camera + internet)");
+      console.warn("Hand tracking unavailable:", err);
+    }
+  }
+
+  function disableHandTracking() {
+    handTrack.enabled = false;
+    handTrack.loading = false;
+    endGesturePressIfActive();
+    if (handTrack.stream) handTrack.stream.getTracks().forEach((t) => { t.onended = null; t.stop(); });
+    handTrack.stream = null;
+    handTrack.landmarker = null;
+    handtrackPreview.style.display = "none";
+    handtrackBtn.textContent = "🖐 HAND TRACKING (BETA)";
+    setHandTrackStatus("");
+    setGestureLabel("");
+  }
+
+  handtrackBtn.addEventListener("click", () => {
+    ensureAudioContext();
+    if (handTrack.enabled) disableHandTracking();
+    else enableHandTracking();
+  });
+
+  handtrackPreview.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    disableHandTracking();
+  });
 
   // ============================================================
   // GAME LOOP
@@ -1860,7 +2536,9 @@
     lastFrameTime = ts;
     const now = performance.now();
 
-    if (state.screen === "play") {
+    if (state.screen === "play" && state.bonusRound.active) {
+      tickBonusRound(dt);
+    } else if (state.screen === "play") {
       if (state.input.pressStart !== null && !state.input.holding) {
         if (now - state.input.pressStart >= HOLD_THRESHOLD_MS) {
           state.input.holding = true;
@@ -1984,6 +2662,7 @@
   // ============================================================
 
   drawEgg(eggCanvasStart);
+  drawIcon(spongeCanvas, "sponge");
   resetRunState();
   renderLeaderboard();
   showScreen("start");

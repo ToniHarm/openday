@@ -2,6 +2,85 @@
 
 All notable changes to the `tamagotchi-speedrun.html` booth game are logged here.
 
+## 2026-09-24 — Hand tracking (webcam gestures, additive)
+
+The remaining item from `tamagotchi-speedrun-updates.md`, built after confirming scope:
+additive input layer (touch stays default), full gesture set including the motion
+gestures.
+
+**Added**
+- **Hand tracking toggle** — an opt-in "🖐 HAND TRACKING (BETA)" button on the Start
+  screen. Tapping it requests the camera and loads `@mediapipe/tasks-vision`'s
+  HandLandmarker from CDN (GPU delegate, falling back to CPU on unsupported
+  hardware). Any failure — no camera, no internet, model load error — just leaves
+  it off with an "unavailable" status message; the touch game is never blocked or
+  degraded by it. Camera frames stay on-device (inference runs locally); only the
+  library and model files are fetched over the network, once.
+- **Gesture set**, all routed through the exact same functions touch input already
+  uses, so there's one source of truth per action:
+  - Pinch (thumb+index together) → feed, whatever's in the current food slot
+  - Open palm held over the pet with a little stroking wiggle → pet/sleep, reusing
+    the same press/hold timing touch has (so tap-vs-hold resolves identically
+    regardless of input method)
+  - A quick fist → a play tap
+  - A pointing finger → scold, resolving an active attention call
+  - A fast lateral wipe with an open-ish hand → clean, when poop is present
+  - A quick upward hand flick → flap, during the bonus round
+- **Camera preview** — a small mirrored thumbnail (top-left of the pet during Play)
+  showing the live feed, landmark dots, and the currently recognized gesture label;
+  tapping it stops tracking and reverts to touch-only for the rest of the session.
+
+**Changed**
+- Refactored the pet-press logic (`beginPetPress`) and the food-eating resolution
+  (`resolveFoodEaten`) out of their touch event handlers into standalone functions,
+  so gesture-triggered actions and touch-triggered actions share one implementation
+  instead of two that could drift apart.
+
+**Known limitations / simplifications**
+- No spatial targeting — gestures are recognized by hand shape and motion alone,
+  not by where in the camera frame the hand appears, since there's no on-screen
+  crosshair for a booth player to aim with. "Pinch and move toward the pet" became
+  just "pinch"; "wipe across the poop" became "wipe, if poop is present."
+- Single-hand tracking only (`numHands: 1`); no two-hand clap gesture.
+- All gesture thresholds (pinch distance, finger-extended ratio, wipe/flick
+  velocity, per-gesture cooldowns) are a first pass pending playtesting with a
+  real camera and real hands.
+- Requires internet once per session to load the vision library and hand model
+  from CDN — the feature is explicitly additive so this never affects the
+  touch-only baseline the booth otherwise runs offline.
+
+## 2026-09-23 — Bonus round, dirty pet, distinct baby/child shapes, idle reactions
+
+The remaining items from `tamagotchi-speedrun-updates.md`, built from Claude's stated
+proposals in that doc (voice mimicry stays out of scope, as already decided there).
+
+**Added**
+- **Bonus round** — landing a normal-play combo (3 taps within 1s) now gives a shot
+  at a ~7s Flappy-style tap-to-flap interlude, as long as no other event (sickness,
+  poop, bedtime, an attention call) is already active. Everything else pauses while
+  it's active — no stat decay, no schedulers, no survival-time increment — since it's
+  meant as a no-risk reward, not an extra hazard. Success pays +18 happy, a miss still
+  pays a +2 consolation. A short cooldown (6s) keeps combos from chain-triggering it.
+- **Pet gets visibly dirty** — once poop is uncleaned, 1-2 small dirt smudges layer
+  onto the pet sprite immediately; at the same ~15s mark that already drains happy
+  and raises sickness risk (`POOP_UNCLEANED_HAPPY_THRESHOLD_MS`), the smudges escalate
+  to a heavier, darker tier and the pet's expression switches to a scrunched
+  "grossed out" squint. Cleaning clears both instantly.
+- **Distinct baby/child sprites** — Baby is now its own small, minimal, limbless
+  pixel grid (previously it just showed the adult "glimmerling" shape scaled down).
+  Child gains a stubby limb-nub row and a bigger frame. The three adult forms already
+  had distinct shapes from the authenticity pass; this fills in the two younger stages.
+- **Idle personality reactions** (the cheap "Talking Angela" pieces — voice mimicry
+  is still explicitly out of scope): eyes now track the pointer with a small pupil
+  shift, the pet blinks on its own every ~2.5-5.5s, and any tap on the pet triggers a
+  quick squish/bounce animation on the sprite itself.
+
+**Known limitations / open items carried forward**
+- Bonus round numeric tuning (duration, gravity, pipe speed/gap, reward size, combo
+  cooldown) is a first pass pending playtesting, same as the rest of the game's tuning.
+- No mini-game difficulty ramp — every bonus round plays the same regardless of how
+  far into the run it triggers.
+
 ## 2026-09-22 — Customization + legend timing
 
 Two items from `tamagotchi-speedrun-updates.md`, built after confirming scope.
