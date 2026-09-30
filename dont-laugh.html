@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Don't Laugh</title>
+<style>
+  :root {
+    --ink: #231942;
+    --p1: #2ec4ff;
+    --p2: #ff4d6d;
+    --yellow: #ffe14d;
+    --green: #3ddc84;
+    --purple: #7b5cff;
+    --white: #fff;
+    --night: #1a1036;
+    --pink: #ff3ea5;
+    --cyan: #28e0ff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: "Arial Rounded MT Bold", "Trebuchet MS", system-ui, sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(ellipse at 50% 115%, rgba(255,62,165,.55) 0%, transparent 55%),
+      radial-gradient(ellipse at 50% -25%, #5b2bd6 0%, transparent 65%),
+      var(--night);
+    overflow: hidden;
+    user-select: none;
+  }
+  /* ---------- game-show stage background ---------- */
+  .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .bg::before { /* twinkly dots */
+    content: ''; position: absolute; inset: 0; opacity: .35;
+    background-image: radial-gradient(rgba(255,255,255,.7) 1px, transparent 1.6px);
+    background-size: 46px 46px; animation: twinkle 3s ease-in-out infinite alternate;
+  }
+  @keyframes twinkle { from { opacity: .15; } to { opacity: .4; } }
+  .beam { /* sweeping spotlights */
+    position: absolute; bottom: -8vh; width: 36vw; height: 125vh; transform-origin: 50% 100%;
+    clip-path: polygon(46% 100%, 54% 100%, 100% 0, 0 0); filter: blur(3px); mix-blend-mode: screen;
+  }
+  .beam.b1 { left: -6vw; background: linear-gradient(to top, rgba(40,224,255,.45), transparent 85%); animation: sweep 7s ease-in-out infinite alternate; }
+  .beam.b2 { right: -6vw; background: linear-gradient(to top, rgba(255,62,165,.45), transparent 85%); animation: sweep 8s ease-in-out infinite alternate-reverse; }
+  .beam.b3 { left: 32vw; background: linear-gradient(to top, rgba(255,225,77,.3), transparent 85%); animation: sweep 11s ease-in-out infinite alternate; }
+  @keyframes sweep { from { transform: rotate(-28deg); } to { transform: rotate(28deg); } }
+  .floor { /* retro neon grid floor */
+    position: absolute; left: -30%; right: -30%; bottom: -4vh; height: 34vh;
+    background:
+      repeating-linear-gradient(90deg, rgba(255,62,165,.45) 0 2px, transparent 2px 70px),
+      repeating-linear-gradient(0deg, rgba(255,62,165,.45) 0 2px, transparent 2px 50px);
+    transform: perspective(300px) rotateX(60deg); transform-origin: bottom;
+    mask-image: linear-gradient(to top, #000 10%, transparent 90%);
+    -webkit-mask-image: linear-gradient(to top, #000 10%, transparent 90%);
+    animation: floorMove 2s linear infinite;
+  }
+  @keyframes floorMove { to { background-position: 0 0, 0 50px; } }
+  .floaty { position: absolute; bottom: -80px; opacity: .22; animation: floatUp linear infinite; }
+  @keyframes floatUp { to { transform: translateY(-125vh) rotate(360deg); } }
+
+  #app { position: relative; z-index: 1; height: 100%; }
+  #app.shake { animation: shake .5s; }
+  @keyframes shake {
+    0%,100% { transform: translate(0,0) rotate(0); }
+    20% { transform: translate(-12px,6px) rotate(-1deg); }
+    40% { transform: translate(10px,-8px) rotate(1deg); }
+    60% { transform: translate(-8px,4px) rotate(-.5deg); }
+    80% { transform: translate(6px,-4px) rotate(.5deg); }
+  }
+
+  .screen { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+  .screen.active { display: flex; }
+
+  h1.logo {
+    font-size: clamp(56px, 10vw, 140px); line-height: 1; color: var(--white); text-align: center;
+    text-shadow: 0 7px 0 var(--pink), 0 0 40px rgba(255,62,165,.7);
+    -webkit-text-stroke: 3px var(--ink);
+    animation: wobble 2.4s ease-in-out infinite;
+  }
+  @keyframes wobble { 0%,100% { transform: rotate(-3deg) scale(1); } 50% { transform: rotate(3deg) scale(1.05); } }
+
+  .tagline { font-size: clamp(22px, 3vw, 36px); color: var(--white); margin: 18px 0 28px; text-shadow: 0 0 20px rgba(40,224,255,.8); text-align: center; }
+
+  .card {
+    background: var(--white); border: 5px solid var(--ink); border-radius: 28px;
+    box-shadow: 0 10px 0 var(--pink), 0 0 50px rgba(255,62,165,.35); padding: 24px 32px; max-width: 760px; width: 100%;
+  }
+  .rules { font-size: 22px; line-height: 1.6; text-align: center; }
+  .rules b.p1 { color: #0a8fd0; } .rules b.p2 { color: #e0304f; }
+
+  .btn {
+    font: inherit; font-size: 30px; cursor: pointer; color: var(--ink);
+    background: var(--yellow); border: 5px solid var(--ink); border-radius: 22px;
+    padding: 16px 40px; box-shadow: 0 8px 0 var(--ink);
+    transition: transform .08s, box-shadow .08s;
+  }
+  .btn:hover { transform: translateY(-2px) rotate(-1deg); }
+  .btn:active { transform: translateY(6px); box-shadow: 0 2px 0 var(--ink); }
+  .btn.big { font-size: 40px; padding: 20px 56px; animation: pulse 1.2s ease-in-out infinite; }
+  .btn.small { font-size: 20px; padding: 10px 20px; box-shadow: 0 5px 0 var(--ink); border-width: 4px; }
+  .btn.green { background: var(--green); }
+  .btn.white { background: var(--white); }
+  @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.06); } }
+
+  .privacy { margin-top: 22px; font-size: 15px; color: var(--white); background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.25); padding: 8px 16px; border-radius: 999px; text-align: center; }
+
+  /* ---------- GAME SCREEN ---------- */
+  #game { justify-content: space-between; padding: 14px 24px 8px; gap: 10px; }
+  .topbar { width: 100%; max-width: 1100px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .roundLabel {
+    background: linear-gradient(90deg, var(--pink), var(--purple)); color: var(--white);
+    border: 4px solid var(--white); border-radius: 999px; padding: 6px 26px; font-size: 20px; letter-spacing: 1px;
+    box-shadow: 0 0 24px rgba(255,62,165,.7); white-space: nowrap; text-align: center;
+  }
+  .challengeBox {
+    width: 100%; background: var(--white); border: 5px solid var(--ink); border-radius: 24px;
+    box-shadow: 0 7px 0 var(--yellow), 0 0 40px rgba(255,225,77,.35);
+    padding: 8px 22px; font-size: clamp(18px, 2vw, 25px); display: flex; align-items: center; gap: 14px; min-height: 72px;
+  }
+  .challengeBox .emoji { font-size: 46px; animation: bounce .8s ease-in-out infinite alternate; }
+
+  .stage { width: 100%; max-width: 1400px; display: flex; align-items: center; justify-content: center; gap: 34px; flex: 1; min-height: 0; }
+
+  /* camera boxes = TV screens inside a ring of flashing marquee bulbs */
+  .frame {
+    --c: var(--p1);
+    position: relative; height: min(56vh, 34vw * 9 / 8); aspect-ratio: 8 / 9; border-radius: 36px;
+    background-color: var(--c);
+    background-image: radial-gradient(circle, #fff8c9 0 4px, transparent 5px);
+    background-size: 24px 24px;
+    box-shadow: 0 0 0 5px var(--ink), 0 0 45px var(--c);
+    animation: bulbs .7s steps(1) infinite;
+    transition: transform .3s, background-color .3s, box-shadow .3s;
+  }
+  @keyframes bulbs { 50% { background-position: 12px 12px; } }
+  .frame.p2 { --c: var(--p2); }
+  .frame.found { --c: var(--green); }  /* camera check: someone is sitting in this box */
+  .frame.defender { transform: scale(1.04); }
+  .tv {
+    position: absolute; inset: 16px; border-radius: 24px; overflow: hidden; background: #111;
+    border: 5px solid var(--ink);
+  }
+  .tv::after { /* glassy screen glare */
+    content: ''; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    background: linear-gradient(135deg, rgba(255,255,255,.18), transparent 35%);
+  }
+  .camInner { position: absolute; top: 0; height: 100%; width: 200%; }
+  .frame.p1 .camInner { left: 0; }
+  .frame.p2 .camInner { left: -100%; }
+  .camInner video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); display: block; }
+  .noCam { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; font-size: 120px; background: #2a2150; }
+  .frame.nocam .noCam { display: flex; }
+
+  .tag {
+    position: absolute; top: -20px; left: 50%; transform: translateX(-50%) rotate(-3deg); z-index: 5;
+    font-size: 20px; padding: 6px 16px; border-radius: 999px; border: 4px solid var(--ink);
+    background: var(--yellow); white-space: nowrap; box-shadow: 0 4px 0 var(--ink);
+  }
+  .tag.defend { background: var(--white); }
+  .tag.found { background: var(--green); }
+  .nameplate {
+    position: absolute; bottom: 0; left: 0; right: 0; z-index: 3; display: flex; justify-content: space-between; align-items: center;
+    padding: 8px 14px; font-size: 22px; color: var(--white);
+    background: linear-gradient(to top, rgba(26,16,54,.95), rgba(26,16,54,.6));
+  }
+  .chip { background: var(--c); color: var(--ink); border: 3px solid var(--ink); border-radius: 999px; padding: 2px 12px; font-size: 20px; }
+
+  .caught {
+    position: absolute; inset: 0; z-index: 4; display: none; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(255, 225, 77, .35); pointer-events: none; overflow: hidden;
+  }
+  .caught.show { display: flex; }
+  .caught .emojis { font-size: 70px; animation: bounce .3s ease-in-out infinite alternate; }
+  .caught .txt {
+    font-size: 48px; color: var(--white); -webkit-text-stroke: 2px var(--ink); text-shadow: 0 5px 0 var(--ink);
+    animation: stamp .35s cubic-bezier(.2,1.8,.4,1);
+  }
+  @keyframes bounce { from { transform: translateY(0) rotate(-6deg); } to { transform: translateY(-14px) rotate(6deg); } }
+  @keyframes stamp { from { transform: scale(3) rotate(-15deg); opacity: 0; } to { transform: scale(1) rotate(-6deg); opacity: 1; } }
+  .fall { position: absolute; top: -80px; font-size: 44px; animation: fall linear forwards; }
+  @keyframes fall { to { transform: translateY(120vh) rotate(540deg); } }
+
+  /* middle column: round clock + buttons */
+  .center { display: flex; flex-direction: column; align-items: center; gap: 14px; width: 250px; text-align: center; }
+  .clock {
+    --pct: 1; --ring: var(--yellow);
+    position: relative; width: 190px; height: 190px; border-radius: 50%; display: grid; place-items: center;
+    background: conic-gradient(var(--ring) calc(var(--pct) * 360deg), rgba(255,255,255,.12) 0);
+    box-shadow: 0 0 0 6px var(--ink), 0 0 45px rgba(255,225,77,.5);
+  }
+  .clock::before { content: ''; position: absolute; inset: 16px; border-radius: 50%; background: var(--night); border: 4px solid var(--ink); }
+  .clock.danger { --ring: var(--p2); box-shadow: 0 0 0 6px var(--ink), 0 0 60px rgba(255,77,109,.8); }
+  .timer {
+    position: relative; font-size: 84px; line-height: 1; color: var(--white);
+    -webkit-text-stroke: 3px var(--ink); text-shadow: 0 5px 0 var(--pink);
+  }
+  .timer.tick { animation: tick .35s ease-out; }
+  .timer.danger { color: var(--p2); }
+  @keyframes tick { from { transform: scale(1.4); } to { transform: scale(1); } }
+  .centerMsg { font-size: 24px; color: var(--white); text-shadow: 0 0 16px var(--pink); animation: pulse 1s infinite; }
+  .controls { display: flex; flex-direction: column; gap: 12px; width: 100%; }
+  .controls .btn { font-size: 22px; padding: 12px 14px; }
+  .controls .btn.green { font-size: 26px; animation: pulse 1.2s ease-in-out infinite; }
+
+  /* laugh-o-meter */
+  .bottombar { width: 100%; max-width: 1100px; }
+  .meterWrap {
+    display: flex; align-items: center; gap: 14px; background: var(--white); border: 5px solid var(--ink);
+    border-radius: 28px; padding: 8px 20px; box-shadow: 0 6px 0 var(--cyan), 0 0 35px rgba(40,224,255,.4);
+  }
+  .meterFace { font-size: 44px; }
+  .meterMid { flex: 1; }
+  .meterTitle { display: flex; justify-content: space-between; font-size: 17px; margin-bottom: 5px; }
+  .meter { position: relative; height: 28px; border-radius: 999px; border: 4px solid var(--ink); overflow: hidden;
+    background: linear-gradient(90deg, #3ddc84, #ffe14d 55%, #ff4d6d); }
+  .meterCover { position: absolute; top: 0; bottom: 0; right: 0; background: #eee; transition: width .05s linear; }
+  .meterLine { position: absolute; top: -4px; bottom: -4px; width: 4px; background: var(--ink); }
+  .subMeters { display: flex; gap: 14px; font-size: 13px; margin-top: 5px; opacity: .75; align-items: center; }
+  .subMeters span.bar { display: inline-block; width: 70px; height: 8px; background: #ddd; border-radius: 4px; overflow: hidden; vertical-align: middle; }
+  .subMeters span.bar i { display: block; height: 100%; width: 0; background: var(--purple); }
+  .subMeters label { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+  .footnote { font-size: 12px; color: var(--white); opacity: .7; text-align: center; }
+
+  /* ---------- OVERLAYS ---------- */
+  .overlay {
+    position: fixed; inset: 0; z-index: 20; display: none; flex-direction: column; align-items: center; justify-content: center;
+    background: rgba(35,25,66,.55); backdrop-filter: blur(3px); padding: 24px; text-align: center;
+  }
+  .overlay.show { display: flex; }
+  .overlay .card { animation: popIn .4s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes popIn { from { transform: scale(.4) rotate(-8deg); opacity: 0; } to { transform: scale(1) rotate(0); opacity: 1; } }
+  .ovTitle { font-size: clamp(48px, 8vw, 96px); color: var(--white); -webkit-text-stroke: 3px var(--ink); text-shadow: 0 6px 0 var(--pink), 0 0 30px rgba(255,62,165,.6); margin-bottom: 18px; }
+  .roles { display: flex; gap: 16px; justify-content: center; margin: 10px 0 18px; flex-wrap: wrap; }
+  .role { font-size: 24px; padding: 10px 18px; border-radius: 16px; border: 4px solid var(--ink); color: var(--white); }
+  .role.p1 { background: #0a8fd0; } .role.p2 { background: #e0304f; }
+  .bigChallenge { font-size: clamp(22px, 2.6vw, 32px); line-height: 1.35; margin: 6px 0 20px; }
+  .bigChallenge .emoji { display: block; font-size: 90px; margin-bottom: 6px; animation: bounce .6s ease-in-out infinite alternate; }
+  .btnRow { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+
+  .countNum {
+    font-size: 40vh; line-height: 1; color: var(--yellow); -webkit-text-stroke: 8px var(--ink); text-shadow: 0 14px 0 var(--ink);
+    animation: countPop .9s ease-out;
+  }
+  @keyframes countPop { 0% { transform: scale(2.4); opacity: 0; } 30% { transform: scale(1); opacity: 1; } 100% { transform: scale(.85); opacity: .9; } }
+
+  #hahaBanner {
+    position: fixed; left: 50%; top: 40%; z-index: 30; pointer-events: none; display: none;
+    font-size: clamp(48px, 8vw, 110px); white-space: nowrap; color: var(--yellow);
+    -webkit-text-stroke: 4px var(--ink); text-shadow: 0 10px 0 var(--ink);
+  }
+  #hahaBanner.show { display: block; animation: haha 1.8s cubic-bezier(.2,1.6,.4,1) forwards; }
+  @keyframes haha {
+    0% { transform: translate(-50%,-50%) scale(0) rotate(-20deg); }
+    25% { transform: translate(-50%,-50%) scale(1.15) rotate(-6deg); }
+    35%, 80% { transform: translate(-50%,-50%) scale(1) rotate(-4deg); opacity: 1; }
+    100% { transform: translate(-50%,-50%) scale(1.3) rotate(-4deg); opacity: 0; }
+  }
+
+  /* ---------- RESULTS ---------- */
+  .results { display: flex; gap: 28px; margin: 10px 0 24px; flex-wrap: wrap; justify-content: center; }
+  .resCard { background: var(--white); border: 5px solid var(--ink); border-radius: 24px; box-shadow: 0 8px 0 var(--ink), 0 0 40px rgba(255,255,255,.25); padding: 20px 36px; text-align: center; min-width: 260px; animation: popIn .5s cubic-bezier(.2,1.6,.4,1) both; }
+  .resCard.p1 { border-top: 16px solid var(--p1); }
+  .resCard.p2 { border-top: 16px solid var(--p2); animation-delay: .2s; }
+  .resCard h3 { font-size: 30px; }
+  .resCard .num { font-size: 80px; line-height: 1.1; }
+  .resCard .crown { font-size: 50px; height: 56px; }
+  .verdict { font-size: clamp(24px, 3vw, 40px); max-width: 900px; margin-bottom: 26px; text-align: center; color: var(--white); -webkit-text-stroke: 1.5px var(--ink); text-shadow: 0 4px 0 var(--pink), 0 0 24px rgba(255,62,165,.6); animation: popIn .6s .5s both; }
+
+  .countSub { font-size: clamp(28px, 4vw, 48px); color: var(--white); -webkit-text-stroke: 1.5px var(--ink); text-shadow: 0 4px 0 var(--pink); margin-top: 10px; }
+  .listening { font-weight: bold; color: #7b2cbf; }
+  #debug {
+    position: fixed; left: 10px; bottom: 10px; z-index: 40; width: 380px; padding: 10px 12px; border-radius: 12px;
+    background: rgba(0,0,0,.85); color: #9f9; font: 13px/1.5 Menlo, monospace; white-space: pre-wrap;
+  }
+  .error { color: #ff9db5; font-size: 18px; margin-top: 12px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="bg" id="bg">
+  <div class="beam b1"></div><div class="beam b2"></div><div class="beam b3"></div>
+  <div class="floor"></div>
+</div>
+<div id="app">
+
+  <!-- START -->
+  <section class="screen active" id="start">
+    <h1 class="logo">😂 DON'T LAUGH</h1>
+    <p class="tagline">Can you make your opponent laugh?</p>
+    <div class="card rules">
+      <p>🎭 <b class="p1">PLAYER 1</b> tries to make <b class="p2">PLAYER 2</b> laugh.</p>
+      <p>🤐 <b class="p2">PLAYER 2</b> must keep a straight face.</p>
+      <p>🔄 Then swap roles. 30 seconds each!</p>
+      <p style="font-size:17px;margin-top:10px;opacity:.75">Sit side by side in front of the camera — Player 1 on the LEFT, Player 2 on the RIGHT.</p>
+    </div>
+    <div style="margin-top:30px"><button class="btn big" id="startBtn">🎮 START GAME</button></div>
+    <p class="error" id="startError"></p>
+    <p class="privacy">🔒 Camera &amp; microphone are used only for this game and are not recorded or uploaded.</p>
+  </section>
+
+  <!-- GAME -->
+  <section class="screen" id="game">
+    <div class="topbar">
+      <div class="roundLabel" id="roundLabel">📸 CAMERA CHECK</div>
+      <div class="challengeBox" id="challengeBox">
+        <span class="emoji">👋</span>
+        <span>Sit side by side: <b>Player 1 on the LEFT</b>, <b>Player 2 on the RIGHT</b>. Make sure you each fit in your box!</span>
+      </div>
+    </div>
+
+    <div class="stage">
+      <div class="frame p1" id="frame0">
+        <div class="tag" id="tag0" style="display:none"></div>
+        <div class="tv">
+          <div class="camInner"><video autoplay playsinline muted></video></div>
+          <div class="noCam">🙂</div>
+          <div class="caught" id="caught0"><div class="emojis">😂😂😂</div><div class="txt">CAUGHT YOU!</div></div>
+          <div class="nameplate"><span>PLAYER 1</span><span class="chip" id="score0">😂 0</span></div>
+        </div>
+      </div>
+
+      <div class="center">
+        <div class="clock" id="clock"><div class="timer" id="timer">30</div></div>
+        <div class="centerMsg" id="centerMsg" style="visibility:hidden">😂 MAKE THEM LAUGH!</div>
+        <div class="controls" id="controls"></div>
+      </div>
+
+      <div class="frame p2" id="frame1">
+        <div class="tag" id="tag1" style="display:none"></div>
+        <div class="tv">
+          <div class="camInner"><video autoplay playsinline muted></video></div>
+          <div class="noCam">🙂</div>
+          <div class="caught" id="caught1"><div class="emojis">😂😂😂</div><div class="txt">CAUGHT YOU!</div></div>
+          <div class="nameplate"><span>PLAYER 2</span><span class="chip" id="score1">😂 0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bottombar">
+      <div class="meterWrap">
+        <div class="meterFace">😐</div>
+        <div class="meterMid">
+          <div class="meterTitle"><b>🤖 LAUGH-O-METER</b><span id="meterWho" class="listening"></span></div>
+          <div class="meter">
+            <div class="meterCover" id="meterCover" style="width:100%"></div>
+            <div class="meterLine" id="meterLine"></div>
+          </div>
+          <div class="subMeters">
+            <span>🎤 mic <span class="bar"><i id="micBar"></i></span></span>
+            <span>😂 "ha-ha-ha" pattern <span class="bar"><i id="audioBar"></i></span></span>
+            <label>Sensitivity <input type="range" id="sens" min="1" max="10" value="5"></label>
+          </div>
+        </div>
+        <div class="meterFace">😂</div>
+      </div>
+    </div>
+    <p class="footnote">🔒 Nothing is recorded or uploaded. The camera is only for showing you. The Laugh-O-Meter uses a sound-recognition model running in this browser to guess if a sound is laughter — it can be wrong, it's not emotion detection. It can't tell who laughed, so performers: don't laugh at your own jokes!</p>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="screen" id="results">
+    <div class="ovTitle">🏆 WHO WON?</div>
+    <div class="results">
+      <div class="resCard p1"><div class="crown" id="crown0"></div><h3>PLAYER 1</h3><div class="num" id="res0">0</div><div>😂 Laughs detected</div></div>
+      <div class="resCard p2"><div class="crown" id="crown1"></div><h3>PLAYER 2</h3><div class="num" id="res1">0</div><div>😂 Laughs detected</div></div>
+    </div>
+    <div class="verdict" id="verdict"></div>
+    <button class="btn big" id="againBtn">🔁 PLAY AGAIN</button>
+    <p class="privacy">📴 Camera &amp; microphone are now switched off.</p>
+  </section>
+</div>
+
+<!-- OVERLAYS -->
+<div class="overlay" id="ovIntro">
+  <div class="card">
+    <div class="ovTitle" id="introTitle" style="font-size:56px;margin-bottom:6px">ROUND 1</div>
+    <div class="roles" id="introRoles"></div>
+    <div class="bigChallenge" id="introChallenge"></div>
+    <div class="btnRow">
+      <button class="btn white small" id="introBackBtn">⬅️ Back</button>
+      <button class="btn white small" id="swapBtn">🔄 Swap roles</button>
+      <button class="btn white small" id="rerollBtn">🔀 Different challenge</button>
+      <button class="btn green" id="goBtn">▶️ START 30 SECONDS</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="ovCount" style="background:rgba(35,25,66,.25);backdrop-filter:none">
+  <div class="countNum" id="countNum">3</div>
+  <div class="countSub" id="countSub"></div>
+</div>
+
+<div class="overlay" id="ovSwitch">
+  <div class="ovTitle">🔄 SWITCH!</div>
+  <div class="card">
+    <div class="roles" id="switchRoles"></div>
+    <p class="bigChallenge" id="switchMsg"></p>
+    <button class="btn green" id="switchBtn">NEXT ➡️</button>
+  </div>
+</div>
+
+<div id="debug" style="display:none"></div>
+<div id="hahaBanner">😂 LAUGH DETECTED!</div>
+
+<script>
+// ------------------------------------------------------------
+// Challenges
+// ------------------------------------------------------------
+const CHALLENGES = [
+  ['🐸', 'You are a frog applying for a Software Engineering job. Convince the interviewer to hire you.'],
+  ['🍌', 'Pretend you are a banana giving a motivational speech.'],
+  ['👽', 'You are an alien visiting Earth for the first time. Explain why humans are weird.'],
+  ['🐔', 'You are a chicken who thinks it is the CEO of a tech company.'],
+  ['🤖', 'Pretend you are a robot whose only job is to order pizza.'],
+  ['🧑‍🏫', 'Explain how to use a computer to someone who thinks the monitor is a microwave.'],
+  ['🦆', 'Act like a duck who is extremely angry about being late to class.'],
+  ['🐢', 'You are a turtle who suddenly became a Formula 1 driver.'],
+  ['🥔', 'You are a potato auditioning for a musical. Sing your big solo.'],
+  ['🧛', 'You are a vampire trying to order a garlic bread without anyone noticing.'],
+  ['🐱', 'You are a cat giving a TED talk about why you knocked everything off the table.'],
+  ['🧀', 'You are a piece of cheese nervously going on a first date with a cracker.'],
+  ['🦖', 'You are a T-Rex trying to make your bed with your tiny arms.'],
+  ['📎', 'You are an old office paperclip who is VERY jealous of AI assistants.'],
+  ['🧙', 'You are a wizard whose only spell turns things into slightly damp socks. Show it off.'],
+  ['🐧', 'You are a penguin weather presenter and today is the hottest day ever recorded.'],
+  ['🍕', 'You are a pizza slice being interviewed right before being eaten.'],
+  ['🐌', 'You are a snail commentating the world\'s slowest football match.'],
+  ['👑', 'You are a king who has just discovered what a sandwich is.'],
+  ['🦒', 'You are a giraffe trying to hide behind a very small lamppost.'],
+  ['🎤', 'Rap battle yourself about who ate the last biscuit.'],
+  ['🐙', 'You are an octopus teaching a PE class. Demonstrate the warm-up.'],
+  ['🥚', 'You are an egg who is terrified of the frying pan. Give your final speech.'],
+  ['🧳', 'You are a tour guide at the world\'s most boring museum. Make the tour EXCITING.'],
+  ['🐝', 'You are a bee who is allergic to flowers. Explain your career choice to your mum.'],
+  ['🤡', 'Tell the worst joke you know, then explain it very seriously for the rest of the time.'],
+];
+
+const ROUND_SECS = 30;
+
+// floating emojis drifting up the stage background
+['😂', '🤣', '😐', '🤐', '🎭', '🍌', '🐸', '🐔', '🦆', '🤡', '👽', '🍕', '🙈', '💀'].forEach((e, i) => {
+  const el = document.createElement('span');
+  el.className = 'floaty';
+  el.textContent = e;
+  el.style.left = (i / 14) * 100 + Math.random() * 5 + '%';
+  el.style.fontSize = 28 + Math.random() * 36 + 'px';
+  el.style.animationDuration = 14 + Math.random() * 14 + 's';
+  el.style.animationDelay = -Math.random() * 28 + 's';
+  document.getElementById('bg').appendChild(el);
+});
+const $ = id => document.getElementById(id);
+const videos = [...document.querySelectorAll('.frame video')];
+
+let deck = [];
+let state = {
+  phase: 'start', // start | setup | intro | countdown | playing | between | results
+  round: 0,       // 0 = first round, 1 = second round (roles swapped)
+  firstPerformer: 0, // who performs in round 1 (the 🔄 Swap button changes it)
+  laughsAtRoundStart: [0, 0],
+  laughs: [0, 0], // laughs detected per player (while defending)
+  challenge: null,
+  usedThisGame: [],
+  roundEnd: 0,
+  lastShown: null,
+};
+
+function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; }
+function drawChallenge() {
+  if (!deck.length) deck = shuffle([...CHALLENGES]);
+  let c = deck.pop();
+  // never give the same challenge twice in one game
+  if (state.usedThisGame.includes(c) && deck.length) c = deck.pop();
+  return c;
+}
+const performer = () => state.round === 0 ? state.firstPerformer : 1 - state.firstPerformer;
+const defender = () => 1 - performer();
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.toggle('active', s.id === id));
+}
+function overlay(id, on) { $(id).classList.toggle('show', on); }
+
+// ------------------------------------------------------------
+// Media (all local — nothing is recorded, saved or sent anywhere)
+// ------------------------------------------------------------
+let stream = null, audioCtx = null, analyser = null, audioBuf = null, hasVideo = false;
+const motionCanvas = document.createElement('canvas');
+motionCanvas.width = 64; motionCanvas.height = 48;
+const mctx = motionCanvas.getContext('2d', { willReadFrequently: true });
+
+async function startMedia() {
+  // raw mic: browser voice processing (echo cancel / noise suppression) can squash laughs
+  const audio = { echoCancellation: false, noiseSuppression: false, autoGainControl: false };
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ audio, video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' } });
+    hasVideo = true;
+  } catch (e) {
+    if (e.name === 'NotAllowedError' || e.name === 'SecurityError') throw e;
+    // no camera? carry on with microphone only
+    stream = await navigator.mediaDevices.getUserMedia({ audio });
+    hasVideo = false;
+  }
+  videos.forEach(v => { v.srcObject = hasVideo ? stream : null; });
+  document.querySelectorAll('.frame').forEach(f => f.classList.toggle('nocam', !hasVideo));
+
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  const src = audioCtx.createMediaStreamSource(stream);
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 1024;
+  src.connect(analyser); // NOT connected to speakers
+  freqBuf = null;
+  startLaughAIAudio(src);
+  audioBuf = new Float32Array(analyser.fftSize);
+}
+
+function stopMedia() {
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  videos.forEach(v => { v.srcObject = null; });
+  // camera + mic tracks are stopped above; the audio context only plays the fanfare, so close it a bit later
+  const ctx = audioCtx;
+  if (ctx) setTimeout(() => ctx.close(), 1500);
+  stream = null; audioCtx = null; analyser = null;
+}
+
+// ------------------------------------------------------------
+// Silly sound effects (generated, no files)
+// ------------------------------------------------------------
+function beep(freq, dur = 0.12, type = 'square', vol = 0.12, when = 0, slideTo = null) {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime + when;
+  const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+  o.type = type; o.frequency.setValueAtTime(freq, t);
+  if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+  g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  o.connect(g).connect(audioCtx.destination); o.start(t); o.stop(t + dur + 0.02);
+}
+const sfx = {
+  tick: () => beep(660, 0.08),
+  go: () => { beep(880, 0.1); beep(1320, 0.25, 'square', 0.12, 0.1); },
+  time: () => { beep(440, 0.2, 'sawtooth', 0.12); beep(330, 0.2, 'sawtooth', 0.12, 0.2); beep(220, 0.5, 'sawtooth', 0.12, 0.4); },
+  laugh: () => { [0, .12, .24].forEach((w, i) => beep(900 - i * 150, 0.1, 'triangle', 0.18, w, 500 - i * 80)); beep(200, 0.4, 'sine', 0.2, 0.4, 900); },
+  fanfare: () => [523, 659, 784, 1047].forEach((f, i) => beep(f, i === 3 ? 0.5 : 0.15, 'square', 0.1, i * 0.15)),
+};
+
+// ------------------------------------------------------------
+// LAUGH-O-METER — microphone only.
+// The camera is ONLY used to show the players (and, on the camera check, to
+// see whether someone is sitting in each box). Faces never add to the meter.
+//
+// Approximate audio laugh detector. Laughs — even quiet ones like "hehe" or a
+// chuckle — are a little group of SHORT, voice-like bursts close together,
+// with quiet around them. So instead of needing a loud sound we:
+//  - compare against the room's own noise level (quiet room → quiet laughs count)
+//  - split the sound into bursts and look at groups of them:
+//      2 short bursts, then quiet          → "hehe" / chuckle  ✅
+//      3+ short, steady bursts             → "ha-ha-ha"         ✅ (counts straight away)
+//      any sound longer than ~0.35 s       → talking, ignored for that group
+//      bursts right after talking          → ignored
+//      very short clicks/claps/taps, or non-voice-like sounds → ignored
+// It can't tell WHO laughed and it will sometimes be wrong. It is NOT
+// emotion recognition — just a fun guess.
+// ------------------------------------------------------------
+const det = {
+  hist: new Float32Array(180), histI: 0, histN: 0, tick: 0, // last ~3 s of loudness
+  floor: 0.002,                                              // room noise level
+  above: false, cur: null,                                   // burst in progress
+  bursts: [], lastSoundEnd: -1e9, lastLongEnd: -1e9, lastAnyEnd: -1e9, // current group of bursts
+  rms: 0, thr: 0, talkWhy: '', burstNote: '–', verdict: '–',             // for the debug panel (press D)
+  groupTalk: false, groupCounted: false,
+  laughSound: 0, level: 0, lastHeard: -1e9,
+  meter: 0, cooldownUntil: 0,
+};
+const TRIGGER = 0.6;
+$('meterLine').style.left = `calc(${TRIGGER * 100}% - 2px)`;
+let freqBuf = null;
+
+function sensFactor() { return 1.6 - (+$('sens').value) * 0.12; } // 5 → 1.0, 10 → 0.4 (more sensitive)
+
+// do these bursts look like a laugh? (steady rhythm, similar loudness)
+// returns '' if OK, otherwise the reason it doesn't look like a laugh
+function patternProblem(b) {
+  b = b.slice(-8);
+  if (b.length < 2) return '';
+  const gaps = b.slice(1).map((x, i) => x.start - b[i].start);
+  if (!gaps.every(g => g >= 90 && g <= 550)) return 'sounds too far apart / too close';
+  const peaks = b.map(x => x.peak);
+  if (Math.max(...peaks) / Math.min(...peaks) > 5) return 'loudness too uneven';
+  // laugh "ha"s are all about the same length; speech syllables vary a lot
+  const durs = b.map(x => x.dur);
+  if (Math.max(...durs) / Math.min(...durs) > 2.5) return 'sound lengths too uneven (talking?)';
+  if (gaps.length >= 2) {
+    const mean = gaps.reduce((a, g) => a + g, 0) / gaps.length;
+    const sd = Math.sqrt(gaps.reduce((a, g) => a + (g - mean) ** 2, 0) / gaps.length);
+    if (sd / mean > 0.5) return 'rhythm too uneven (talking?)';
+  }
+  return '';
+}
+const laughPattern = b => !patternProblem(b);
+
+// One detector step. rms = loudness this frame, voiced = sound is mostly in the voice range.
+// Returns true when a laugh has just been heard.
+function laughStep(now, dt, rms, voiced, sf) {
+  // room noise = 45th percentile of the last ~3 s (so steady or chattery background noise
+  // raises the bar, but the quiet gaps around a laugh keep it low)
+  det.hist[det.histI] = rms;
+  det.histI = (det.histI + 1) % det.hist.length;
+  det.histN = Math.min(det.histN + 1, det.hist.length);
+  if (++det.tick % 10 === 0) {
+    const sorted = Array.from(det.hist.subarray(0, det.histN)).sort((a, b) => a - b);
+    det.floor = Math.max(0.0004, sorted[Math.floor(sorted.length * 0.45)]);
+  }
+  const thr = Math.max(det.floor * 2.2, 0.0012) * sf;
+  det.thr = thr;
+
+  if (rms > thr) {
+    if (!det.above) { det.above = true; det.cur = { start: now, frames: 0, voiced: 0, peak: 0 }; }
+    const c = det.cur;
+    c.frames++; if (voiced) c.voiced++;
+    c.peak = Math.max(c.peak, rms);
+    if (now - c.start > 350) { det.groupTalk = true; det.talkWhy = 'a sound lasted > 0.35 s (talking?)'; } // long sound = talking
+  } else if (det.above && rms < thr * 0.6) {
+    det.above = false;
+    const c = det.cur, dur = now - c.start;
+    c.dur = dur;
+    const quietBefore = c.start - det.lastAnyEnd;
+    det.lastAnyEnd = now;
+    if (dur > 350) { det.groupTalk = true; det.lastLongEnd = now; det.lastSoundEnd = now; }
+    else if (dur < 40) det.burstNote = `${dur | 0} ms click — ignored`;
+    else if (c.voiced / c.frames < 0.25) det.burstNote = `${dur | 0} ms, not voice-like — ignored`;
+    else {                                                        // short and (at least partly) voice-like
+      det.lastSoundEnd = now;
+      if (!det.bursts.length) {
+        // a laugh starts out of quiet, not straight after talking or in the middle of noise
+        if (c.start - det.lastLongEnd < 1000) { det.groupTalk = true; det.talkWhy = 'came right after talking'; }
+        else if (quietBefore < 250) { det.groupTalk = true; det.talkWhy = 'no quiet before it'; }
+      }
+      if (c.peak >= thr * 1.3) { det.bursts.push(c); det.burstNote = `${dur | 0} ms voice sound ✔`; } // must clearly stand out
+      else det.burstNote = `${dur | 0} ms, too quiet vs room — ignored`;
+    }
+  }
+
+  const b = det.bursts;
+  let heard = false, target = 0;
+  if (!det.groupTalk && b.length && laughPattern(b)) {
+    const loud = clamp(Math.max(...b.map(x => x.peak)) / 0.08);
+    target = [0, 0.25, 0.5, 0.75, 0.85][Math.min(b.length, 4)] + 0.15 * loud;
+    if (b.length >= 4 && !det.groupCounted) heard = det.groupCounted = true; // "ha-ha-ha-ha" — count now (once)
+  }
+  // group ends after ~0.4 s of quiet → a "hehe" / chuckle (2–3 bursts) counts here
+  if (!det.above && (b.length || det.groupTalk) && now - det.lastSoundEnd > 400) {
+    // short groups must be really short "he"s (words are usually longer)
+    const shortHe = b.length >= 4 || b.every(x => x.dur <= 220);
+    const problem = patternProblem(b);
+    if (!det.groupTalk && b.length >= 2 && shortHe && !det.groupCounted && !problem) heard = true;
+    det.verdict = heard || det.groupCounted ? `✅ LAUGH (${b.length} sounds)`
+      : det.groupTalk ? `❌ ${det.talkWhy}`
+      : b.length < 2 ? '❌ only 1 sound (a chuckle needs 2+)'
+      : !shortHe ? '❌ sounds too long for a "he" (> 0.22 s)'
+      : `❌ ${problem}`;
+    det.bursts = []; det.groupTalk = false; det.groupCounted = false; // next sound starts a new group
+  }
+  if (heard) { det.lastHeard = now; target = Math.max(target, 0.9); }
+
+  det.laughSound = Math.max(clamp(target), det.laughSound - dt * 1.0);
+  det.level = clamp(rms / 0.1);
+  return heard;
+}
+
+// is most of the sound energy in the human-voice range (80–5000 Hz)?
+function soundsLikeVoice() {
+  if (!freqBuf || freqBuf.length !== analyser.frequencyBinCount) freqBuf = new Float32Array(analyser.frequencyBinCount);
+  analyser.getFloatFrequencyData(freqBuf);
+  const hz = audioCtx.sampleRate / analyser.fftSize;
+  let voice = 0, total = 0;
+  for (let i = 1; i < freqBuf.length && i * hz < 8000; i++) {
+    const e = Math.pow(10, freqBuf[i] / 10);
+    total += e;
+    if (i * hz >= 80 && i * hz <= 5000) voice += e;
+  }
+  return total > 0 && voice / total > 0.4;
+}
+
+function analyseAudio(now, dt) {
+  analyser.getFloatTimeDomainData(audioBuf);
+  let s = 0;
+  for (let i = 0; i < audioBuf.length; i++) s += audioBuf[i] * audioBuf[i];
+  const rms = Math.sqrt(s / audioBuf.length);
+  det.rms = rms;
+  return laughStep(now, dt, rms, soundsLikeVoice(), sensFactor());
+}
+
+// ------------------------------------------------------------
+// AI LAUGH LISTENER (main detector)
+// Google's YAMNet sound classifier (via MediaPipe), trained on millions of
+// labelled sound clips. It has real classes for Laughter, Giggle, Snicker,
+// Chuckle/chortle, Belly laugh — and tells them apart from Speech.
+// The model is downloaded once and runs inside this browser tab: audio is
+// never recorded, saved or sent anywhere. Still just a guess, not perfect.
+// If it can't load (no internet), the simple detector above is used instead.
+// ------------------------------------------------------------
+const AI_BASE = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-audio@0.10.14';
+const AI_MODEL = 'https://storage.googleapis.com/mediapipe-models/audio_classifier/yamnet/float32/1/yamnet.tflite';
+const LAUGH_CLASSES = /laugh|giggle|snicker|chuckle|chortle/i;
+const ai = {
+  status: 'off', clf: null,
+  buf: null, pos: 0, filled: 0,  // rolling last 1 s of microphone audio
+  lastRun: 0, laugh: 0, top: [], counted: false, quietSince: 0,
+};
+const aiMode = () => ai.status === 'ready' && !!ai.buf;
+const aiThreshold = () => 0.15 * sensFactor(); // tested: real laughs ≥ 0.15, speech/silence ≈ 0
+
+async function loadLaughAI() {
+  if (ai.status === 'ready' || ai.status === 'loading') return;
+  ai.status = 'loading';
+  try {
+    const { AudioClassifier, FilesetResolver } = await import(AI_BASE + '/audio_bundle.mjs');
+    const fileset = await FilesetResolver.forAudioTasks(AI_BASE + '/wasm');
+    ai.clf = await AudioClassifier.createFromOptions(fileset, { baseOptions: { modelAssetPath: AI_MODEL } });
+    ai.status = 'ready';
+  } catch (e) {
+    console.warn('AI laugh listener failed to load — using the simple detector', e);
+    ai.status = 'failed';
+  }
+}
+
+// keep a rolling 1-second copy of the mic in memory (overwritten continuously, never stored)
+function startLaughAIAudio(src) {
+  ai.buf = new Float32Array(audioCtx.sampleRate);
+  ai.pos = 0; ai.filled = 0; ai.laugh = 0; ai.counted = false;
+  const node = audioCtx.createScriptProcessor(4096, 1, 1);
+  const mute = audioCtx.createGain();
+  mute.gain.value = 0; // the node must be connected to run, but nothing reaches the speakers
+  src.connect(node); node.connect(mute); mute.connect(audioCtx.destination);
+  node.onaudioprocess = e => {
+    const x = e.inputBuffer.getChannelData(0), n = ai.buf.length;
+    for (let i = 0; i < x.length; i++) { ai.buf[ai.pos] = x[i]; ai.pos = (ai.pos + 1) % n; }
+    ai.filled = Math.min(n, ai.filled + x.length);
+  };
+}
+
+// classify the last second of sound ~4 times a second. Returns true when a NEW laugh is heard.
+function runLaughAI(now) {
+  if (!aiMode() || ai.filled < ai.buf.length / 2 || now - ai.lastRun < 250) return false;
+  ai.lastRun = now;
+  const n = ai.buf.length, w = new Float32Array(n);
+  w.set(ai.buf.subarray(ai.pos)); w.set(ai.buf.subarray(0, ai.pos), n - ai.pos); // oldest → newest
+  // gentle volume levelling (up to 8×) so quiet chuckles are loud enough for the model
+  let e = 0;
+  for (let i = 0; i < n; i++) e += w[i] * w[i];
+  const gain = Math.min(8, 0.05 / Math.max(Math.sqrt(e / n), 1e-6));
+  for (let i = 0; i < n; i++) w[i] *= gain;
+
+  let cats;
+  try { cats = ai.clf.classify(w, audioCtx.sampleRate)[0].classifications[0].categories; } catch { return false; }
+  ai.laugh = cats.reduce((a, c) => a + (LAUGH_CLASSES.test(c.categoryName) ? c.score : 0), 0);
+  ai.top = cats.slice().sort((a, b) => b.score - a.score).slice(0, 3);
+
+  // one laugh = one count: re-arm only after ~0.8 s without laughing
+  const thr = aiThreshold();
+  let heard = false;
+  if (ai.laugh >= thr && !ai.counted) heard = ai.counted = true;
+  if (ai.laugh < thr * 0.5) {
+    if (!ai.quietSince) ai.quietSince = now;
+    if (now - ai.quietSince > 800) ai.counted = false;
+  } else ai.quietSince = 0;
+  return heard;
+}
+
+// ------------------------------------------------------------
+// CAMERA CHECK ONLY: is someone sitting in each box?
+// Uses the MediaPipe face tracker if it loads (runs in this browser; video never
+// leaves the computer), otherwise a rough skin-colour count. Never affects scoring.
+// ------------------------------------------------------------
+const MP_BASE = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
+const MP_MODEL = 'https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task';
+const face = {
+  status: 'off', landmarker: null, lastRun: 0, lastSeen: [0, 0],
+  mouth: [[], []],        // recent mouth readings per player: { t, jaw, smile }
+  act: [0, 0],            // how much each player's mouth has been moving (last ~1.2 s)
+};
+const faceMode = () => face.status === 'ready' && hasVideo;
+
+async function loadFaceTracker() {
+  if (face.status === 'ready' || face.status === 'loading') return;
+  face.status = 'loading';
+  try {
+    const { FaceLandmarker, FilesetResolver } = await import(MP_BASE + '/vision_bundle.mjs');
+    const fileset = await FilesetResolver.forVisionTasks(MP_BASE + '/wasm');
+    const opts = delegate => ({ baseOptions: { modelAssetPath: MP_MODEL, delegate }, runningMode: 'VIDEO', numFaces: 2, outputFaceBlendshapes: true });
+    try { face.landmarker = await FaceLandmarker.createFromOptions(fileset, opts('GPU')); }
+    catch { face.landmarker = await FaceLandmarker.createFromOptions(fileset, opts('CPU')); }
+    face.status = 'ready';
+  } catch (e) {
+    console.warn('Face tracker failed to load — using skin-colour check for the camera boxes', e);
+    face.status = 'failed';
+  }
+}
+
+// The camera never COUNTS a laugh. It is used to (1) show who is sitting in each box
+// on the camera check and (2) when the MICROPHONE hears a laugh, work out WHO made it
+// by seeing whose mouth was moving.
+function runFace(now) {
+  if (!faceMode() || state.phase === 'results') return;
+  const v = videos[0];
+  if (v.readyState < 2 || now - face.lastRun < 80) return;
+  face.lastRun = now;
+  let res;
+  try { res = face.landmarker.detectForVideo(v, now); } catch { return; }
+  const seen = [false, false];
+  (res.faceLandmarks || []).forEach((lm, i) => {
+    // Display is mirrored, so raw x > 0.5 = Player 1 (left on screen). Landmark 1 = nose tip.
+    const p = lm[1].x > 0.5 ? 0 : 1;
+    if (seen[p]) return;
+    seen[p] = true;
+    face.lastSeen[p] = now;
+    const bs = {};
+    (res.faceBlendshapes?.[i]?.categories || []).forEach(c => { bs[c.categoryName] = c.score; });
+    face.mouth[p].push({ t: now, jaw: bs.jawOpen || 0, smile: ((bs.mouthSmileLeft || 0) + (bs.mouthSmileRight || 0)) / 2 });
+  });
+  [0, 1].forEach(p => {
+    face.mouth[p] = face.mouth[p].filter(m => now - m.t < 1200);
+    face.act[p] = mouthActivity(face.mouth[p]);
+  });
+  if (state.phase === 'setup') [0, 1].forEach(p => setFound(p, now - face.lastSeen[p] < 600));
+}
+
+// laughing = mouth opening and closing a lot (plus a big open smile)
+function mouthActivity(ms) {
+  if (ms.length < 3) return 0;
+  const sd = k => {
+    const mean = ms.reduce((a, m) => a + m[k], 0) / ms.length;
+    return Math.sqrt(ms.reduce((a, m) => a + (m[k] - mean) ** 2, 0) / ms.length);
+  };
+  const avgJaw = ms.reduce((a, m) => a + m.jaw, 0) / ms.length;
+  return sd('jaw') + 0.5 * sd('smile') + 0.3 * Math.max(0, avgJaw - 0.05);
+}
+
+// The mic heard a laugh — who made it? Returns 'defender', 'performer' or 'unknown'.
+function whoLaughed(now) {
+  if (!faceMode()) return 'unknown';
+  const d = defender(), p = performer();
+  const dSeen = now - face.lastSeen[d] < 600, pSeen = now - face.lastSeen[p] < 600;
+  const dAct = dSeen ? face.act[d] : 0, pAct = pSeen ? face.act[p] : 0;
+  if (!pSeen) return 'unknown';
+  if (!dSeen) {
+    // defender is hiding their face (people do that when they laugh!) — only blame the
+    // performer if their mouth is clearly LAUGHING, not just talking
+    return pAct > 0.12 ? 'performer' : 'unknown';
+  }
+  // performer's mouth clearly busy while the defender's is (nearly) still → it was the performer
+  if (pAct > 0.04 && pAct > dAct * 2 && dAct < 0.06) return 'performer';
+  return 'defender';
+}
+
+function samplePresence() {
+  const v = videos[0];
+  if (!hasVideo || v.readyState < 2 || state.phase !== 'setup' || faceMode()) return;
+  const W = 64, H = 48;
+  mctx.drawImage(v, 0, 0, W, H);
+  checkPresence(mctx.getImageData(0, 0, W, H).data, W, H);
+}
+
+const presence = [0, 0];
+function checkPresence(d, W, H) {
+  for (let p = 0; p < 2; p++) {
+    const x0 = p === 0 ? W / 2 : 0; // mirrored: Player 1 is the raw RIGHT half
+    let skin = 0, n = 0;
+    for (let y = Math.floor(H * 0.1); y < Math.floor(H * 0.9); y++) {
+      for (let x = x0 + 3; x < x0 + W / 2 - 3; x++, n++) {
+        const i = (y * W + x) * 4, r = d[i], g = d[i + 1], b = d[i + 2];
+        const Y = 0.299 * r + 0.587 * g + 0.114 * b;
+        const cb = 128 - 0.168736 * r - 0.331264 * g + 0.5 * b;
+        const cr = 128 + 0.5 * r - 0.418688 * g - 0.081312 * b;
+        if (Y > 40 && cr > 135 && cr < 180 && cb > 85 && cb < 135) skin++;
+      }
+    }
+    presence[p] += (skin / n - presence[p]) * 0.15;
+    const found = $('frame' + p).classList.contains('found') ? presence[p] > 0.05 : presence[p] > 0.08;
+    setFound(p, found);
+  }
+}
+
+function setFound(p, found) {
+  const frame = $('frame' + p), tag = $('tag' + p);
+  frame.classList.toggle('found', found);
+  tag.classList.toggle('found', found);
+  tag.textContent = found ? `✅ PLAYER ${p + 1} READY` : `👀 Where's Player ${p + 1}?`;
+}
+
+// ------------------------------------------------------------
+// Main loop
+// ------------------------------------------------------------
+function listeningText(now) {
+  if (ai.status === 'loading') return '⏳ Loading the laugh listener…';
+  if (state.phase === 'playing' && now - (det.performerLaughAt || -1e9) < 1500)
+    return `🎭 That was PLAYER ${performer() + 1} (the performer) laughing — doesn't count!`;
+  if (now - det.lastHeard < 1500) return '😂 That sounded like a laugh!';
+  if (det.laughSound > 0.3) return '🤔 Was that a laugh…?';
+  return state.phase === 'setup' ? '🎤 Chuckle or laugh to test it!' : '🎤 Listening for laughter…';
+}
+
+let lastFrame = performance.now();
+function loop(now) {
+  const dt = Math.min(0.1, (now - lastFrame) / 1000);
+  lastFrame = now;
+
+  if (analyser) {
+    let heard = analyseAudio(now, dt); // simple detector (fallback)
+    if (aiMode()) {
+      heard = runLaughAI(now);
+      // meter: the AI laugh score, scaled so the threshold sits on the black line
+      det.laughSound = Math.max(clamp(ai.laugh / aiThreshold() * TRIGGER), det.laughSound - dt * 0.8);
+      if (heard) det.lastHeard = now;
+    }
+    samplePresence();
+    runFace(now);
+
+    // ONLY the laugh-sound detector moves the meter
+    det.meter += (det.laughSound - det.meter) * Math.min(1, dt / 0.12);
+    if (now < det.cooldownUntil) det.meter = Math.max(0, det.meter - dt * 2);
+
+    $('meterCover').style.width = (100 - clamp(det.meter) * 100) + '%';
+    $('audioBar').style.width = det.laughSound * 100 + '%';
+    $('micBar').style.width = det.level * 100 + '%';
+    if (state.phase === 'setup' || state.phase === 'playing') $('meterWho').textContent = listeningText(now);
+    if ($('debug').style.display !== 'none') {
+      const bar = v => '█'.repeat(Math.min(30, Math.round(v * 3000))).padEnd(30, '·');
+      $('debug').textContent =
+        `🔧 LAUGH DEBUG (press D to hide)\n` +
+        `── simple detector ──\n` +
+        `mic now   ${det.rms.toFixed(4)} ${bar(det.rms)}\n` +
+        `room      ${det.floor.toFixed(4)} ${bar(det.floor)}\n` +
+        `threshold ${det.thr.toFixed(4)} ${bar(det.thr)}\n` +
+        `sounding  ${det.above ? 'YES' : 'no'}   sounds in group: ${det.bursts.length}\n` +
+        `last sound: ${det.burstNote}\n` +
+        `last group: ${det.verdict}\n` +
+        (aiMode()
+          ? `\n🤖 AI laugh score ${ai.laugh.toFixed(2)} (counts at ${aiThreshold().toFixed(2)})\n` +
+            `AI hears: ${ai.top.map(c => `${c.categoryName} ${c.score.toFixed(2)}`).join(', ')}`
+          : `\n🤖 AI listener: ${ai.status} (using simple detector above)`) +
+        (faceMode() ? `\n👄 mouth moving  P1 ${face.act[0].toFixed(3)}  P2 ${face.act[1].toFixed(3)}` : '');
+    }
+
+    if (state.phase === 'playing') {
+      if (heard) {
+        if (whoLaughed(now) === 'performer') {
+          // the performer laughing at their own joke doesn't count against the defender
+          det.performerLaughAt = now;
+          ai.counted = false; det.groupCounted = false; // keep listening in case the defender joins in
+        } else laughDetected(); // one laugh = one count (plus a 3 s cooldown)
+      }
+      updateTimer(now);
+    }
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+// ------------------------------------------------------------
+// Laugh!
+// ------------------------------------------------------------
+function laughDetected() {
+  if (state.phase !== 'playing') return;
+  const now = performance.now();
+  if (now < det.cooldownUntil) return;
+  det.cooldownUntil = now + 3000;
+
+  const p = defender();
+  state.laughs[p]++;
+  $('score' + p).textContent = '😂 ' + state.laughs[p];
+
+  const caught = $('caught' + p);
+  caught.classList.add('show');
+  emojiRain(caught, 14);
+  setTimeout(() => caught.classList.remove('show'), 2200);
+
+  const banner = $('hahaBanner');
+  banner.classList.remove('show'); void banner.offsetWidth; banner.classList.add('show');
+  const app = $('app');
+  app.classList.remove('shake'); void app.offsetWidth; app.classList.add('shake');
+  sfx.laugh();
+}
+
+function emojiRain(container, n) {
+  const pool = ['😂', '🤣', '😆', '😹', '💀', '🙈'];
+  for (let i = 0; i < n; i++) {
+    const s = document.createElement('span');
+    s.className = 'fall';
+    s.textContent = pool[Math.random() * pool.length | 0];
+    s.style.left = Math.random() * 90 + '%';
+    s.style.animationDuration = 1.2 + Math.random() * 1.2 + 's';
+    s.style.animationDelay = Math.random() * 0.6 + 's';
+    container.appendChild(s);
+    setTimeout(() => s.remove(), 3200);
+  }
+}
+
+// ------------------------------------------------------------
+// Game flow
+// ------------------------------------------------------------
+function setControls(html) { $('controls').innerHTML = html; }
+
+$('startBtn').onclick = async () => {
+  $('startError').textContent = '';
+  if (!navigator.mediaDevices?.getUserMedia) {
+    $('startError').innerHTML = 'This browser can\'t access the camera here. Open the page via <b>http://localhost</b> in Chrome, Safari or Firefox.';
+    return;
+  }
+  $('startBtn').textContent = '📸 Asking for camera & mic…';
+  try {
+    await startMedia();
+    loadLaughAI();                   // loads in the background
+    if (hasVideo) loadFaceTracker(); // loads in the background
+  } catch (e) {
+    $('startBtn').textContent = '🎮 START GAME';
+    $('startError').innerHTML = e.name === 'NotAllowedError'
+      ? '🙈 Camera/microphone permission was blocked. Click the camera icon in the address bar, choose <b>Allow</b>, then press START again.'
+      : '😬 Couldn\'t start the camera/microphone: ' + e.message;
+    return;
+  }
+  $('startBtn').textContent = '🎮 START GAME';
+  state.round = 0; state.laughs = [0, 0]; state.usedThisGame = []; state.firstPerformer = 0;
+  [0, 1].forEach(p => { $('score' + p).textContent = '😂 0'; });
+  enterSetup();
+};
+
+function enterSetup() {
+  state.phase = 'setup';
+  show('game');
+  $('roundLabel').textContent = '📸 CAMERA CHECK';
+  $('challengeBox').innerHTML = hasVideo
+    ? '<span class="emoji">👋</span><span>Sit side by side: <b>Player 1 on the LEFT</b>, <b>Player 2 on the RIGHT</b>. Make sure you each fit in your box!</span>'
+    : '<span class="emoji">🎤</span><span>No camera found — playing with the <b>microphone only</b>. That still works!</span>';
+  $('timer').textContent = ROUND_SECS; $('timer').className = 'timer'; setClock(1, false);
+  $('centerMsg').style.visibility = 'hidden';
+  [0, 1].forEach(p => {
+    $('tag' + p).style.display = hasVideo ? '' : 'none';
+    $('tag' + p).className = 'tag defend';
+    $('frame' + p).classList.remove('defender');
+  });
+  setControls(`
+    <button class="btn green" id="readyBtn">✅ WE'RE READY!</button>
+    <button class="btn small white" id="setupBackBtn">⬅️ Back to start</button>`);
+  $('readyBtn').onclick = () => enterIntro();
+  $('setupBackBtn').onclick = () => { stopMedia(); state.phase = 'start'; show('start'); };
+}
+
+function enterIntro(keepChallenge = false) {
+  state.phase = 'intro';
+  document.querySelectorAll('.frame').forEach(f => f.classList.remove('found'));
+  const perf = performer(), def = defender();
+  if (!keepChallenge || !state.challenge) {
+    state.challenge = drawChallenge();
+    state.usedThisGame.push(state.challenge);
+  }
+  // swapping only makes sense before the first round
+  $('swapBtn').style.display = state.round === 0 ? '' : 'none';
+  $('introTitle').textContent = 'ROUND ' + (state.round + 1);
+  $('introRoles').innerHTML = `
+    <div class="role p${perf + 1}">🎭 PLAYER ${perf + 1} performs</div>
+    <div class="role p${def + 1}">🤐 PLAYER ${def + 1} keeps a straight face</div>`;
+  renderIntroChallenge();
+
+  // roles on the camera frames
+  [0, 1].forEach(p => {
+    const tag = $('tag' + p);
+    tag.style.display = '';
+    tag.textContent = p === perf ? '🎭 PERFORMER' : '🤐 DON\'T LAUGH';
+    tag.className = 'tag' + (p === perf ? '' : ' defend');
+    $('frame' + p).classList.toggle('defender', p === def);
+  });
+  $('roundLabel').innerHTML = `ROUND ${state.round + 1} · 🎭 P${perf + 1} vs 🤐 P${def + 1}`;
+  $('challengeBox').innerHTML = `<span class="emoji">${state.challenge[0]}</span><span>${state.challenge[1]}</span>`;
+  $('meterWho').textContent = '🎤 Listening for laughter…';
+  $('timer').textContent = ROUND_SECS; $('timer').className = 'timer'; setClock(1, false);
+  setControls('');
+  overlay('ovIntro', true);
+}
+
+function renderIntroChallenge() {
+  $('introChallenge').innerHTML = `<span class="emoji">${state.challenge[0]}</span>PLAYER ${performer() + 1}, your challenge:<br><b>“${state.challenge[1]}”</b>`;
+  $('challengeBox').innerHTML = `<span class="emoji">${state.challenge[0]}</span><span>${state.challenge[1]}</span>`;
+}
+
+$('rerollBtn').onclick = () => {
+  state.usedThisGame.pop();
+  state.challenge = drawChallenge();
+  state.usedThisGame.push(state.challenge);
+  renderIntroChallenge();
+  beep(500, 0.08, 'triangle', 0.12, 0, 900);
+};
+
+$('swapBtn').onclick = () => {
+  state.firstPerformer = 1 - state.firstPerformer;
+  enterIntro(true);
+  beep(400, 0.1, 'triangle', 0.12, 0, 800);
+};
+
+$('introBackBtn').onclick = () => {
+  overlay('ovIntro', false);
+  if (state.round === 0) enterSetup();
+  else showSwitch();
+};
+
+$('goBtn').onclick = () => {
+  overlay('ovIntro', false);
+  state.phase = 'countdown';
+  $('countSub').textContent = `😐 PLAYER ${defender() + 1}: DON'T LAUGH!`;
+  const seq = ['3', '2', '1', 'GO!'];
+  overlay('ovCount', true);
+  seq.forEach((txt, i) => setTimeout(() => {
+    const n = $('countNum');
+    n.textContent = txt;
+    n.style.animation = 'none'; void n.offsetWidth; n.style.animation = '';
+    txt === 'GO!' ? sfx.go() : sfx.tick();
+  }, i * 900));
+  setTimeout(() => { overlay('ovCount', false); startRound(); }, seq.length * 900);
+};
+
+function startRound() {
+  state.phase = 'playing';
+  state.roundEnd = performance.now() + ROUND_SECS * 1000;
+  state.lastShown = null;
+  state.laughsAtRoundStart = [...state.laughs];
+  det.cooldownUntil = 0; det.bursts = []; det.meter = 0;
+  $('centerMsg').style.visibility = 'visible';
+  $('centerMsg').textContent = '😂 MAKE THEM LAUGH!';
+  setControls(`
+    <button class="btn small white" id="manualBtn">😂 They laughed! (L)</button>
+    <button class="btn small white" id="abortBtn">⬅️ Back (redo round)</button>`);
+  $('manualBtn').onclick = laughDetected;
+  $('abortBtn').onclick = () => {
+    // cancel this round: undo its laughs and go back to the challenge screen
+    state.laughs = [...state.laughsAtRoundStart];
+    [0, 1].forEach(p => { $('score' + p).textContent = '😂 ' + state.laughs[p]; });
+    $('centerMsg').style.visibility = 'hidden';
+    enterIntro(true);
+  };
+}
+
+function setClock(pct, danger) {
+  $('clock').style.setProperty('--pct', pct);
+  $('clock').classList.toggle('danger', danger);
+}
+
+function updateTimer(now) {
+  const remaining = (state.roundEnd - now) / 1000;
+  setClock(clamp(remaining / ROUND_SECS), remaining <= 3);
+  const left = Math.ceil((state.roundEnd - now) / 1000);
+  if (left !== state.lastShown) {
+    state.lastShown = left;
+    const t = $('timer');
+    if (left <= 0) { endRound(); return; }
+    t.textContent = left;
+    t.className = 'timer';
+    void t.offsetWidth;
+    t.className = 'timer tick' + (left <= 3 ? ' danger' : '');
+    if (left <= 3) sfx.tick();
+  }
+}
+
+function endRound() {
+  state.phase = 'between';
+  const t = $('timer');
+  t.textContent = 'TIME!'; t.className = 'timer tick danger';
+  t.style.fontSize = '46px';
+  setClock(0, true);
+  $('centerMsg').style.visibility = 'hidden';
+  setControls('');
+  sfx.time();
+
+  setTimeout(() => {
+    t.style.fontSize = '';
+    if (state.round === 0) {
+      showSwitch();
+    } else {
+      showResults();
+    }
+  }, 1800);
+}
+
+function showSwitch() {
+  state.phase = 'between';
+  const firstDef = 1 - state.firstPerformer, n = state.laughs[firstDef];
+  $('switchRoles').innerHTML = `
+    <div class="role p${firstDef + 1}">🎭 PLAYER ${firstDef + 1} → performs</div>
+    <div class="role p${state.firstPerformer + 1}">🤐 PLAYER ${state.firstPerformer + 1} → tries not to laugh</div>`;
+  $('switchMsg').innerHTML = n === 0
+    ? `😐 PLAYER ${firstDef + 1} didn't laugh once. Revenge time!`
+    : `😂 PLAYER ${firstDef + 1} laughed <b>${n}</b> time${n === 1 ? '' : 's'}. Now it's payback time!`;
+  state.round = 0;
+  overlay('ovSwitch', true);
+}
+
+$('switchBtn').onclick = () => {
+  overlay('ovSwitch', false);
+  state.round = 1;
+  state.challenge = null;
+  enterIntro();
+};
+
+function showResults() {
+  state.phase = 'results';
+  sfx.fanfare();
+  stopMedia(); // camera + mic OFF as soon as the game ends
+  const [a, b] = state.laughs;
+  $('res0').textContent = a; $('res1').textContent = b;
+  $('crown0').textContent = a < b ? '👑' : a > b ? '🤡' : '🤝';
+  $('crown1').textContent = b < a ? '👑' : b > a ? '🤡' : '🤝';
+
+  let v;
+  if (a === 0 && b === 0) v = '😐 NOBODY LAUGHED. ARE YOU TWO EVEN HUMAN?';
+  else if (a === b && a >= 4) v = '🤣 THIS WAS A DISASTER. IT\'S A DRAW OF PURE CHAOS.';
+  else if (a === b) v = '💀 BOTH OF YOU FAILED. EVERYONE WAS LAUGHING.';
+  else {
+    const winner = a < b ? 1 : 2, loser = a < b ? 2 : 1, winScore = Math.min(a, b);
+    v = winScore === 0
+      ? `😐 PLAYER ${winner} HAS NO SOUL. THEY DIDN'T LAUGH ONCE.<br>😂 PLAYER ${loser} IS THE EASIEST PERSON TO MAKE LAUGH.`
+      : `🏆 PLAYER ${winner} WINS!<br>😂 PLAYER ${loser} IS THE EASIEST PERSON TO MAKE LAUGH.`;
+    if (a + b >= 8) v += '<br>🤣 HONESTLY, THIS WAS A DISASTER.';
+  }
+  $('verdict').innerHTML = v;
+  show('results');
+}
+
+$('againBtn').onclick = () => {
+  show('start');
+  state.phase = 'start';
+};
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'd' || e.key === 'D') $('debug').style.display = $('debug').style.display === 'none' ? '' : 'none';
+  if ((e.key === 'l' || e.key === 'L') && state.phase === 'playing') laughDetected();
+});
+
+// safety: always release the camera/mic when the page is closed
+window.addEventListener('pagehide', stopMedia);
+</script>
+</body>
+</html>
