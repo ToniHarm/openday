@@ -61,21 +61,52 @@
     position: relative;
     width: min(94vw, 480px);
     height: min(94vh, 780px);
-    background: linear-gradient(160deg, var(--shell-pink), var(--shell-lavender) 55%, var(--shell-blue));
+    --frame-bg: linear-gradient(160deg, var(--shell-pink), var(--shell-lavender) 55%, var(--shell-blue));
+    --frame-pattern: none;
+    --frame-bezel: var(--ink);
+    --frame-button: var(--accent);
+    --frame-title: var(--ink);
+    background: var(--frame-bg);
     border-radius: 46% 46% 40% 40% / 30% 30% 24% 24%;
     box-shadow: 10px 10px 0 rgba(74,46,85,0.28), 0 0 0 6px rgba(255,255,255,0.35) inset;
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 26px 20px 18px;
+    isolation: isolate;
+    transition: background 180ms ease, box-shadow 180ms ease;
   }
+
+  #shell::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: var(--frame-pattern);
+    opacity: 0.72;
+    pointer-events: none;
+  }
+
+  #shell[data-frame="red-flower"] { --frame-bg: linear-gradient(155deg,#92f4ba 0 18%,#ff5161 48%,#e93434); --frame-pattern: radial-gradient(circle at 78% 13%,#fff 0 9px,#ffe24e 10px 13px,transparent 14px),radial-gradient(circle at 20% 72%,rgba(255,255,255,.22) 0 5px,transparent 6px); --frame-bezel:#ff7eb4; --frame-button:#ff56a7; --frame-title:#fff; }
+  #shell[data-frame="blue-angel"] { --frame-bg: linear-gradient(145deg,#c9f4ff,#6bb9ef 42%,#3677bd); --frame-pattern: radial-gradient(circle at 16% 27%,rgba(255,255,255,.8) 0 12px,transparent 13px),radial-gradient(circle at 84% 27%,rgba(255,255,255,.8) 0 12px,transparent 13px),radial-gradient(circle,rgba(255,255,255,.35) 1.5px,transparent 2px); --frame-bezel:#a8dcf8; --frame-button:#eafaff; --frame-title:#fff4a3; }
+  #shell[data-frame="pink-sprinkle"] { --frame-bg: linear-gradient(150deg,#ffc4df,#f19bbf); --frame-pattern: repeating-linear-gradient(35deg,transparent 0 34px,#f7d33d 35px 39px,transparent 40px 57px,#16a6a0 58px 62px,transparent 63px 81px,#d82f67 82px 86px); --frame-bezel:#f6dc72; --frame-button:#8d543e; --frame-title:#b60f4a; }
+  #shell[data-frame="pastel-angel"] { --frame-bg: linear-gradient(150deg,#fffbd4,#d8fff2 40%,#f3c7ff 76%,#fff1c4); --frame-pattern: radial-gradient(circle at 15% 40%,rgba(255,255,255,.9) 0 14px,transparent 15px),linear-gradient(45deg,transparent 45%,rgba(92,211,255,.65) 47% 53%,transparent 55%); --frame-bezel:#9b7dd2; --frame-button:#d795c9; --frame-title:#fff; }
+  #shell[data-frame="pink-hearts"] { --frame-bg: linear-gradient(145deg,#ffb4d0,#f578ab); --frame-pattern: radial-gradient(circle at 20% 20%,#dd356f 0 7px,transparent 8px),radial-gradient(circle at 75% 36%,#dd356f 0 9px,transparent 10px),radial-gradient(circle at 34% 77%,#dd356f 0 8px,transparent 9px); --frame-bezel:#d84f83; --frame-button:#fff; --frame-title:#fff; }
+  #shell[data-frame="white-angel"] { --frame-bg: linear-gradient(145deg,#fff,#e4edf5 65%,#cad7e6); --frame-pattern: radial-gradient(circle at 12% 30%,rgba(255,255,255,.85) 0 12px,transparent 13px),radial-gradient(circle at 88% 30%,rgba(255,255,255,.85) 0 12px,transparent 13px); --frame-bezel:#d9e5ee; --frame-button:#fffbe3; --frame-title:#27364a; }
+  #shell[data-frame="teal-party"] { --frame-bg: linear-gradient(150deg,#13a8bd,#05778f); --frame-pattern: radial-gradient(circle at 18% 19%,#ffda4e 0 5px,transparent 6px),radial-gradient(circle at 80% 25%,#ff649c 0 6px,transparent 7px),radial-gradient(circle at 25% 80%,#51e5b0 0 7px,transparent 8px),radial-gradient(circle at 75% 78%,#ff784d 0 5px,transparent 6px); --frame-bezel:#f49ab7; --frame-button:#ff81af; --frame-title:#fff; }
+  #shell[data-frame="midnight-stars"] { --frame-bg: linear-gradient(145deg,#1348bd,#071d72 68%,#050d3b); --frame-pattern: radial-gradient(circle at 18% 18%,#fff5a5 0 2px,transparent 3px),radial-gradient(circle at 79% 26%,#f3cf3d 0 3px,transparent 4px),radial-gradient(circle at 30% 75%,#fff 0 2px,transparent 3px),linear-gradient(25deg,transparent 45%,rgba(255,213,50,.35) 47% 49%,transparent 51%); --frame-bezel:#e5b939; --frame-button:#eaf6ff; --frame-title:#fff09b; }
+  #shell[data-frame="family-doodle"] { --frame-bg: linear-gradient(145deg,#f8b5d5,#f18bbb); --frame-pattern: linear-gradient(35deg,transparent 0 31%,rgba(255,255,255,.5) 32% 34%,transparent 35% 66%,rgba(116,195,255,.45) 67% 69%,transparent 70%),radial-gradient(circle at 20% 28%,#ffe55a 0 4px,transparent 5px),radial-gradient(circle at 77% 70%,#62d7e8 0 4px,transparent 5px); --frame-bezel:#ffd5e8; --frame-button:#ffdb36; --frame-title:#fff; }
+  #shell[data-frame="pearl-angel"] { --frame-bg: linear-gradient(145deg,#fffdf4,#e8e2d2 58%,#c8c2b5); --frame-pattern: radial-gradient(circle at 50% 12%,rgba(255,255,255,.9) 0 9px,transparent 10px),linear-gradient(115deg,transparent 40%,rgba(255,255,255,.45) 43% 48%,transparent 51%); --frame-bezel:#eae2cf; --frame-button:#fffced; --frame-title:#283344; }
+  #shell[data-frame="pink-crystal"] { --frame-bg: linear-gradient(145deg,rgba(255,235,248,.92),rgba(255,130,202,.72) 52%,rgba(229,78,164,.8)); --frame-pattern: linear-gradient(45deg,rgba(255,255,255,.3) 25%,transparent 25% 75%,rgba(255,255,255,.3) 75%),linear-gradient(-45deg,transparent 42%,rgba(255,255,255,.22) 43% 48%,transparent 49%); --frame-bezel:#ffc1e5; --frame-button:#ff80c5; --frame-title:#fff; }
+  #shell[data-frame="blue-flower"] { --frame-bg: linear-gradient(145deg,#d9faff,#79d9ef 46%,#40aed1); --frame-pattern: radial-gradient(circle at 17% 21%,#ff784c 0 4px,#fff 5px 8px,transparent 9px),radial-gradient(circle at 82% 34%,#ffe34e 0 4px,#fff 5px 8px,transparent 9px),linear-gradient(45deg,rgba(255,255,255,.28) 25%,transparent 25% 50%,rgba(255,255,255,.28) 50% 75%,transparent 75%); --frame-bezel:#86d9f2; --frame-button:#55c7e8; --frame-title:#047daf; }
 
   .shell-nameplate {
     font-family: var(--font-shell);
     font-weight: 700;
     font-size: 1rem;
     letter-spacing: 0.04em;
-    color: var(--ink);
+    color: var(--frame-title);
     text-align: center;
     margin-bottom: 12px;
     text-shadow: 1px 1px 0 rgba(255,255,255,0.6);
@@ -83,11 +114,12 @@
 
   #lcd-screen {
     position: relative;
-    flex: 1;
-    width: 100%;
+    flex: 0 1 570px;
+    min-height: 0;
+    width: min(78%, 360px);
     background: var(--screen-bg);
     border-radius: 18px;
-    box-shadow: 0 0 0 8px var(--ink), inset 0 0 14px rgba(74,46,85,0.25);
+    box-shadow: 0 0 0 8px var(--frame-bezel), inset 0 0 14px rgba(74,46,85,0.25);
     overflow: hidden;
   }
 
@@ -101,7 +133,7 @@
     width: 34px;
     height: 34px;
     border-radius: 50%;
-    background: var(--accent);
+    background: var(--frame-button);
     box-shadow: 0 4px 0 rgba(74,46,85,0.3);
     display: flex;
     align-items: center;
@@ -237,8 +269,60 @@
     flex-direction: column;
     align-items: center;
     gap: 8px;
-    margin-bottom: 16px;
+    margin-bottom: 10px;
   }
+
+  .frame-picker-label { margin: 0; font-size: 0.42rem; opacity: 0.82; }
+
+  .frame-picker {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: repeat(2, 42px);
+    grid-auto-columns: 34px;
+    gap: 5px 7px;
+    width: min(100%, 252px);
+    overflow-x: auto;
+    padding: 4px 5px 7px;
+    scrollbar-width: thin;
+    scroll-snap-type: x proximity;
+  }
+
+  .frame-option {
+    position: relative;
+    width: 32px;
+    height: 38px;
+    border: 2px solid var(--px-outline);
+    border-radius: 48% 48% 43% 43% / 38% 38% 48% 48%;
+    background: var(--thumb-bg);
+    padding: 0;
+    cursor: pointer;
+    scroll-snap-align: start;
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,.35);
+  }
+
+  .frame-option::before {
+    content: "";
+    position: absolute;
+    inset: 8px 6px 10px;
+    border: 2px solid var(--thumb-bezel);
+    border-radius: 3px;
+    background: #dff5ee;
+  }
+
+  .frame-option::after {
+    content: "";
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 4px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--thumb-button);
+    box-shadow: 7px 0 var(--thumb-button), -7px 0 var(--thumb-button);
+  }
+
+  .frame-option[aria-checked="true"] { outline: 3px solid var(--px-purple); outline-offset: 2px; transform: translateY(-1px); }
+  .frame-option:focus-visible { outline: 3px solid var(--px-gold); outline-offset: 2px; }
 
   .swatch-row {
     display: flex;
@@ -280,6 +364,12 @@
     text-align: center;
     background: white;
   }
+
+  #screen-start { padding: 14px 12px; }
+  #screen-start .egg-canvas-wrap { height: 78px; margin: 0 0 12px; }
+  #screen-start #egg-canvas-start { width: 78px; height: 78px; }
+  #screen-start .px-title { margin: 0 0 9px; line-height: 1.7; }
+  #screen-start .px-body { margin: 0 0 10px; line-height: 2; }
 
   .pet-name-label {
     font-size: 0.42rem;
@@ -626,6 +716,32 @@
 
   canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
 
+  @media (min-width: 900px) and (min-height: 800px) {
+    #shell {
+      width: min(90vw, 560px);
+      height: min(92vh, 860px);
+      padding: 30px 26px 22px;
+    }
+
+    #lcd-screen {
+      width: min(80%, 420px);
+      flex-basis: 640px;
+    }
+
+    #screen-start { padding: 18px 16px; }
+    #screen-start .egg-canvas-wrap { height: 86px; margin-bottom: 14px; }
+    #screen-start #egg-canvas-start { width: 86px; height: 86px; }
+    #screen-start .px-title { font-size: 0.9rem; margin-bottom: 11px; }
+    #screen-start .px-body { font-size: 0.58rem; margin-bottom: 12px; }
+    .frame-picker {
+      grid-template-rows: repeat(2, 46px);
+      grid-auto-columns: 38px;
+      width: min(100%, 282px);
+    }
+    .frame-option { width: 36px; height: 42px; }
+    .swatch { width: 32px; height: 32px; min-width: 32px; min-height: 32px; }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.001ms !important;
@@ -647,6 +763,8 @@
       <p class="px-body">feed it · play with it<br>scold it · clean up<br>put it to bed<br><br>survive 2:00</p>
 
       <div class="custom-picker">
+        <p class="frame-picker-label" id="frame-picker-label">PICK A FRAME</p>
+        <div class="frame-picker" id="frame-picker" role="radiogroup" aria-labelledby="frame-picker-label"></div>
         <div class="swatch-row" id="swatch-row" role="group" aria-label="Pick a color"></div>
         <label for="pet-name-input" class="sr-only">Name your pet (optional)</label>
         <input type="text" id="pet-name-input" maxlength="10" placeholder="NAME (OPTIONAL)" autocomplete="off">
@@ -831,6 +949,20 @@
   const STAGE_LABELS = { baby: "BABY", child: "CHILD", form: "ADULT" };
 
   const COLOR_SWATCHES = ["#FF6FB5", "#B98AFF", "#4DE0C4", "#FFCB3D", "#6FC8FF"];
+  const FRAME_THEMES = [
+    { id: "red-flower", label: "Red flower", bg: "linear-gradient(145deg,#8cf0ac 0 20%,#ef3d43 55%)", bezel: "#ff7eb4", button: "#ff56a7" },
+    { id: "blue-angel", label: "Blue angel", bg: "linear-gradient(145deg,#c9f4ff,#397fbe)", bezel: "#a8dcf8", button: "#eafaff" },
+    { id: "pink-sprinkle", label: "Pink sprinkles", bg: "linear-gradient(145deg,#ffc4df,#eb8cb5)", bezel: "#f6dc72", button: "#8d543e" },
+    { id: "pastel-angel", label: "Pastel angel", bg: "linear-gradient(145deg,#fffbd4,#c9f4ff 52%,#efc0ff)", bezel: "#9b7dd2", button: "#d795c9" },
+    { id: "pink-hearts", label: "Pink hearts", bg: "radial-gradient(circle at 28% 24%,#d9326c 0 4px,transparent 5px),#f491ba", bezel: "#d84f83", button: "#fff" },
+    { id: "white-angel", label: "White angel", bg: "linear-gradient(145deg,#fff,#cedae8)", bezel: "#d9e5ee", button: "#fffbe3" },
+    { id: "teal-party", label: "Teal party", bg: "radial-gradient(circle at 25% 24%,#ffdc4e 0 4px,transparent 5px),#07889d", bezel: "#f49ab7", button: "#ff81af" },
+    { id: "midnight-stars", label: "Midnight stars", bg: "radial-gradient(circle at 25% 24%,#ffe96e 0 3px,transparent 4px),#092883", bezel: "#e5b939", button: "#eaf6ff" },
+    { id: "family-doodle", label: "Pink family", bg: "linear-gradient(145deg,#fac3dc,#ef8cb9)", bezel: "#ffd5e8", button: "#ffdb36" },
+    { id: "pearl-angel", label: "Pearl angel", bg: "linear-gradient(145deg,#fffdf4,#cfc8b8)", bezel: "#eae2cf", button: "#fffced" },
+    { id: "pink-crystal", label: "Pink crystal", bg: "linear-gradient(145deg,#ffe8f6,#e64fa5)", bezel: "#ffc1e5", button: "#ff80c5" },
+    { id: "blue-flower", label: "Blue flower", bg: "linear-gradient(145deg,#d9faff,#45b5d6)", bezel: "#86d9f2", button: "#55c7e8" },
+  ];
   const LEGEND_FALLBACK_MS = 7000;
 
   function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
@@ -871,6 +1003,7 @@
       draggingItemId: null,
     },
     audio: { muted: false },
+    frameId: FRAME_THEMES[0].id,
     petColor: COLOR_SWATCHES[0],
     petName: "",
     bonusRound: { active: false, birdY: 80, birdVel: 0, pipes: [], elapsed: 0, nextPipeIn: 0 },
@@ -893,100 +1026,95 @@
     return { ".": T, O: "#4A2E55", P: bodyColor, W: "#FFFFFF", B: "#2E1A38" };
   }
 
-  // small, simple, no limbs — reads as "just hatched"
   const BABY_BODY = [
-    ".OOOOOOOO.",
-    "OPPPPPPPPO",
-    "OPPPPPPPPO",
-    "OPPPPPPPPO",
-    "OPPPPPPPPO",
-    "OPPPPPPPPO",
-    "OPPPPPPPPO",
-    "OPPPPPPPPO",
-    ".OOOOOOOO.",
+    "....OOO....",
+    "..OOPPPOO..",
+    ".OPPPPPPPO.",
+    "OPPPPPPPPPO",
+    "OPPPPPPPPPO",
+    "OPPPPPPPPPO",
+    "OPPPPPPPPPO",
+    ".OPPPPPPPO.",
+    "..OPPPPPO..",
+    "...OO.OO...",
   ];
 
-  // bigger, gains stubby limb-nubs — reads as "developing", not baby-but-scaled
   const CHILD_BODY = [
-    "..OOOOOOOO..",
-    ".OPPPPPPPPO.",
-    "OPPPPPPPPPPO",
-    "PPPPPPPPPPPP",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    ".OPPPPPPPPO.",
-    "..OOOOOOOO..",
+    ".OO.......OO.",
+    "OPPO.....OPPO",
+    "OPPPOOOOOPPPO",
+    ".OPPPPPPPPPO.",
+    "OPPPPPPPPPPPO",
+    "OPPPPPPPPPPPO",
+    "OOPPPPPPPPPOO",
+    ".OPPPPPPPPPO.",
+    "..OPPPPPPPO..",
+    "...OO...OO...",
   ];
 
-  const ROUND_BODY = [
-    "..OOOOOOOO..",
-    ".OPPPPPPPPO.",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    ".OPPPPPPPPO.",
-    "..OOOOOOOO..",
+  const GLIMMERLING_BODY = [
+    ".OO.......OO.",
+    "OPPO.....OPPO",
+    "OPPPOOOOOPPPO",
+    ".OPPPPPPPPPO.",
+    "OPPPPPPPPPPPO",
+    "OOPPPPPPPPPOO",
+    "OOPPPPPPPPPOO",
+    ".OPPPPPPPPPO.",
+    "..OPPPPPPPO..",
+    "..OO.....OO..",
   ];
 
   const WOBBLET_BODY = [
-    "...OOOOOOO..",
-    "..OPPPPPPPO.",
-    ".OPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPO.",
-    "OPPPPPPPPPPO",
-    ".OPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    ".OPPPPPPPPO.",
-    "..OPPPPPPO..",
-    "...OOOOOO...",
+    "..OO......OO.",
+    ".OPPO....OPPO",
+    ".OPPPOOOOPPPO",
+    "OPPPPPPPPPPO.",
+    "OPPPPPPPPPPPO",
+    ".OPPPPPPPPPPO",
+    "OOPPPPPPPPPO.",
+    ".OPPPPPPPPPO.",
+    "..OPPPPPPPO..",
+    "...OO..OO....",
   ];
 
   const GRUMPLET_BODY = [
-    "..OOOOOOOO..",
-    ".OPPPPPPPPO.",
-    "OPPOO..OOPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPPPPPPPPPO",
-    "OPPOOOOOOPPO",
-    "OPPPPPPPPPPO",
-    ".OPPPPPPPPO.",
-    "..OOOOOOOO..",
+    ".OO.......OO.",
+    "OPPO.....OPPO",
+    "OPPPOOOOOPPPO",
+    ".OPPPPPPPPPO.",
+    "OPPPPPPPPPPPO",
+    "OPPPPPPPPPPPO",
+    "OOPPPPPPPPPOO",
+    ".OPPOOOOOPPO.",
+    "..OPPPPPPPO..",
+    "...OO...OO...",
   ];
 
   const ICON_GRIDS = {
     meal: {
-      palette: { ".": T, O: "#4A2E55", G: "#FFCB3D", W: "#FFFFFF" },
+      palette: { ".": T, O: "#4A2E55", W: "#F7F1D0", G: "#65C466", R: "#FF8B4D", B: "#D85A8B" },
       rows: [
         "..OOOO..",
-        ".OGGGGO.",
-        "OGGGGGGO",
-        "OGGGGGGO",
-        "OGWWWWGO",
-        "OGGGGGGO",
-        ".OGGGGO.",
-        "..OOOO..",
+        ".OWWWWO.",
+        "OWGWGWRO",
+        "OWRWRGWO",
+        "OOOOOOOO",
+        ".OBBBBO.",
+        "..OBBO..",
+        "........",
       ],
     },
     snack: {
-      palette: { ".": T, O: "#4A2E55", M: "#4DE0C4", P: "#B98AFF", G: "#FFCB3D" },
+      palette: { ".": T, O: "#4A2E55", P: "#FF8FC7", M: "#D85A8B", R: "#E64B55", G: "#65C466", W: "#FFFFFF" },
       rows: [
-        ".OOOOOO.",
-        "OMMMMMMO",
-        "OMPMPMPO",
-        "OOOOOOOO",
-        ".OGGGGO.",
-        ".OGGGGO.",
-        ".OGGGGO.",
+        "...R....",
+        "..OGO...",
+        ".OPPPPO.",
+        "OPWPPWPO",
+        "OPPPPPPO",
+        ".OMMMMO.",
+        ".OMMMMO.",
         "..OOOO..",
       ],
     },
@@ -1003,17 +1131,19 @@
         "..OOOO..",
       ],
     },
-    sponge: {
-      palette: { ".": T, O: "#4A2E55", S: "#FFD873", B: "#B98AFF" },
+    poop: {
+      palette: { ".": T, O: "#2E1A38", B: "#8B4A22", D: "#5A2B18", W: "#FFFFFF", P: "#FF9FCB" },
       rows: [
-        "........",
-        ".OOOOOO.",
-        "OSSSSSSO",
-        "OSBSBSBO",
-        "OSSSSSSO",
-        "OSBSBSBO",
-        "OSSSSSSO",
-        ".OOOOOO.",
+        "....OO....",
+        "...OBBO...",
+        "..OBBBBO..",
+        ".OBBBBBBO.",
+        "OBBBBBBBBO",
+        "OBOWBBWOBO",
+        "OBBOBBBOBO",
+        "OPBBBBBBPO",
+        ".OBBBBBBO.",
+        "..OOOOOO..",
       ],
     },
     heartFilled: {
@@ -1030,19 +1160,6 @@
     },
     heartEmpty: {
       palette: { ".": T, O: "#4A2E55" },
-      rows: [
-        ".OO.OO..",
-        "O..O..O.",
-        "O.....O.",
-        "O.....O.",
-        "..O.O...",
-        "...O....",
-        "........",
-      ],
-    },
-  };
-
-  function drawGrid(ctx, rows, palette, x, y, pixelSize) {
     ctx.imageSmoothingEnabled = false;
     rows.forEach((row, ry) => {
       for (let rx = 0; rx < row.length; rx++) {
@@ -1056,15 +1173,15 @@
 
   function clearCanvas(canvas) {
     const ctx = canvas.getContext("2d");
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
     return ctx;
   }
 
   function drawIcon(canvas, key) {
     const spec = ICON_GRIDS[key];
     const ctx = clearCanvas(canvas);
-    const px = Math.floor(canvas.width / 8);
-    const gridW = spec.rows[0].length * px;
+    const cols = Math.max(...spec.rows.map((row) => row.length));
+    const px = Math.floor(Math.min(canvas.width / cols, canvas.height / spec.rows.length));
+    const gridW = cols * px;
     const gridH = spec.rows.length * px;
     const ox = Math.floor((canvas.width - gridW) / 2);
     const oy = Math.floor((canvas.height - gridH) / 2);
@@ -1077,7 +1194,7 @@
     if (stage === "form") {
       if (form === "wobblet") return { rows: WOBBLET_BODY };
       if (form === "grumplet") return { rows: GRUMPLET_BODY };
-      return { rows: ROUND_BODY }; // glimmerling
+      return { rows: GLIMMERLING_BODY };
     }
     if (stage === "child") return { rows: CHILD_BODY };
     return { rows: BABY_BODY };
@@ -1178,20 +1295,24 @@
     }
   }
 
-  // small muddy smudges layered onto the pet once poop is uncleaned; a second,
-  // heavier tier kicks in at the same mark that already drains happy (see
-  // POOP_UNCLEANED_HAPPY_THRESHOLD_MS) so the visual escalation tracks the
-  // mechanical one instead of being its own separate timer
-  function drawDirt(ctx, ox, oy, gridW, gridH, scale, heavy) {
-    const s = scale * 0.6;
-    ctx.fillStyle = "#8B5A2B";
-    ctx.fillRect(ox + gridW * 0.16, oy + gridH * 0.74, s, s);
-    ctx.fillRect(ox + gridW * 0.6, oy + gridH * 0.8, s * 0.8, s * 0.8);
-    if (heavy) {
-      ctx.fillStyle = "#6B4423";
-      ctx.fillRect(ox + gridW * 0.34, oy + gridH * 0.54, s, s);
-      ctx.fillRect(ox + gridW * 0.48, oy + gridH * 0.88, s * 1.1, s * 0.8);
-      ctx.fillRect(ox + gridW * 0.74, oy + gridH * 0.44, s * 0.7, s * 0.7);
+  function drawCuteFace(ctx, cx, cyRow, px, expression) {
+    drawEyes(ctx, cx, cyRow, px, expression);
+
+    const cheekY = (cyRow + 2.25) * px;
+    ctx.fillStyle = "#FF9FCB";
+    ctx.fillRect(cx - px * 4.2, cheekY, px * 1.15, px * 0.55);
+    ctx.fillRect(cx + px * 3.05, cheekY, px * 1.15, px * 0.55);
+
+    ctx.fillStyle = "#2E1A38";
+    const mouthY = (cyRow + 2.15) * px;
+    if (expression === "sickly") {
+      ctx.fillRect(cx - px * 0.7, mouthY + px * 0.45, px * 1.4, px * 0.45);
+    } else if (expression === "sleepy") {
+      ctx.fillRect(cx - px * 0.5, mouthY, px, px * 0.35);
+    } else {
+      ctx.fillRect(cx - px * 0.25, mouthY, px * 0.5, px * 0.65);
+      ctx.fillRect(cx - px * 0.8, mouthY + px * 0.35, px * 0.55, px * 0.35);
+      ctx.fillRect(cx + px * 0.25, mouthY + px * 0.35, px * 0.55, px * 0.35);
     }
   }
 
@@ -1250,22 +1371,8 @@
     const palette = buildPalette(color);
     drawGrid(ctx, shape.rows, palette, ox, oy, scale);
 
-    const expr = currentExpression();
-
-    let pupilOffset = null;
-    if (expr === "normal" && pointerScreenPos) {
-      const rect = petCanvas.getBoundingClientRect();
-      const dx = pointerScreenPos.x - (rect.left + rect.width / 2);
-      const dy = pointerScreenPos.y - (rect.top + rect.height / 2);
-      const maxOffset = scale * 0.4;
-      pupilOffset = { x: clamp(dx * 0.04, -maxOffset, maxOffset), y: clamp(dy * 0.04, -maxOffset, maxOffset) };
-    }
-    drawEyes(ctx, petCanvas.width / 2, oy / scale + 3, scale, expr, pupilOffset);
-
-    if (state.poopPresent) {
-      const heavy = (performance.now() - state.poopSpawnedAt) >= POOP_UNCLEANED_HAPPY_THRESHOLD_MS;
-      drawDirt(ctx, ox, oy, gridW, gridH, scale, heavy);
-    }
+    const expr = state.sick ? "sickly" : petExpression;
+    drawCuteFace(ctx, petCanvas.width / 2, oy / scale + 3, scale, expr);
 
     // glimmerling sparkle accessory
     if (state.growthStage === "form" && state.form === "glimmerling") {
@@ -1497,6 +1604,44 @@
   const swatchRow = document.getElementById("swatch-row");
   const petNameInput = document.getElementById("pet-name-input");
   const petNameLabel = document.getElementById("pet-name-label");
+  const shell = document.getElementById("shell");
+  const framePicker = document.getElementById("frame-picker");
+
+  function selectFrame(frameId) {
+    const frame = FRAME_THEMES.find((item) => item.id === frameId) || FRAME_THEMES[0];
+    state.frameId = frame.id;
+    shell.dataset.frame = frame.id;
+    framePicker.querySelectorAll(".frame-option").forEach((option) => {
+      const selected = option.dataset.frameId === frame.id;
+      option.setAttribute("aria-checked", String(selected));
+      option.tabIndex = selected ? 0 : -1;
+    });
+  }
+
+  FRAME_THEMES.forEach((frame) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "frame-option";
+    btn.dataset.frameId = frame.id;
+    btn.setAttribute("role", "radio");
+    btn.setAttribute("aria-label", frame.label + " frame");
+    btn.title = frame.label;
+    btn.style.setProperty("--thumb-bg", frame.bg);
+    btn.style.setProperty("--thumb-bezel", frame.bezel);
+    btn.style.setProperty("--thumb-button", frame.button);
+    btn.addEventListener("click", () => selectFrame(frame.id));
+    btn.addEventListener("keydown", (event) => {
+      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
+      event.preventDefault();
+      const current = FRAME_THEMES.findIndex((item) => item.id === state.frameId);
+      const delta = (event.key === "ArrowLeft" || event.key === "ArrowUp") ? -1 : 1;
+      const next = (current + delta + FRAME_THEMES.length) % FRAME_THEMES.length;
+      selectFrame(FRAME_THEMES[next].id);
+      framePicker.querySelector(`[data-frame-id="${FRAME_THEMES[next].id}"]`).focus();
+    });
+    framePicker.appendChild(btn);
+  });
+  selectFrame(state.frameId);
 
   swatchRow.innerHTML = "";
   COLOR_SWATCHES.forEach((hex) => {
