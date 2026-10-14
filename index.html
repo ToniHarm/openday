@@ -3,120 +3,578 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Pet Games — Open Day</title>
+<title>Tamagotchi Plaza</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎮</text></svg>">
+<link rel="stylesheet" href="css/pet-tokens.css">
 <style>
-  @font-face {
-    font-family: "Press Start 2P";
-    src: url("fonts/PressStart2P-Regular.ttf") format("truetype");
-    font-display: swap;
-  }
-  :root {
-    --shell-pink:#FFD6E8; --shell-lavender:#E3D4FF; --shell-blue:#CFEFFF;
-    --cream:#FFF8F2; --accent:#FF5FA2; --gold:#FFD873; --ink:#4A2E55;
-    --px-pink:#FF6FB5; --px-gold:#FFCB3D; --px-purple:#B98AFF; --px-mint:#4DE0C4;
-    --font-shell:"Baloo 2","Trebuchet MS","Comic Sans MS",cursive,sans-serif;
-    --font-screen:"Press Start 2P",monospace;
-  }
   *,*::before,*::after{box-sizing:border-box}
   html,body{margin:0;padding:0;min-height:100%;overflow-x:hidden}
   body{
     font-family:var(--font-shell);color:var(--ink);
-    background:linear-gradient(135deg,var(--shell-pink) 0%,var(--shell-lavender) 50%,var(--shell-blue) 100%);
-    min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    padding:24px 16px;
+    background:linear-gradient(180deg,var(--shell-blue) 0%,var(--shell-lavender) 32%,#EAF7EE 62%,#CFF0DC 100%);
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
   }
 
-  /* header */
-  .hub-header{text-align:center;margin-bottom:28px}
-  .hub-title{
-    font-family:var(--font-screen);font-size:clamp(.7rem,3vw,1.1rem);
-    color:var(--ink);line-height:1.8;margin:0 0 6px;
-    text-shadow:2px 2px 0 rgba(255,255,255,.5);
+  /* ---------- HUD ---------- */
+  .hud{
+    width:100%;box-sizing:border-box;
+    background:var(--cream);border-bottom:4px solid var(--ink);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 20px;gap:12px;position:sticky;top:0;z-index:20;
   }
-  .hub-sub{font-size:clamp(.9rem,3.5vw,1.1rem);color:var(--ink);opacity:.7;margin:0}
-  .hub-emoji{font-size:clamp(2.5rem,8vw,3.5rem);display:block;margin-bottom:8px;animation:hubFloat 3s ease-in-out infinite}
-  @keyframes hubFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+  .hud-pet{display:flex;align-items:center;gap:10px}
+  .hud-avatar{width:44px;height:44px;border-radius:12px;background:var(--px-mint);border:3px solid var(--ink);display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .hud-avatar canvas{width:100%;height:100%}
+  .hud-name{font-family:var(--font-screen);font-size:.6rem;line-height:1.4}
+  .hud-stage{font-size:.75rem;opacity:.7}
+  .hud-points{font-family:var(--font-screen);font-size:.6rem;background:var(--gold);border:3px solid var(--ink);border-radius:20px;padding:8px 14px;white-space:nowrap}
 
-  /* game grid */
+  /* ---------- identify screen ---------- */
+  .identify-wrap{
+    flex:1;width:100%;display:flex;align-items:center;justify-content:center;padding:24px 16px;
+  }
+  .identify-card{
+    background:white;border:4px solid var(--ink);border-radius:24px;
+    box-shadow:8px 8px 0 var(--ink);padding:28px 24px;max-width:360px;width:100%;
+    text-align:center;
+  }
+  .identify-emoji{font-size:2.6rem;display:block;margin-bottom:6px;animation:hubFloat 3s ease-in-out infinite}
+  @keyframes hubFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  .identify-title{font-family:var(--font-screen);font-size:.85rem;margin:0 0 6px;line-height:1.7}
+  .identify-sub{font-size:.85rem;opacity:.7;margin:0 0 18px}
+  .identify-field{text-align:left;margin-bottom:12px}
+  .identify-field label{display:block;font-size:.7rem;font-weight:700;margin-bottom:4px}
+  .identify-field input{
+    width:100%;font-family:var(--font-shell);font-size:1rem;padding:10px 12px;
+    border:3px solid var(--ink);border-radius:10px;background:var(--screen-bg);
+  }
+  .swatch-row{display:flex;gap:8px;justify-content:center;margin:14px 0}
+  .swatch{
+    width:32px;height:32px;border-radius:50%;border:3px solid var(--ink);
+    padding:0;cursor:pointer;opacity:.55;
+  }
+  .swatch.selected{opacity:1;box-shadow:0 0 0 3px #fff,0 0 0 5px var(--ink)}
+  .identify-actions{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+  .px-btn{
+    font-family:var(--font-screen);font-size:.65rem;padding:14px 16px;
+    border-radius:10px;border:3px solid var(--ink);background:var(--px-gold);
+    color:var(--ink);cursor:pointer;touch-action:manipulation;
+  }
+  .px-btn:active{transform:translateY(2px)}
+  .px-btn-ghost{background:var(--screen-bg)}
+  .identify-error{font-size:.75rem;color:#C0335B;min-height:1.2em;margin:8px 0 0}
+
+  /* ---------- plaza screen ---------- */
+  .plaza-wrap{display:none;flex:1;width:100%;flex-direction:column;align-items:center;padding:20px 16px 30px}
+  .plaza-wrap.active{display:flex}
+  .identify-screen{display:flex}
+  .identify-screen.hidden{display:none}
+
+  .plaza-3d-wrap{position:relative;width:min(94vw,760px);margin-bottom:20px}
+  #plaza-3d-canvas{
+    width:100%;aspect-ratio:4/3;display:block;
+    border:4px solid var(--ink);border-radius:20px;
+    touch-action:none;cursor:pointer;background:var(--shell-blue);
+  }
+  .plaza-loading{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-screen);font-size:.6rem;color:var(--ink);
+    background:var(--shell-blue);border:4px solid var(--ink);border-radius:20px;
+  }
+  .plaza-loading.hidden{display:none}
+
+  .plaza-title{font-family:var(--font-screen);font-size:clamp(.7rem,3vw,1rem);text-align:center;margin:0 0 18px}
+
   .game-grid{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-    gap:18px;width:100%;max-width:700px;
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));
+    gap:18px;width:100%;max-width:760px;
   }
-
-  /* game card */
   .game-card{
-    background:white;border-radius:24px;
-    border:4px solid var(--ink);
-    box-shadow:6px 6px 0 var(--ink);
-    padding:24px 16px;text-align:center;
-    text-decoration:none;color:var(--ink);
-    display:flex;flex-direction:column;align-items:center;gap:10px;
-    transition:transform .1s,box-shadow .1s;
-    cursor:pointer;
+    position:relative;background:white;border-radius:20px;border:4px solid var(--ink);
+    box-shadow:6px 6px 0 var(--ink);padding:26px 14px 16px;text-align:center;
+    display:flex;flex-direction:column;align-items:center;gap:8px;
+    transition:transform .1s,box-shadow .1s;cursor:pointer;touch-action:manipulation;
+    font:inherit;color:var(--ink);
   }
   .game-card:hover{transform:translate(-2px,-2px);box-shadow:8px 8px 0 var(--ink)}
   .game-card:active{transform:translate(4px,4px);box-shadow:2px 2px 0 var(--ink)}
-
-  .card-emoji{font-size:clamp(2.8rem,8vw,3.8rem);line-height:1;animation:cardBounce 2s ease-in-out infinite}
-  .game-card:nth-child(2) .card-emoji{animation-delay:.3s}
-  .game-card:nth-child(3) .card-emoji{animation-delay:.6s}
-  @keyframes cardBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-
-  .card-title{
-    font-family:var(--font-screen);font-size:clamp(.5rem,2.5vw,.7rem);
-    line-height:1.6;margin:0;
-  }
-  .card-desc{font-size:clamp(.8rem,2.5vw,.95rem);opacity:.7;margin:0;line-height:1.5}
-
-  .card-tag{
-    font-family:var(--font-screen);font-size:.45rem;
-    padding:4px 10px;border-radius:20px;border:2px solid var(--ink);
-    margin-top:4px;
-  }
+  .game-card:focus-visible{outline:3px solid var(--px-purple);outline-offset:3px}
+  .card-roof{position:absolute;top:-4px;left:-4px;right:-4px;height:14px;border-radius:20px 20px 0 0;background:var(--card-roof,var(--accent))}
+  .card-emoji{font-size:clamp(2.2rem,7vw,2.8rem);line-height:1}
+  .card-title{font-family:var(--font-screen);font-size:clamp(.48rem,2.3vw,.62rem);line-height:1.6;margin:0}
+  .card-desc{font-size:clamp(.72rem,2.3vw,.85rem);opacity:.7;margin:0;line-height:1.4}
+  .card-tag{font-family:var(--font-screen);font-size:.4rem;padding:4px 9px;border-radius:20px;border:2px solid var(--ink);margin-top:2px}
   .tag-solo{background:var(--px-mint)}
   .tag-multi{background:var(--px-gold)}
-  .tag-classic{background:var(--px-pink);color:white}
 
-  /* footer */
-  .hub-footer{margin-top:24px;font-family:var(--font-screen);font-size:.38rem;opacity:.55;text-align:center;line-height:2}
+  .plaza-footer{margin-top:24px;font-family:var(--font-screen);font-size:.36rem;opacity:.55;text-align:center;line-height:2}
+
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    font-family:var(--font-screen);font-size:.6rem;background:var(--ink);color:#fff;
+    padding:12px 18px;border-radius:12px;opacity:0;pointer-events:none;
+    transition:opacity .25s,transform .25s;z-index:50;text-align:center;max-width:80vw;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
 
-<div class="hub-header">
-  <span class="hub-emoji">🎮</span>
-  <p class="hub-title">PET GAMES</p>
-  <p class="hub-sub">Choose a game to play!</p>
+<div class="hud" id="hud" style="display:none;">
+  <div class="hud-pet">
+    <div class="hud-avatar"><canvas id="hud-avatar-canvas" width="44" height="44"></canvas></div>
+    <div>
+      <div class="hud-name" id="hud-name">PET</div>
+      <div class="hud-stage" id="hud-stage">Baby</div>
+    </div>
+  </div>
+  <div class="hud-points" id="hud-points">0 PTS</div>
 </div>
 
-<div class="game-grid">
+<div class="identify-wrap identify-screen" id="screen-identify">
+  <div class="identify-card">
+    <span class="identify-emoji">🐣</span>
+    <p class="identify-title">TAMAGOTCHI<br>PLAZA</p>
+    <p class="identify-sub">Enter your name + PIN to hatch<br>a new pet, or resume yours.</p>
 
-  <a class="game-card" href="tamagotchi-speedrun.html">
-    <span class="card-emoji">🐣</span>
-    <p class="card-title">TAMAGOTCHI<br>SPEEDRUN</p>
-    <p class="card-desc">Hatch &amp; raise your pet.<br>Keep it alive for 2 mins!</p>
-    <span class="card-tag tag-solo">1 PLAYER</span>
-  </a>
+    <div class="identify-field">
+      <label for="name-input">NAME</label>
+      <input type="text" id="name-input" maxlength="12" placeholder="e.g. PIXEL" autocomplete="off">
+    </div>
+    <div class="identify-field">
+      <label for="pin-input">PIN (4 digits)</label>
+      <input type="text" id="pin-input" maxlength="6" placeholder="e.g. 4471" autocomplete="off" inputmode="numeric">
+    </div>
 
-  <a class="game-card" href="pet-race.html">
-    <span class="card-emoji">🏆</span>
-    <p class="card-title">PET RACE</p>
-    <p class="card-desc">Mash to race! Tap fast<br>for TURBO boost 🔥</p>
-    <span class="card-tag tag-multi">1–2 PLAYERS</span>
-  </a>
+    <p class="identify-sub" style="margin:0 0 6px;font-size:.72rem;">new pet color</p>
+    <div class="swatch-row" id="swatch-row"></div>
 
-  <a class="game-card" href="flappy-pet.html">
-    <span class="card-emoji">🐦</span>
-    <p class="card-title">FLAPPY PET</p>
-    <p class="card-desc">Tap to flap through<br>the pipes. How far?</p>
-    <span class="card-tag tag-solo">1 PLAYER</span>
-  </a>
-
+    <div class="identify-actions">
+      <button class="px-btn" id="resume-btn">RESUME MY PET</button>
+      <button class="px-btn px-btn-ghost" id="hatch-btn">HATCH A NEW PET</button>
+    </div>
+    <p class="identify-error" id="identify-error"></p>
+  </div>
 </div>
 
-<p class="hub-footer">tap a game to start &nbsp;·&nbsp; open day 2026</p>
+<div class="plaza-wrap" id="screen-plaza">
+  <div class="plaza-3d-wrap" id="plaza-3d-wrap">
+    <canvas id="plaza-3d-canvas"></canvas>
+    <div class="plaza-loading" id="plaza-loading">loading plaza...</div>
+  </div>
 
+  <p class="plaza-title">🏙️ CHOOSE A LOCATION</p>
+
+  <div class="game-grid" id="game-grid" style="display:none;">
+
+    <button class="game-card" data-location="home" style="--card-roof:var(--accent);">
+      <span class="card-roof"></span>
+      <span class="card-emoji">🏠</span>
+      <p class="card-title">HOME</p>
+      <p class="card-desc">Feed, clean &amp; tuck<br>your pet in</p>
+      <span class="card-tag tag-solo">1 PLAYER</span>
+    </button>
+
+    <button class="game-card" data-location="sky" style="--card-roof:#4DE0C4;">
+      <span class="card-roof"></span>
+      <span class="card-emoji">🐦</span>
+      <p class="card-title">FLAPPY SKY</p>
+      <p class="card-desc">Flap through<br>the pipes</p>
+      <span class="card-tag tag-solo">1 PLAYER</span>
+    </button>
+
+    <button class="game-card" data-location="racetrack" style="--card-roof:#FF7A5C;">
+      <span class="card-roof"></span>
+      <span class="card-emoji">🏁</span>
+      <p class="card-title">RACETRACK</p>
+      <p class="card-desc">Mash for<br>TURBO boost</p>
+      <span class="card-tag tag-multi">1-2 PLAYERS</span>
+    </button>
+
+    <button class="game-card" data-location="clubhouse" style="--card-roof:#FF6FB5;">
+      <span class="card-roof"></span>
+      <span class="card-emoji">😂</span>
+      <p class="card-title">CLUBHOUSE</p>
+      <p class="card-desc">First to laugh<br>loses!</p>
+      <span class="card-tag tag-multi">1-2 PLAYERS</span>
+    </button>
+
+    <button class="game-card" data-location="shop" style="--card-roof:#FFCB3D;">
+      <span class="card-roof"></span>
+      <span class="card-emoji">🎀</span>
+      <p class="card-title">SHOP</p>
+      <p class="card-desc">Spend your<br>points</p>
+      <span class="card-tag tag-solo">COSMETICS</span>
+    </button>
+
+    <button class="game-card" data-location="restaurant" style="--card-roof:#B98AFF;">
+      <span class="card-roof"></span>
+      <span class="card-emoji">🍕</span>
+      <p class="card-title">RESTAURANT</p>
+      <p class="card-desc">Cook to the<br>clock</p>
+      <span class="card-tag tag-solo">1 PLAYER</span>
+    </button>
+
+  </div>
+
+  <p class="plaza-footer">tap a building to visit &nbsp;·&nbsp; open day 2026</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/pet-save.js"></script>
+<script src="js/pet-render.js"></script>
+<script src="js/vendor/three.min.js"></script>
+<script src="js/pet-render-3d.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var COLOR_SWATCHES = ["#FF6FB5", "#B98AFF", "#4DE0C4", "#FFCB3D", "#6FC8FF"];
+  var LOCATION_LABELS = {
+    sky: "Flappy Sky", racetrack: "Racetrack", clubhouse: "Clubhouse",
+    shop: "Shop", restaurant: "Restaurant",
+  };
+  var STAGE_LABELS = { baby: "Baby", child: "Child", form: null };
+  var FORM_LABELS = { glimmerling: "Glimmerling", wobblet: "Wobblet", grumplet: "Grumplet" };
+
+  var screenIdentify = document.getElementById("screen-identify");
+  var screenPlaza = document.getElementById("screen-plaza");
+  var hud = document.getElementById("hud");
+  var nameInput = document.getElementById("name-input");
+  var pinInput = document.getElementById("pin-input");
+  var swatchRow = document.getElementById("swatch-row");
+  var identifyError = document.getElementById("identify-error");
+  var resumeBtn = document.getElementById("resume-btn");
+  var hatchBtn = document.getElementById("hatch-btn");
+  var toastEl = document.getElementById("toast");
+  var hudAvatarCanvas = document.getElementById("hud-avatar-canvas");
+  var hudName = document.getElementById("hud-name");
+  var hudStage = document.getElementById("hud-stage");
+  var hudPoints = document.getElementById("hud-points");
+
+  var chosenColor = COLOR_SWATCHES[0];
+  swatchRow.innerHTML = "";
+  COLOR_SWATCHES.forEach(function (hex) {
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "swatch" + (hex === chosenColor ? " selected" : "");
+    btn.style.background = hex;
+    btn.setAttribute("aria-label", "Pick color " + hex);
+    btn.addEventListener("click", function () {
+      chosenColor = hex;
+      swatchRow.querySelectorAll(".swatch").forEach(function (s) { s.classList.remove("selected"); });
+      btn.classList.add("selected");
+    });
+    swatchRow.appendChild(btn);
+  });
+
+  var toastTimer = null;
+  function showToast(text) {
+    toastEl.textContent = text;
+    toastEl.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 2600);
+  }
+
+  function showError(text) { identifyError.textContent = text; }
+
+  function stageLabelFor(record) {
+    if (record.appearance.growthStage === "form" && record.appearance.form) {
+      return FORM_LABELS[record.appearance.form] || "Grown";
+    }
+    return STAGE_LABELS[record.appearance.growthStage] || "Baby";
+  }
+
+  function enterPlaza(record) {
+    hudName.textContent = record.identity.name || "PET";
+    hudStage.textContent = stageLabelFor(record);
+    hudPoints.textContent = record.points.balance + " PTS";
+    PetRender.renderPet(hudAvatarCanvas, {
+      stage: record.appearance.growthStage,
+      form: record.appearance.form,
+      baseColor: record.appearance.petColor,
+      cosmetics: Object.values(record.appearance.cosmetics.equipped).filter(Boolean),
+    });
+    hud.style.display = "flex";
+    screenIdentify.classList.add("hidden");
+    screenPlaza.classList.add("active");
+    initPlazaWorld(record);
+  }
+
+  // ============================================================
+  // 3D PLAZA — Three.js scene; falls back to the plain button grid
+  // (already fully wired below) if WebGL isn't available on this device.
+  // ============================================================
+
+  var plazaInitialized = false;
+  var gameGrid = document.getElementById("game-grid");
+  var plaza3dWrap = document.getElementById("plaza-3d-wrap");
+  var plazaLoading = document.getElementById("plaza-loading");
+  var plazaCanvas = document.getElementById("plaza-3d-canvas");
+
+  function showFallbackGrid() {
+    plaza3dWrap.style.display = "none";
+    gameGrid.style.display = "";
+  }
+
+  var LOCATIONS_3D = [
+    { id: "home", color: 0xFF5FA2, roof: 0xE0407F, x: 0, z: 4.6, scale: 1.3 },
+    { id: "racetrack", color: 0xFF7A5C, roof: 0xE0563A, x: 0, z: -4.6, scale: 0.9 },
+    { id: "sky", color: 0x4DE0C4, roof: 0x35B89E, x: -4.3, z: 2.3, scale: 1.0 },
+    { id: "shop", color: 0xFFCB3D, roof: 0xE0A82A, x: 4.3, z: 2.3, scale: 1.0 },
+    { id: "clubhouse", color: 0xFF6FB5, roof: 0xE0559A, x: -4.3, z: -2.3, scale: 1.0 },
+    { id: "restaurant", color: 0xB98AFF, roof: 0x9A6DE0, x: 4.3, z: -2.3, scale: 1.0 },
+  ];
+
+  function buildCheckerTexture() {
+    var c = document.createElement("canvas");
+    c.width = 64; c.height = 64;
+    var ctx = c.getContext("2d");
+    ctx.fillStyle = "#F3E9D8";
+    ctx.fillRect(0, 0, 64, 64);
+    ctx.fillStyle = "#E7D6B8";
+    ctx.fillRect(0, 0, 32, 32);
+    ctx.fillRect(32, 32, 32, 32);
+    var tex = new THREE.CanvasTexture(c);
+    tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+    tex.repeat.set(6, 6);
+    tex.magFilter = THREE.NearestFilter;
+    return tex;
+  }
+
+  function buildBuilding(loc) {
+    var group = new THREE.Group();
+    var s = loc.scale;
+    var box = new THREE.Mesh(
+      new THREE.BoxGeometry(2 * s, 1.6 * s, 2 * s),
+      new THREE.MeshLambertMaterial({ color: loc.color })
+    );
+    box.position.y = 0.8 * s;
+    group.add(box);
+    var roof = new THREE.Mesh(
+      new THREE.ConeGeometry(1.65 * s, 1.6 * s, 4),
+      new THREE.MeshLambertMaterial({ color: loc.roof })
+    );
+    roof.rotation.y = Math.PI / 4;
+    roof.position.y = 1.6 * s + 0.8 * s;
+    group.add(roof);
+    group.position.set(loc.x, 0, loc.z);
+    group.userData.location = loc.id;
+    group.traverse(function (n) { n.userData.location = loc.id; });
+    return group;
+  }
+
+  function buildFountain() {
+    var group = new THREE.Group();
+    var tiers = [
+      { r: 1.1, h: 0.35, y: 0.18, color: 0xF3E9D8 },
+      { r: 0.75, h: 0.3, y: 0.5, color: 0xFBF3E4 },
+      { r: 0.5, h: 0.22, y: 0.75, color: 0xCFEFFF },
+    ];
+    tiers.forEach(function (t) {
+      var m = new THREE.Mesh(new THREE.CylinderGeometry(t.r, t.r, t.h, 16), new THREE.MeshLambertMaterial({ color: t.color }));
+      m.position.y = t.y;
+      group.add(m);
+    });
+    var topper = new THREE.Mesh(new THREE.OctahedronGeometry(0.22, 0), new THREE.MeshLambertMaterial({ color: 0xFF6FB5 }));
+    topper.position.y = 1.05;
+    group.add(topper);
+    group.userData.topper = topper;
+    return group;
+  }
+
+  function initPlazaWorld(record) {
+    if (plazaInitialized) return;
+    plazaInitialized = true;
+
+    if (!window.THREE || !PetRender3D.isAvailable()) {
+      showFallbackGrid();
+      return;
+    }
+
+    var renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({ canvas: plazaCanvas, antialias: true, alpha: true });
+    } catch (e) {
+      console.warn("Plaza 3D unavailable, using fallback location list:", e);
+      showFallbackGrid();
+      return;
+    }
+    renderer.setClearColor(0x000000, 0);
+
+    var scene = new THREE.Scene();
+    var rect = plazaCanvas.getBoundingClientRect();
+    var w = Math.max(1, rect.width), h = Math.max(1, rect.height);
+    plazaCanvas.width = w; plazaCanvas.height = h;
+    renderer.setSize(w, h, false);
+
+    var viewSize = 13;
+    var aspect = w / h;
+    var camera = new THREE.OrthographicCamera(
+      -viewSize * aspect / 2, viewSize * aspect / 2, viewSize / 2, -viewSize / 2, 0.1, 100
+    );
+    camera.position.set(10, 10, 10);
+    camera.lookAt(0, 0, 0);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+    var sun = new THREE.DirectionalLight(0xffffff, 0.6);
+    sun.position.set(6, 10, 4);
+    scene.add(sun);
+
+    var ground = new THREE.Mesh(new THREE.CircleGeometry(9, 48), new THREE.MeshLambertMaterial({ map: buildCheckerTexture() }));
+    ground.rotation.x = -Math.PI / 2;
+    scene.add(ground);
+
+    var buildingGroup = new THREE.Group();
+    LOCATIONS_3D.forEach(function (loc) { buildingGroup.add(buildBuilding(loc)); });
+    scene.add(buildingGroup);
+
+    var fountain = buildFountain();
+    scene.add(fountain);
+
+    var petGroup = PetRender3D.buildPetObject({
+      stage: record.appearance.growthStage,
+      form: record.appearance.form,
+      baseColor: record.appearance.petColor,
+      cosmetics: Object.values(record.appearance.cosmetics.equipped).filter(Boolean),
+    });
+    petGroup.scale.multiplyScalar(0.4);
+    petGroup.position.set(0.8, 0.55, 3.2);
+    scene.add(petGroup);
+
+    var ambientPets = [];
+    [{ color: "#4DE0C4", x: -1.8, z: 1.5 }, { color: "#FFCB3D", x: 1.6, z: -1.3 }].forEach(function (p) {
+      var g = PetRender3D.buildPetObject({ stage: "baby", form: null, baseColor: p.color });
+      g.scale.multiplyScalar(0.3);
+      g.position.set(p.x, 0.4, p.z);
+      scene.add(g);
+      ambientPets.push({ group: g, baseX: p.x, baseZ: p.z, phase: Math.random() * Math.PI * 2 });
+    });
+
+    var raycaster = new THREE.Raycaster();
+    var pointer = new THREE.Vector2();
+    plazaCanvas.addEventListener("pointerdown", function (e) {
+      var r = plazaCanvas.getBoundingClientRect();
+      pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1;
+      pointer.y = -((e.clientY - r.top) / r.height) * 2 + 1;
+      raycaster.setFromCamera(pointer, camera);
+      // only the buildings are hit-tested (not ground/fountain/pets), so
+      // every hit here is guaranteed to carry a location tag
+      var hits = raycaster.intersectObjects(buildingGroup.children, true);
+      if (hits.length) {
+        var loc = hits[0].object.userData.location;
+        if (LOCATION_URLS[loc]) { location.href = LOCATION_URLS[loc]; return; }
+        showToast((LOCATION_LABELS[loc] || loc) + " is coming soon!");
+      }
+    });
+
+    function onResize() {
+      var r = plazaCanvas.getBoundingClientRect();
+      var nw = Math.max(1, r.width), nh = Math.max(1, r.height);
+      plazaCanvas.width = nw; plazaCanvas.height = nh;
+      var a = nw / nh;
+      camera.left = -viewSize * a / 2; camera.right = viewSize * a / 2;
+      camera.top = viewSize / 2; camera.bottom = -viewSize / 2;
+      camera.updateProjectionMatrix();
+      renderer.setSize(nw, nh, false);
+    }
+    window.addEventListener("resize", onResize);
+
+    plazaLoading.classList.add("hidden");
+    window.__plazaDebug = { camera: camera, locations: LOCATIONS_3D }; // for staff debugging only
+
+    plazaCanvas.addEventListener("webglcontextlost", function () {
+      showFallbackGrid();
+    });
+
+    function animate(t) {
+      if (plaza3dWrap.style.display === "none") return; // stopped: fell back to 2D grid
+      var time = t / 1000;
+      fountain.userData.topper.position.y = 1.05 + Math.sin(time * 2.4) * 0.06;
+      petGroup.rotation.y = Math.sin(time * 0.6) * 0.3;
+      petGroup.position.y = 0.55 + Math.sin(time * 1.8) * 0.05;
+      ambientPets.forEach(function (p, i) {
+        p.group.position.x = p.baseX + Math.sin(time * 0.4 + p.phase) * 0.6;
+        p.group.position.z = p.baseZ + Math.cos(time * 0.3 + p.phase) * 0.6;
+        p.group.rotation.y = time * 0.5 + p.phase;
+      });
+      renderer.render(scene, camera);
+      requestAnimationFrame(animate);
+    }
+    requestAnimationFrame(animate);
+  }
+
+  resumeBtn.addEventListener("click", function () {
+    showError("");
+    var key = PetSave.keyFor(nameInput.value, pinInput.value);
+    var record = PetSave.load(key);
+    if (!record) {
+      showError("No pet found for that name + PIN. Check your spelling, or hatch a new one below.");
+      return;
+    }
+    sessionStorage.setItem("active-pet-key", key);
+    enterPlaza(record);
+  });
+
+  hatchBtn.addEventListener("click", function () {
+    showError("");
+    if (!nameInput.value.trim() || !pinInput.value.trim()) {
+      showError("Enter a name and a PIN first.");
+      return;
+    }
+    var result = PetSave.createPet(nameInput.value, pinInput.value, { petColor: chosenColor });
+    if (!result.ok) {
+      showError("That name + PIN is already taken. Try RESUME, or pick a different PIN.");
+      return;
+    }
+    sessionStorage.setItem("active-pet-key", PetSave.keyFor(nameInput.value, pinInput.value));
+    enterPlaza(result.record);
+  });
+
+  var LOCATION_URLS = {
+    home: "tamagotchi-speedrun.html",
+    sky: "flappy-pet.html",
+    racetrack: "pet-race.html",
+    clubhouse: "dont-laugh.html",
+    shop: "shop.html",
+    restaurant: "restaurant.html",
+  };
+
+  document.querySelectorAll(".game-card").forEach(function (card) {
+    card.addEventListener("click", function () {
+      var loc = card.dataset.location;
+      if (LOCATION_URLS[loc]) {
+        location.href = LOCATION_URLS[loc];
+        return;
+      }
+      showToast((LOCATION_LABELS[loc] || loc) + " is coming soon!");
+    });
+  });
+
+  // one-shot "you earned points" flash from whichever location the player
+  // just came back from — read once and discarded
+  var flashRaw = sessionStorage.getItem("pet-plaza-flash");
+  if (flashRaw) {
+    sessionStorage.removeItem("pet-plaza-flash");
+    try {
+      var flash = JSON.parse(flashRaw);
+      showToast("+" + flash.points + " pts at " + (LOCATION_LABELS[flash.location] || flash.location) + (flash.note ? " — " + flash.note : ""));
+    } catch (e) { /* malformed flash, ignore */ }
+  }
+
+  // ============================================================
+  // INIT — resume the active pet if one's already identified this session
+  // ============================================================
+
+  var activeKey = sessionStorage.getItem("active-pet-key");
+  var existing = activeKey ? PetSave.load(activeKey) : null;
+  if (existing) {
+    enterPlaza(existing);
+  } else {
+    sessionStorage.removeItem("active-pet-key");
+  }
+})();
+</script>
 </body>
 </html>

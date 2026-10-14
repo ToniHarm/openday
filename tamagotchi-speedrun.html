@@ -3,38 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Tamagotchi Speedrun</title>
+<title>Home — Tamagotchi Plaza</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐣</text></svg>">
+<link rel="stylesheet" href="css/pet-tokens.css">
 <style>
-  @font-face {
-    font-family: "Press Start 2P";
-    src: url("fonts/PressStart2P-Regular.ttf") format("truetype");
-    font-display: swap;
-  }
-
-  :root {
-    /* shell palette — the plastic toy body, outside the screen */
-    --shell-pink: #FFD6E8;
-    --shell-lavender: #E3D4FF;
-    --shell-blue: #CFEFFF;
-    --cream: #FFF8F2;
-    --accent: #FF5FA2;
-    --gold: #FFD873;
-    --ink: #4A2E55;
-
-    /* screen / pixel palette — punchier, matches real color-LCD sprites */
-    --screen-bg: #EAFBFF;
-    --px-pink: #FF6FB5;
-    --px-gold: #FFCB3D;
-    --px-purple: #B98AFF;
-    --px-mint: #4DE0C4;
-    --px-outline: #4A2E55;
-    --px-white: #FFFFFF;
-
-    --font-shell: "Baloo 2", "Trebuchet MS", "Comic Sans MS", cursive, sans-serif;
-    --font-screen: "Press Start 2P", monospace;
-  }
-
   * { box-sizing: border-box; }
 
   html, body {
@@ -209,18 +181,9 @@
     outline-offset: 2px;
   }
 
-  /* ---------- egg / hatching ---------- */
+  /* ---------- egg / hatching (first-ever visit for this pet only) ---------- */
 
   .egg-canvas-wrap { margin-bottom: 10px; }
-
-  [data-screen="start"].active .egg-canvas-wrap {
-    animation: eggWobble 2.6s ease-in-out infinite;
-  }
-
-  @keyframes eggWobble {
-    0%, 100% { transform: rotate(-4deg); }
-    50% { transform: rotate(4deg); }
-  }
 
   .hatching-panel .egg-canvas-wrap {
     animation: eggShake 0.16s linear infinite;
@@ -239,143 +202,6 @@
     0% { transform: scale(1); }
     60% { transform: scale(1.3); filter: brightness(1.7); }
     100% { transform: scale(1.5); opacity: 0; }
-  }
-
-  .legend-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin-top: 10px;
-  }
-
-  .legend-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.42rem;
-    line-height: 1.5;
-  }
-
-  .legend-tap-prompt {
-    margin-top: 16px !important;
-    animation: callBlink 0.9s steps(2) infinite;
-  }
-
-  /* ---------- start screen customization ---------- */
-
-  .custom-picker {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 10px;
-  }
-
-  .frame-picker-label { margin: 0; font-size: 0.42rem; opacity: 0.82; }
-
-  .frame-picker {
-    display: grid;
-    grid-auto-flow: column;
-    grid-template-rows: repeat(2, 42px);
-    grid-auto-columns: 34px;
-    gap: 5px 7px;
-    width: min(100%, 252px);
-    overflow-x: auto;
-    padding: 4px 5px 7px;
-    scrollbar-width: thin;
-    scroll-snap-type: x proximity;
-  }
-
-  .frame-option {
-    position: relative;
-    width: 32px;
-    height: 38px;
-    border: 2px solid var(--px-outline);
-    border-radius: 48% 48% 43% 43% / 38% 38% 48% 48%;
-    background: var(--thumb-bg);
-    padding: 0;
-    cursor: pointer;
-    scroll-snap-align: start;
-    box-shadow: inset 0 0 0 2px rgba(255,255,255,.35);
-  }
-
-  .frame-option::before {
-    content: "";
-    position: absolute;
-    inset: 8px 6px 10px;
-    border: 2px solid var(--thumb-bezel);
-    border-radius: 3px;
-    background: #dff5ee;
-  }
-
-  .frame-option::after {
-    content: "";
-    position: absolute;
-    left: 8px;
-    right: 8px;
-    bottom: 4px;
-    height: 3px;
-    border-radius: 50%;
-    background: var(--thumb-button);
-    box-shadow: 7px 0 var(--thumb-button), -7px 0 var(--thumb-button);
-  }
-
-  .frame-option[aria-checked="true"] { outline: 3px solid var(--px-purple); outline-offset: 2px; transform: translateY(-1px); }
-  .frame-option:focus-visible { outline: 3px solid var(--px-gold); outline-offset: 2px; }
-
-  .swatch-row {
-    display: flex;
-    gap: 8px;
-    justify-content: center;
-  }
-
-  .swatch {
-    width: 30px;
-    height: 30px;
-    min-width: 30px;
-    min-height: 30px;
-    border-radius: 50%;
-    border: 3px solid var(--px-outline);
-    padding: 0;
-    cursor: pointer;
-    touch-action: manipulation;
-    opacity: 0.55;
-  }
-
-  .swatch.selected {
-    opacity: 1;
-    box-shadow: 0 0 0 3px var(--px-white), 0 0 0 5px var(--px-outline);
-  }
-
-  .swatch:focus-visible {
-    outline: 3px solid var(--px-purple);
-    outline-offset: 3px;
-  }
-
-  #pet-name-input {
-    font-family: var(--font-screen);
-    font-size: 0.5rem;
-    padding: 8px 10px;
-    min-height: 40px;
-    width: 90%;
-    border-radius: 8px;
-    border: 3px solid var(--px-outline);
-    text-align: center;
-    background: white;
-  }
-
-  #screen-start { padding: 14px 12px; }
-  #screen-start .egg-canvas-wrap { height: 78px; margin: 0 0 12px; }
-  #screen-start #egg-canvas-start { width: 78px; height: 78px; }
-  #screen-start .px-title { margin: 0 0 9px; line-height: 1.7; }
-  #screen-start .px-body { margin: 0 0 10px; line-height: 2; }
-
-  .pet-name-label {
-    font-size: 0.42rem;
-    text-align: center;
-    margin: 0 0 4px;
-    opacity: 0.8;
   }
 
   /* ---------- play screen ---------- */
@@ -400,7 +226,7 @@
 
   .hud-corner.right { text-align: right; align-items: flex-end; }
 
-  .mute-btn {
+  .mute-btn, .plaza-btn {
     font-size: 0.9rem;
     min-width: 44px;
     min-height: 44px;
@@ -411,6 +237,8 @@
     touch-action: manipulation;
     margin-top: 4px;
   }
+
+  .plaza-btn { font-size: 0.55rem; padding: 0 8px; }
 
   .meters {
     width: 100%;
@@ -442,18 +270,25 @@
 
   #pet-canvas-wrap {
     position: relative;
+    width: 160px;
+    height: 160px;
     touch-action: none;
     user-select: none;
     animation: petBob 3.2s ease-in-out infinite;
   }
 
+  /* two canvases stacked at the same rect — only one is ever shown, decided
+     once at page init (see the isUsing3D flag below); a canvas can only ever
+     be bound to one context type for its lifetime, so this project never
+     tries to switch a single canvas between 2D and WebGL mid-session */
+  #pet-canvas-2d, #pet-canvas-3d {
+    position: absolute;
+    inset: 0;
+  }
+
   @keyframes petBob {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-5px); }
-  }
-
-  .sick-tint canvas#pet-canvas {
-    filter: grayscale(0.5) saturate(0.6) brightness(0.92);
   }
 
   .call-flash {
@@ -550,7 +385,7 @@
 
   .bedtime-prompt.show { opacity: 1; animation: callBlink 0.9s steps(2) infinite; }
 
-  #pet-canvas { transform-origin: 50% 85%; }
+  #pet-canvas-2d, #pet-canvas-3d { transform-origin: 50% 85%; }
 
   @keyframes petSquish {
     0% { transform: scale(1, 1); }
@@ -559,39 +394,69 @@
     100% { transform: scale(1, 1); }
   }
 
-  #pet-canvas.pet-squish { animation: petSquish 320ms ease; }
+  #pet-canvas-2d.pet-squish, #pet-canvas-3d.pet-squish { animation: petSquish 320ms ease; }
 
-  .bonus-overlay {
+  .milestone-pop {
     position: absolute;
-    inset: 0;
-    z-index: 40;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(255, 248, 242, 0.9);
-    touch-action: none;
-    user-select: none;
-    cursor: pointer;
-  }
-
-  .bonus-overlay canvas {
-    border: 3px solid var(--px-outline);
-    border-radius: 10px;
-  }
-
-  .bonus-hint {
-    position: absolute;
-    top: 2px;
+    top: 30%;
     left: 50%;
-    transform: translateX(-50%);
-    font-size: 0.38rem;
-    background: var(--px-outline);
-    color: var(--px-white);
-    padding: 3px 7px;
-    border-radius: 6px;
+    transform: translate(-50%, -50%) scale(0.7);
+    font-family: var(--font-screen);
+    font-size: 0.55rem;
+    text-align: center;
+    line-height: 1.8;
+    color: var(--px-outline);
+    background: var(--cream);
+    border: 3px solid var(--px-outline);
+    border-radius: 12px;
+    padding: 10px 14px;
+    opacity: 0;
+    pointer-events: none;
+    z-index: 50;
+    white-space: nowrap;
+  }
+
+  .milestone-pop.show { animation: milestonePop 2.4s ease forwards; }
+
+  @keyframes milestonePop {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+    15% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+    25% { transform: translate(-50%, -50%) scale(1); }
+    85% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+
+  .points-flash {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%) scale(0.6);
+    font-family: var(--font-screen);
+    font-size: 0.5rem;
+    color: var(--px-outline);
+    opacity: 0;
     pointer-events: none;
     white-space: nowrap;
-    z-index: 41;
+  }
+
+  .points-flash.show { animation: popUp 0.9s ease forwards; }
+
+  /* small tappable pill, bottom-pinned — must NOT block the interaction's own
+     gesture (e.g. still-feedable food) while it's showing */
+  .beat-continue {
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 46;
+    background: var(--px-outline);
+    color: var(--px-white);
+    font-size: 0.4rem;
+    padding: 7px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    touch-action: manipulation;
+    white-space: nowrap;
   }
 
   .handtrack-toggle {
@@ -644,68 +509,6 @@
     min-height: 0.5em;
   }
 
-  /* ---------- result screen ---------- */
-
-  #screen-result { overflow-y: auto; padding-top: 20px; padding-bottom: 20px; }
-
-  .name-entry {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-bottom: 16px;
-    width: 100%;
-  }
-
-  #name-input {
-    font-family: var(--font-screen);
-    font-size: 0.55rem;
-    padding: 10px 12px;
-    min-height: 44px;
-    border-radius: 8px;
-    border: 3px solid var(--px-outline);
-    text-align: center;
-    background: white;
-  }
-
-  .name-entry-actions { display: flex; gap: 8px; justify-content: center; }
-
-  .leaderboard {
-    background: rgba(185, 138, 255, 0.15);
-    border: 2px dashed var(--px-outline);
-    border-radius: 10px;
-    padding: 10px;
-    margin-bottom: 16px;
-    max-height: 180px;
-    overflow-y: auto;
-    width: 100%;
-  }
-
-  .leaderboard h3 {
-    font-size: 0.5rem;
-    margin: 0 0 8px;
-    cursor: default;
-  }
-
-  #leaderboard-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    text-align: left;
-    font-size: 0.4rem;
-  }
-
-  #leaderboard-list li {
-    display: flex;
-    justify-content: space-between;
-    gap: 6px;
-    padding: 5px 2px;
-    border-bottom: 1px dashed rgba(74,46,85,0.25);
-  }
-
-  #leaderboard-list li:last-child { border-bottom: none; }
-
-  .lb-empty { opacity: 0.7; }
-
   .sr-only {
     position: absolute;
     width: 1px; height: 1px;
@@ -727,19 +530,6 @@
       width: min(80%, 420px);
       flex-basis: 640px;
     }
-
-    #screen-start { padding: 18px 16px; }
-    #screen-start .egg-canvas-wrap { height: 86px; margin-bottom: 14px; }
-    #screen-start #egg-canvas-start { width: 86px; height: 86px; }
-    #screen-start .px-title { font-size: 0.9rem; margin-bottom: 11px; }
-    #screen-start .px-body { font-size: 0.58rem; margin-bottom: 12px; }
-    .frame-picker {
-      grid-template-rows: repeat(2, 46px);
-      grid-auto-columns: 38px;
-      width: min(100%, 282px);
-    }
-    .frame-option { width: 36px; height: 42px; }
-    .swatch { width: 32px; height: 32px; min-width: 32px; min-height: 32px; }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -753,43 +543,14 @@
 </head>
 <body>
 <div id="shell">
-  <div class="shell-nameplate">✧ Tamagotchi Speedrun ✧</div>
+  <div class="shell-nameplate">✧ Home ✧</div>
 
   <div id="lcd-screen">
-
-    <section class="screen active" data-screen="start" id="screen-start">
-      <div class="egg-canvas-wrap"><canvas id="egg-canvas-start" width="96" height="96"></canvas></div>
-      <p class="px-title">HATCH A<br>NEW PET</p>
-      <p class="px-body">feed it · play with it<br>scold it · clean up<br>put it to bed<br><br>survive 2:00</p>
-
-      <div class="custom-picker">
-        <p class="frame-picker-label" id="frame-picker-label">PICK A FRAME</p>
-        <div class="frame-picker" id="frame-picker" role="radiogroup" aria-labelledby="frame-picker-label"></div>
-        <div class="swatch-row" id="swatch-row" role="group" aria-label="Pick a color"></div>
-        <label for="pet-name-input" class="sr-only">Name your pet (optional)</label>
-        <input type="text" id="pet-name-input" maxlength="10" placeholder="NAME (OPTIONAL)" autocomplete="off">
-      </div>
-
-      <button class="px-btn" id="hatch-btn">HATCH</button>
-      <button class="px-btn px-btn-ghost handtrack-toggle" id="handtrack-btn" type="button">🖐 HAND TRACKING (BETA)</button>
-      <p class="px-small" id="handtrack-status"></p>
-      <p class="px-small">your care data never leaves<br>this device · hand tracking<br>needs internet to load once</p>
-    </section>
 
     <section class="screen" data-screen="hatching" id="screen-hatching">
       <div class="hatching-panel" id="hatching-crack-view">
         <div class="egg-canvas-wrap"><canvas id="egg-canvas-hatch" width="110" height="110"></canvas></div>
         <p class="px-title" style="margin-top:10px;">hatching...</p>
-      </div>
-      <div class="hatching-panel" id="hatching-legend-view" style="display:none;">
-        <p class="px-title" style="font-size:0.6rem;">HOW TO CARE</p>
-        <div class="legend-grid">
-          <div class="legend-item"><canvas class="legend-icon" data-icon="meal" width="32" height="32"></canvas>DRAG TO FEED</div>
-          <div class="legend-item"><canvas class="legend-icon" data-icon="heartFilled" width="32" height="32"></canvas>TAP TO PLAY</div>
-          <div class="legend-item"><canvas class="legend-icon" data-icon="sponge" width="32" height="32"></canvas>WIPE WITH SPONGE</div>
-          <div class="legend-item"><canvas class="legend-icon" data-icon="medicine" width="32" height="32"></canvas>HOLD AT BEDTIME</div>
-        </div>
-        <p class="px-small legend-tap-prompt" id="legend-tap-prompt">tap to continue</p>
       </div>
     </section>
 
@@ -800,12 +561,15 @@
           <span id="weight-tag">WEIGHT: healthy</span>
         </div>
         <div class="hud-corner right">
-          <span id="timer">0:00.0</span>
-          <button class="mute-btn" id="mute-btn" aria-label="Mute sound" aria-pressed="false">S</button>
+          <span id="points-tag">0 PTS</span>
+          <div style="display:flex; gap:4px;">
+            <button class="mute-btn" id="mute-btn" aria-label="Mute sound" aria-pressed="false">S</button>
+            <button class="plaza-btn" id="plaza-btn" aria-label="Return to Plaza" title="Return to Plaza">🏙️</button>
+          </div>
         </div>
       </div>
 
-      <p class="pet-name-label" id="pet-name-label"></p>
+      <p class="pet-name-label" id="pet-name-label" style="font-size:0.42rem; text-align:center; margin:0 0 4px; opacity:0.8;"></p>
 
       <div class="meters">
         <div class="meter-row">
@@ -820,10 +584,12 @@
 
       <div class="pet-stage-area" id="pet-stage-area">
         <div id="pet-canvas-wrap">
-          <canvas id="pet-canvas" width="160" height="160"></canvas>
+          <canvas id="pet-canvas-2d" width="160" height="160"></canvas>
+          <canvas id="pet-canvas-3d" width="160" height="160" style="display:none;"></canvas>
           <div class="call-flash" id="call-flash">!</div>
           <div class="combo-pop" id="combo-pop">COMBO!</div>
           <div class="approve-pop" id="approve-pop">+DISC</div>
+          <div class="points-flash" id="points-flash">+0 PTS</div>
         </div>
 
         <div class="food-item" id="food-item" aria-label="Food item, drag onto the pet's mouth" role="img">
@@ -837,10 +603,14 @@
         <div class="bedtime-prompt" id="bedtime-prompt">HOLD TO SLEEP</div>
         <div class="night-dim" id="night-dim">zzz...</div>
 
-        <div class="bonus-overlay" id="bonus-overlay" style="display:none;">
-          <p class="bonus-hint" id="bonus-hint">BONUS! TAP TO FLAP</p>
-          <canvas id="bonus-canvas" width="160" height="160"></canvas>
+        <div class="beat-continue" id="beat-continue" style="display:none;">
+          <p class="beat-continue-text" id="beat-continue-text">TAP TO CONTINUE</p>
         </div>
+
+        <div class="milestone-pop" id="milestone-pop">GREW UP!</div>
+
+        <button class="px-btn px-btn-ghost handtrack-toggle" id="handtrack-btn" type="button" style="position:absolute; bottom:6px; right:6px; font-size:0.35rem; padding:6px 8px; min-height:0; margin-top:0;">🖐 HAND TRACKING</button>
+        <p class="px-small" id="handtrack-status" style="position:absolute; bottom:-2px; left:0; right:0; font-size:0.3rem; margin:0; text-align:center;"></p>
 
         <div class="handtrack-preview" id="handtrack-preview" style="display:none;" title="Tap to stop hand tracking">
           <video id="handtrack-video" muted playsinline autoplay></video>
@@ -848,27 +618,6 @@
           <span class="handtrack-label" id="handtrack-label"></span>
         </div>
       </div>
-    </section>
-
-    <section class="screen" data-screen="result" id="screen-result">
-      <p class="px-title" id="verdict-text">STARVING FOR ATTENTION</p>
-      <p class="px-body" id="result-meta"></p>
-
-      <div class="name-entry" id="name-entry">
-        <label for="name-input" class="sr-only">Your name</label>
-        <input type="text" id="name-input" maxlength="12" placeholder="ENTER NAME" autocomplete="off">
-        <div class="name-entry-actions">
-          <button class="px-btn" id="save-score-btn">SAVE</button>
-          <button class="px-btn px-btn-ghost" id="skip-score-btn">SKIP</button>
-        </div>
-      </div>
-
-      <div class="leaderboard">
-        <h3 id="leaderboard-title">TOP RUNS</h3>
-        <ol id="leaderboard-list"></ol>
-      </div>
-
-      <button class="px-btn btn-again" id="again-btn">GO AGAIN</button>
     </section>
 
   </div>
@@ -880,218 +629,109 @@
   </div>
 </div>
 
+<script src="js/pet-save.js"></script>
+<script src="js/vendor/howler.min.js"></script>
+<script src="js/pet-audio.js"></script>
+<script src="js/pet-render.js"></script>
+<script src="js/vendor/three.min.js"></script>
+<script src="js/pet-render-3d.js"></script>
 <script>
 (function () {
   "use strict";
 
   // ============================================================
+  // ACTIVE PET — this page never runs without a save loaded via the Plaza
+  // ============================================================
+
+  var activeKey = sessionStorage.getItem("active-pet-key");
+  var record = activeKey ? PetSave.load(activeKey) : null;
+  if (!record) {
+    location.href = "index.html";
+    return;
+  }
+
+  // ============================================================
   // CONSTANTS
   // ============================================================
 
-  const DECAY_PER_SEC = { hunger: 1.0, happy: 0.9 };
-  const HOLD_THRESHOLD_MS = 200;
-  const TAP_HAPPY_DELTA = 4;
-  const COMBO_WINDOW_MS = 1000;
-  const COMBO_TAP_COUNT = 3;
-  const COMBO_HAPPY_BONUS = 2;
+  var HOLD_THRESHOLD_MS = 200;
+  var TAP_HAPPY_DELTA = 4;
+  var COMBO_WINDOW_MS = 1000;
+  var COMBO_TAP_COUNT = 3;
+  var COMBO_HAPPY_BONUS = 2;
 
-  const MEAL_HUNGER = 18, MEAL_HAPPY = 2;
-  const SNACK_HUNGER = 10, SNACK_HAPPY = 6, SNACK_WEIGHT = 8;
-  const FOOD_RESPAWN_MS = 400;
+  var MEAL_HUNGER = 18, MEAL_HAPPY = 2;
+  var SNACK_HUNGER = 10, SNACK_HAPPY = 6, SNACK_WEIGHT = 8;
+  var FOOD_RESPAWN_MS = 400;
 
-  const CALL_MIN_MS = 20000, CALL_MAX_MS = 25000, CALL_WINDOW_MS = 5000;
-  const DISCIPLINE_GAIN = 6;
+  var CALL_WINDOW_MS = 5000;
+  var DISCIPLINE_GAIN = 6;
 
-  const POOP_FIRST_MS = 10000, POOP_MIN_MS = 18000, POOP_MAX_MS = 22000;
-  const POOP_UNCLEANED_HAPPY_THRESHOLD_MS = 15000;
-  const POOP_HAPPY_DRAIN_PER_SEC = 1;
+  var POOP_UNCLEANED_HAPPY_THRESHOLD_MS = 15000;
+  var POOP_HAPPY_DRAIN_PER_SEC = 1;
 
-  const SICKNESS_ROLL_INTERVAL_MS = 15000;
-  const SICKNESS_UNRESOLVED_FLAG_MS = 5000;
-  const SICKNESS_FATAL_MS = 15000;
-  const SICK_CURE_HAPPY_PENALTY = 3;
+  // visit-count thresholds driving growth stage — a first-pass tuning
+  // constant, same as the rest of this game's numbers, pending playtesting
+  var STAGE_CHILD_AT_VISITS = 4;
+  var STAGE_FORM_AT_VISITS = 10;
 
-  const BRANCH_POINT_S = 40;
-  const CHILD_START_S = 15;
-  const WIN_TIME_S = 120;
-
-  // bonus round — a Flappy-style tap-to-flap interlude, triggered by landing
-  // a normal-play combo (see registerPlayTap). Everything else pauses while
-  // it's active: no decay, no schedulers ticking, no survival-time increment.
-  const BONUS_DURATION_MS = 7000;
-  const BONUS_COOLDOWN_MS = 6000;
-  const BONUS_GRAVITY = 420;
-  const BONUS_FLAP_VELOCITY = -145;
-  const BONUS_PIPE_GAP = 56;
-  const BONUS_PIPE_WIDTH = 18;
-  const BONUS_PIPE_SPEED = 62;
-  const BONUS_PIPE_INTERVAL_MS = 1400;
-  const BONUS_BIRD_X = 40;
-  const BONUS_BIRD_R = 8;
-  const BONUS_SUCCESS_HAPPY = 18;
-  const BONUS_FAIL_HAPPY = 2;
-
-  const LB_KEY = "tamagotchi-leaderboard";
-  const LB_MAX = 10;
-
-  const VERDICTS = {
-    hunger: ["STARVING FOR ATTENTION", "FORGOT TO FEED IT — CLASSIC"],
-    happy: ["TOO SAD TO CONTINUE", "NEEDED MORE HUGS"],
-    sickness: ["GOT TOO SICK TO CONTINUE", "SHOULD'VE CALLED THE MEDICINE SOONER"],
-    win: {
-      glimmerling: ["THRIVING!", "CERTIFIED GOOD BLOOMSTER", "MAIN CHARACTER ENERGY"],
-      wobblet: ["SURVIVED, VIBES: MIXED", "A LITTLE CHAOTIC BUT THRIVING ANYWAY"],
-      grumplet: ["SURVIVED... BARELY LIKED YOU", "FERAL BUT ALIVE", "GREMLIN MODE: SUCCESSFUL"],
-    },
+  // the fixed sequence of interactions Home cycles through, repeatedly and
+  // indefinitely — there is no terminal "reveal" any more, since the pet now
+  // persists across the whole event instead of ending a single timed run
+  var INTERACTION_SEQUENCE = ["feed", "clean", "attention", "bedtime"];
+  var INTERACTION_LABELS = {
+    feed: "FEED TIME", clean: "CLEAN UP", attention: "ATTENTION!", bedtime: "BEDTIME",
   };
 
-  const FORM_LABELS = { glimmerling: "GLIMMERLING", wobblet: "WOBBLET", grumplet: "GRUMPLET" };
-  const STAGE_LABELS = { baby: "BABY", child: "CHILD", form: "ADULT" };
-
-  const COLOR_SWATCHES = ["#FF6FB5", "#B98AFF", "#4DE0C4", "#FFCB3D", "#6FC8FF"];
-  const FRAME_THEMES = [
-    { id: "red-flower", label: "Red flower", bg: "linear-gradient(145deg,#8cf0ac 0 20%,#ef3d43 55%)", bezel: "#ff7eb4", button: "#ff56a7" },
-    { id: "blue-angel", label: "Blue angel", bg: "linear-gradient(145deg,#c9f4ff,#397fbe)", bezel: "#a8dcf8", button: "#eafaff" },
-    { id: "pink-sprinkle", label: "Pink sprinkles", bg: "linear-gradient(145deg,#ffc4df,#eb8cb5)", bezel: "#f6dc72", button: "#8d543e" },
-    { id: "pastel-angel", label: "Pastel angel", bg: "linear-gradient(145deg,#fffbd4,#c9f4ff 52%,#efc0ff)", bezel: "#9b7dd2", button: "#d795c9" },
-    { id: "pink-hearts", label: "Pink hearts", bg: "radial-gradient(circle at 28% 24%,#d9326c 0 4px,transparent 5px),#f491ba", bezel: "#d84f83", button: "#fff" },
-    { id: "white-angel", label: "White angel", bg: "linear-gradient(145deg,#fff,#cedae8)", bezel: "#d9e5ee", button: "#fffbe3" },
-    { id: "teal-party", label: "Teal party", bg: "radial-gradient(circle at 25% 24%,#ffdc4e 0 4px,transparent 5px),#07889d", bezel: "#f49ab7", button: "#ff81af" },
-    { id: "midnight-stars", label: "Midnight stars", bg: "radial-gradient(circle at 25% 24%,#ffe96e 0 3px,transparent 4px),#092883", bezel: "#e5b939", button: "#eaf6ff" },
-    { id: "family-doodle", label: "Pink family", bg: "linear-gradient(145deg,#fac3dc,#ef8cb9)", bezel: "#ffd5e8", button: "#ffdb36" },
-    { id: "pearl-angel", label: "Pearl angel", bg: "linear-gradient(145deg,#fffdf4,#cfc8b8)", bezel: "#eae2cf", button: "#fffced" },
-    { id: "pink-crystal", label: "Pink crystal", bg: "linear-gradient(145deg,#ffe8f6,#e64fa5)", bezel: "#ffc1e5", button: "#ff80c5" },
-    { id: "blue-flower", label: "Blue flower", bg: "linear-gradient(145deg,#d9faff,#45b5d6)", bezel: "#86d9f2", button: "#55c7e8" },
+  var FRAME_THEMES = [
+    { id: "red-flower" }, { id: "blue-angel" }, { id: "pink-sprinkle" }, { id: "pastel-angel" },
+    { id: "pink-hearts" }, { id: "white-angel" }, { id: "teal-party" }, { id: "midnight-stars" },
+    { id: "family-doodle" }, { id: "pearl-angel" }, { id: "pink-crystal" }, { id: "blue-flower" },
   ];
-  const LEGEND_FALLBACK_MS = 7000;
 
   function clamp(v, min, max) { return Math.max(min, Math.min(max, v)); }
-  function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
   function jitter(min, max) { return min + Math.random() * (max - min); }
 
   // ============================================================
-  // STATE
+  // STATE — persistent fields mirror `record`; the rest is page-local
+  // interaction/UI bookkeeping that never needs to survive a navigation
   // ============================================================
 
-  const state = {
-    screen: "start",
-    stats: { hunger: 100, happy: 100 },
-    discipline: 0,
-    weight: 50,
-    sick: false,
-    sickSince: null,
-    sickUnresolvedEver: false,
+  var state = {
+    stats: record.stats,
+    growthStage: record.appearance.growthStage,
+    form: record.appearance.form,
+    petColor: record.appearance.petColor,
+    frameId: record.appearance.frameId,
+    petName: record.identity.name,
     poopPresent: false,
     poopSpawnedAt: null,
     foodSlot: { type: null },
-    survivalTime: 0,
-    growthStage: "baby",
-    form: null,
-    careAccum: { hungerSum: 0, happySum: 0, samples: 0 },
-    endReason: null,
-    currentVerdict: "",
+    beat: null,
     events: {
       callActive: false, callDeadline: null,
       bedtimeActive: false, bedtimeHandled: false, bedtimeDeadline: null,
-      bedtimeFired: false,
-      nightBeatUntil: null,
     },
-    input: {
-      pressStart: null,
-      holding: false,
-      tapTimestamps: [],
-      draggingItemId: null,
-    },
-    audio: { muted: false },
-    frameId: FRAME_THEMES[0].id,
-    petColor: COLOR_SWATCHES[0],
-    petName: "",
-    bonusRound: { active: false, birdY: 80, birdVel: 0, pipes: [], elapsed: 0, nextPipeIn: 0 },
+    input: { pressStart: null, holding: false, tapTimestamps: [], draggingItemId: null },
   };
 
-  // scheduler bookkeeping (not part of the spec'd state shape, kept local)
-  let nextCallTime = null;
-  let nextPoopTime = null;
-  let nextSicknessRollTime = null;
-  let lastSampleSecond = -1;
-  let bonusCooldownUntil = 0;
-
-  // ============================================================
-  // PIXEL SPRITES  (canvas, no images, imageSmoothingEnabled=false)
-  // ============================================================
-
-  const T = null; // transparent
-
-  function buildPalette(bodyColor) {
-    return { ".": T, O: "#4A2E55", P: bodyColor, W: "#FFFFFF", B: "#2E1A38" };
+  // persists the page-local mirror of the save's stats/appearance back into
+  // the shared record — points/visits/care/form themselves are only ever
+  // changed through PetSave.awardPoints (see completeInteraction)
+  function persist() {
+    record.stats = state.stats;
+    record.appearance.growthStage = state.growthStage;
+    record.appearance.petColor = state.petColor;
+    record.appearance.frameId = state.frameId;
+    PetSave.save(record);
   }
 
-  const BABY_BODY = [
-    "....OOO....",
-    "..OOPPPOO..",
-    ".OPPPPPPPO.",
-    "OPPPPPPPPPO",
-    "OPPPPPPPPPO",
-    "OPPPPPPPPPO",
-    "OPPPPPPPPPO",
-    ".OPPPPPPPO.",
-    "..OPPPPPO..",
-    "...OO.OO...",
-  ];
+  // ============================================================
+  // HUD ICON SPRITES (food/sponge/heart meters — page-local, not the pet body)
+  // ============================================================
 
-  const CHILD_BODY = [
-    ".OO.......OO.",
-    "OPPO.....OPPO",
-    "OPPPOOOOOPPPO",
-    ".OPPPPPPPPPO.",
-    "OPPPPPPPPPPPO",
-    "OPPPPPPPPPPPO",
-    "OOPPPPPPPPPOO",
-    ".OPPPPPPPPPO.",
-    "..OPPPPPPPO..",
-    "...OO...OO...",
-  ];
-
-  const GLIMMERLING_BODY = [
-    ".OO.......OO.",
-    "OPPO.....OPPO",
-    "OPPPOOOOOPPPO",
-    ".OPPPPPPPPPO.",
-    "OPPPPPPPPPPPO",
-    "OOPPPPPPPPPOO",
-    "OOPPPPPPPPPOO",
-    ".OPPPPPPPPPO.",
-    "..OPPPPPPPO..",
-    "..OO.....OO..",
-  ];
-
-  const WOBBLET_BODY = [
-    "..OO......OO.",
-    ".OPPO....OPPO",
-    ".OPPPOOOOPPPO",
-    "OPPPPPPPPPPO.",
-    "OPPPPPPPPPPPO",
-    ".OPPPPPPPPPPO",
-    "OOPPPPPPPPPO.",
-    ".OPPPPPPPPPO.",
-    "..OPPPPPPPO..",
-    "...OO..OO....",
-  ];
-
-  const GRUMPLET_BODY = [
-    ".OO.......OO.",
-    "OPPO.....OPPO",
-    "OPPPOOOOOPPPO",
-    ".OPPPPPPPPPO.",
-    "OPPPPPPPPPPPO",
-    "OPPPPPPPPPPPO",
-    "OOPPPPPPPPPOO",
-    ".OPPOOOOOPPO.",
-    "..OPPPPPPPO..",
-    "...OO...OO...",
-  ];
-
-  const ICON_GRIDS = {
+  var T = null;
+  var ICON_GRIDS = {
     meal: {
       palette: { ".": T, O: "#4A2E55", W: "#F7F1D0", G: "#65C466", R: "#FF8B4D", B: "#D85A8B" },
       rows: [
@@ -1118,32 +758,17 @@
         "..OOOO..",
       ],
     },
-    medicine: {
-      palette: { ".": T, O: "#4A2E55", M: "#4DE0C4", W: "#FFFFFF" },
+    sponge: {
+      palette: { ".": T, O: "#4A2E55", S: "#FFCB3D", B: "#B98AFF" },
       rows: [
         "........",
-        "..OOOO..",
-        ".OMMMMO.",
-        "OMMWWMMO",
-        "OMWWWWMO",
-        "OMMWWMMO",
-        ".OMMMMO.",
-        "..OOOO..",
-      ],
-    },
-    poop: {
-      palette: { ".": T, O: "#2E1A38", B: "#8B4A22", D: "#5A2B18", W: "#FFFFFF", P: "#FF9FCB" },
-      rows: [
-        "....OO....",
-        "...OBBO...",
-        "..OBBBBO..",
-        ".OBBBBBBO.",
-        "OBBBBBBBBO",
-        "OBOWBBWOBO",
-        "OBBOBBBOBO",
-        "OPBBBBBBPO",
-        ".OBBBBBBO.",
-        "..OOOOOO..",
+        ".OOOOOO.",
+        "OSSSSSSO",
+        "OSBSBSBO",
+        "OSSSSSSO",
+        "OSBSBSBO",
+        "OSSSSSSO",
+        ".OOOOOO.",
       ],
     },
     heartFilled: {
@@ -1160,188 +785,69 @@
     },
     heartEmpty: {
       palette: { ".": T, O: "#4A2E55" },
-    ctx.imageSmoothingEnabled = false;
-    rows.forEach((row, ry) => {
-      for (let rx = 0; rx < row.length; rx++) {
-        const color = palette[row[rx]];
-        if (!color) continue;
-        ctx.fillStyle = color;
-        ctx.fillRect(x + rx * pixelSize, y + ry * pixelSize, pixelSize, pixelSize);
-      }
-    });
-  }
-
-  function clearCanvas(canvas) {
-    const ctx = canvas.getContext("2d");
-    return ctx;
-  }
+      rows: [
+        ".OO.OO..",
+        "O..O..O.",
+        "O.....O.",
+        "O.....O.",
+        "..O.O...",
+        "...O....",
+        "........",
+      ],
+    },
+  };
 
   function drawIcon(canvas, key) {
-    const spec = ICON_GRIDS[key];
-    const ctx = clearCanvas(canvas);
-    const cols = Math.max(...spec.rows.map((row) => row.length));
-    const px = Math.floor(Math.min(canvas.width / cols, canvas.height / spec.rows.length));
-    const gridW = cols * px;
-    const gridH = spec.rows.length * px;
-    const ox = Math.floor((canvas.width - gridW) / 2);
-    const oy = Math.floor((canvas.height - gridH) / 2);
-    drawGrid(ctx, spec.rows, spec.palette, ox, oy, px);
+    var spec = ICON_GRIDS[key];
+    var ctx = PetRender.clearCanvas(canvas);
+    var cols = Math.max.apply(null, spec.rows.map(function (row) { return row.length; }));
+    var px = Math.floor(Math.min(canvas.width / cols, canvas.height / spec.rows.length));
+    var gridW = cols * px;
+    var gridH = spec.rows.length * px;
+    var ox = Math.floor((canvas.width - gridW) / 2);
+    var oy = Math.floor((canvas.height - gridH) / 2);
+    PetRender.drawGrid(ctx, spec.rows, spec.palette, ox, oy, px);
   }
 
-  // pet body shape, keyed by what's currently on screen — color is computed
-  // separately (see petColorFor) so the player's chosen swatch carries through
-  function petShapeFor(stage, form) {
-    if (stage === "form") {
-      if (form === "wobblet") return { rows: WOBBLET_BODY };
-      if (form === "grumplet") return { rows: GRUMPLET_BODY };
-      return { rows: GLIMMERLING_BODY };
-    }
-    if (stage === "child") return { rows: CHILD_BODY };
-    return { rows: BABY_BODY };
+  // ============================================================
+  // PET EXPRESSION / RENDERING
+  // ============================================================
+
+  // decide ONCE whether this session renders the pet in 3D — a canvas can
+  // only ever be bound to one context type for its lifetime, so this is not
+  // re-evaluated later; a webglcontextlost event (GPU dropping the context
+  // mid-session, a different failure mode than load-time unavailability)
+  // still falls back to the 2D canvas below
+  var petCanvas2D = document.getElementById("pet-canvas-2d");
+  var petCanvas3D = document.getElementById("pet-canvas-3d");
+  var use3D = typeof PetRender3D !== "undefined" && PetRender3D.isAvailable();
+  var petCanvas = use3D ? petCanvas3D : petCanvas2D;
+  if (use3D) {
+    petCanvas3D.style.display = "";
+    petCanvas2D.style.display = "none";
+    petCanvas3D.addEventListener("webglcontextlost", function () {
+      use3D = false;
+      petCanvas = petCanvas2D;
+      petCanvas3D.style.display = "none";
+      petCanvas2D.style.display = "";
+      renderPet();
+    });
   }
+  var petExpression = "normal";
+  var isBlinking = false;
 
-  // ---- customization: base color the player picked, tinted by care quality ----
-
-  function hexToHsl(hex) {
-    const r = parseInt(hex.slice(1, 3), 16) / 255;
-    const g = parseInt(hex.slice(3, 5), 16) / 255;
-    const b = parseInt(hex.slice(5, 7), 16) / 255;
-    const max = Math.max(r, g, b), min = Math.min(r, g, b);
-    let h, s;
-    const l = (max + min) / 2;
-    if (max === min) { h = 0; s = 0; }
-    else {
-      const d = max - min;
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-      switch (max) {
-        case r: h = (g - b) / d + (g < b ? 6 : 0); break;
-        case g: h = (b - r) / d + 2; break;
-        default: h = (r - g) / d + 4;
-      }
-      h /= 6;
-    }
-    return [h * 360, s * 100, l * 100];
-  }
-
-  function hslToHex(h, s, l) {
-    h /= 360; s /= 100; l /= 100;
-    let r, g, b;
-    if (s === 0) { r = g = b = l; }
-    else {
-      const hue2rgb = (p, q, t) => {
-        if (t < 0) t += 1;
-        if (t > 1) t -= 1;
-        if (t < 1 / 6) return p + (q - p) * 6 * t;
-        if (t < 1 / 2) return q;
-        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-        return p;
-      };
-      const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
-      const p = 2 * l - q;
-      r = hue2rgb(p, q, h + 1 / 3);
-      g = hue2rgb(p, q, h);
-      b = hue2rgb(p, q, h - 1 / 3);
-    }
-    const toHex = (x) => Math.round(clamp(x, 0, 1) * 255).toString(16).padStart(2, "0");
-    return "#" + toHex(r) + toHex(g) + toHex(b);
-  }
-
-  // two-axis color: the player's pick is the identity, care quality (form)
-  // adjusts its glossiness/saturation — baby/child show the pick as-is
-  function petColorFor(stage, form, baseHex) {
-    const [h, s, l] = hexToHsl(baseHex);
-    if (stage === "form") {
-      if (form === "glimmerling") return hslToHex(h, clamp(s + 15, 0, 100), clamp(l + 8, 0, 100));
-      if (form === "wobblet") return hslToHex(h, clamp(s - 15, 0, 100), l);
-      if (form === "grumplet") return hslToHex(h, clamp(s - 35, 0, 100), clamp(l - 12, 0, 100));
-    }
-    return baseHex;
-  }
-
-  // eyes are drawn separately from the body grid so expression can change
-  // per-frame (pressed / sleepy / normal) without needing a sprite per state
-  function drawEyes(ctx, cx, cyRow, px, expression, pupilOffset) {
-    const eyeY = cyRow * px;
-    const leftX = cx - px * 3.4;
-    const rightX = cx + px * 1.6;
-    ctx.fillStyle = "#2E1A38";
-    if (expression === "sleepy" || expression === "sickly" || expression === "blink") {
-      ctx.fillRect(leftX, eyeY + px * 0.4, px * 1.8, px * 0.6);
-      ctx.fillRect(rightX, eyeY + px * 0.4, px * 1.8, px * 0.6);
-    } else if (expression === "grossed") {
-      // scrunched, slightly downturned — "ugh, gross" squint
-      ctx.fillRect(leftX, eyeY + px * 0.55, px * 1.8, px * 0.5);
-      ctx.fillRect(rightX, eyeY + px * 0.35, px * 1.8, px * 0.5);
-    } else {
-      const ex = pupilOffset ? pupilOffset.x : 0;
-      const ey = pupilOffset ? pupilOffset.y : 0;
-      const scale = expression === "pressed" ? 1.4 : 1;
-      const r = px * 0.9 * scale;
-      ctx.beginPath();
-      ctx.arc(leftX + px * 0.9 + ex, eyeY + px * 0.9 + ey, r, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.beginPath();
-      ctx.arc(rightX + px * 0.9 + ex, eyeY + px * 0.9 + ey, r, 0, Math.PI * 2);
-      ctx.fill();
-      if (expression !== "pressed") {
-        ctx.fillStyle = "#FFFFFF";
-        ctx.beginPath();
-        ctx.arc(leftX + px * 0.55 + ex, eyeY + px * 0.55 + ey, r * 0.3, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(rightX + px * 0.55 + ex, eyeY + px * 0.55 + ey, r * 0.3, 0, Math.PI * 2);
-        ctx.fill();
-      }
-    }
-  }
-
-  function drawCuteFace(ctx, cx, cyRow, px, expression) {
-    drawEyes(ctx, cx, cyRow, px, expression);
-
-    const cheekY = (cyRow + 2.25) * px;
-    ctx.fillStyle = "#FF9FCB";
-    ctx.fillRect(cx - px * 4.2, cheekY, px * 1.15, px * 0.55);
-    ctx.fillRect(cx + px * 3.05, cheekY, px * 1.15, px * 0.55);
-
-    ctx.fillStyle = "#2E1A38";
-    const mouthY = (cyRow + 2.15) * px;
-    if (expression === "sickly") {
-      ctx.fillRect(cx - px * 0.7, mouthY + px * 0.45, px * 1.4, px * 0.45);
-    } else if (expression === "sleepy") {
-      ctx.fillRect(cx - px * 0.5, mouthY, px, px * 0.35);
-    } else {
-      ctx.fillRect(cx - px * 0.25, mouthY, px * 0.5, px * 0.65);
-      ctx.fillRect(cx - px * 0.8, mouthY + px * 0.35, px * 0.55, px * 0.35);
-      ctx.fillRect(cx + px * 0.25, mouthY + px * 0.35, px * 0.55, px * 0.35);
-    }
-  }
-
-  const petCanvas = document.getElementById("pet-canvas");
-  let petExpression = "normal";
-  let isBlinking = false;
-  let pointerScreenPos = null;
-
-  window.addEventListener("pointermove", (e) => {
-    pointerScreenPos = { x: e.clientX, y: e.clientY };
-  });
-
-  // idle personality: a small unscripted blink every few seconds, independent
-  // of the game loop so it keeps ticking even across screen changes
   function scheduleBlink() {
-    setTimeout(() => {
-      if (state.screen === "play" && !state.bonusRound.active) {
-        isBlinking = true;
-        setTimeout(() => { isBlinking = false; }, 140);
-      }
+    setTimeout(function () {
+      isBlinking = true;
+      setTimeout(function () { isBlinking = false; }, 140);
       scheduleBlink();
     }, jitter(2500, 5500));
   }
   scheduleBlink();
 
-  // precedence: sickness > an active gesture state (pressed/sleepy) > the
-  // uncleaned-poop squint > an idle blink > normal
+  // precedence: an active gesture state (pressed/sleepy) > the uncleaned-poop
+  // squint > an idle blink > normal
   function currentExpression() {
-    if (state.sick) return "sickly";
     if (petExpression !== "normal") return petExpression;
     if (state.poopPresent && (performance.now() - state.poopSpawnedAt) >= POOP_UNCLEANED_HAPPY_THRESHOLD_MS) return "grossed";
     if (isBlinking) return "blink";
@@ -1349,205 +855,50 @@
   }
 
   function renderPet() {
-    const shape = petShapeFor(state.growthStage, state.form);
-    const ctx = clearCanvas(petCanvas);
-    const gridCols = shape.rows[0].length;
-    const gridRows = shape.rows.length;
-
-    // scale grows with growth stage, and continues intensifying post-branch
-    let scale = 8;
-    if (state.growthStage === "child") scale = 9.5;
-    if (state.growthStage === "form") {
-      const growPastBranch = clamp((state.survivalTime - BRANCH_POINT_S) / (WIN_TIME_S - BRANCH_POINT_S), 0, 1);
-      scale = 10.5 + growPastBranch * 2.5;
-    }
-
-    const gridW = gridCols * scale;
-    const gridH = gridRows * scale;
-    const ox = (petCanvas.width - gridW) / 2;
-    const oy = (petCanvas.height - gridH) / 2 + 6;
-
-    const color = petColorFor(state.growthStage, state.form, state.petColor);
-    const palette = buildPalette(color);
-    drawGrid(ctx, shape.rows, palette, ox, oy, scale);
-
-    const expr = state.sick ? "sickly" : petExpression;
-    drawCuteFace(ctx, petCanvas.width / 2, oy / scale + 3, scale, expr);
-
-    // glimmerling sparkle accessory
-    if (state.growthStage === "form" && state.form === "glimmerling") {
-      ctx.fillStyle = "#FFD873";
-      const sx = ox + gridW - scale * 1.5;
-      const sy = oy - scale * 0.5;
-      ctx.fillRect(sx, sy, scale * 0.6, scale * 0.6);
-      ctx.fillRect(sx - scale * 0.6, sy + scale * 0.6, scale * 0.4, scale * 0.4);
-      ctx.fillRect(sx + scale * 0.6, sy + scale * 0.6, scale * 0.4, scale * 0.4);
+    var opts = {
+      stage: state.growthStage,
+      form: state.form,
+      baseColor: state.petColor,
+      expression: currentExpression(),
+      cosmetics: Object.values(record.appearance.cosmetics.equipped).filter(Boolean),
+    };
+    if (use3D) {
+      var ok = PetRender3D.renderToCanvas(petCanvas, opts);
+      if (!ok) { // WebGL died after all — fall back for the rest of this session
+        use3D = false;
+        petCanvas = petCanvas2D;
+        petCanvas3D.style.display = "none";
+        petCanvas2D.style.display = "";
+        PetRender.renderPet(petCanvas, opts);
+      }
+    } else {
+      PetRender.renderPet(petCanvas, opts);
     }
   }
 
   // ============================================================
-  // AUDIO  (Web Audio oscillators only — no files, no network)
+  // AUDIO — presets built on the shared PetAudio.tone()
   // ============================================================
 
-  const audio = { ctx: null, masterGain: null, sickOsc: null, sickGain: null, sickLfo: null };
-
-  function ensureAudioContext() {
-    if (audio.ctx) return;
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    audio.ctx = new Ctx();
-    audio.masterGain = audio.ctx.createGain();
-    audio.masterGain.gain.value = state.audio.muted ? 0 : 0.2;
-    audio.masterGain.connect(audio.ctx.destination);
-  }
-
-  function setMuted(muted) {
-    state.audio.muted = muted;
-    if (!audio.masterGain) return;
-    audio.masterGain.gain.linearRampToValueAtTime(muted ? 0 : 0.2, audio.ctx.currentTime + 0.08);
-  }
-
-  function tone(freq, durationMs, opts) {
-    if (!audio.ctx) return;
-    opts = opts || {};
-    const type = opts.type || "sine";
-    const delayMs = opts.delayMs || 0;
-    const peakGain = opts.peakGain != null ? opts.peakGain : 0.5;
-    const endFreq = opts.endFreq;
-
-    const t0 = audio.ctx.currentTime + delayMs / 1000;
-    const dur = durationMs / 1000;
-
-    const osc = audio.ctx.createOscillator();
-    osc.type = type;
-    osc.frequency.setValueAtTime(freq, t0);
-    if (endFreq) osc.frequency.linearRampToValueAtTime(endFreq, t0 + dur);
-
-    const g = audio.ctx.createGain();
-    g.gain.setValueAtTime(0, t0);
-    g.gain.linearRampToValueAtTime(peakGain, t0 + Math.min(0.015, dur / 3));
-    g.gain.linearRampToValueAtTime(0, t0 + dur);
-
-    osc.connect(g);
-    g.connect(audio.masterGain);
-    osc.start(t0);
-    osc.stop(t0 + dur + 0.02);
-  }
-
-  function sfxChomp() { tone(300, 90, { type: "sine", endFreq: 500, peakGain: 0.5 }); }
-  function sfxBounce() { tone(600, 60, { type: "square", peakGain: 0.3 }); }
-  function sfxCombo() { [523, 659, 784].forEach((f, i) => tone(f, 100, { type: "triangle", delayMs: i * 90, peakGain: 0.4 })); }
+  function sfxChomp() { PetAudio.playSample("chomp", function () { PetAudio.tone(300, 90, { type: "sine", endFreq: 500, peakGain: 0.5 }); }); }
+  function sfxBounce() { PetAudio.tone(600, 60, { type: "square", peakGain: 0.3 }); }
+  function sfxCombo() { [523, 659, 784].forEach(function (f, i) { PetAudio.tone(f, 100, { type: "triangle", delayMs: i * 90, peakGain: 0.4 }); }); }
   function sfxDisciplineCall() {
-    tone(880, 90, { type: "square", peakGain: 0.35 });
-    tone(880, 90, { type: "square", delayMs: 160, peakGain: 0.35 });
+    PetAudio.tone(880, 90, { type: "square", peakGain: 0.35 });
+    PetAudio.tone(880, 90, { type: "square", delayMs: 160, peakGain: 0.35 });
   }
-  function sfxDisciplineResolved() { tone(988, 130, { type: "triangle", peakGain: 0.4 }); }
-  function sfxPoopAppear() { tone(220, 80, { type: "sine", endFreq: 140, peakGain: 0.3 }); }
-  function sfxPoopCleaned() { tone(700, 90, { type: "triangle", endFreq: 900, peakGain: 0.35 }); }
-  function sfxSicknessOnset() { tone(400, 400, { type: "sawtooth", endFreq: 180, peakGain: 0.3 }); }
-  function sfxMedicineCured() {
-    tone(600, 100, { type: "sine", peakGain: 0.35 });
-    tone(500, 140, { type: "triangle", delayMs: 90, peakGain: 0.3 });
-  }
-  function sfxBedtimeCall() { tone(300, 500, { type: "sine", endFreq: 200, peakGain: 0.3 }); }
+  function sfxDisciplineResolved() { PetAudio.playSample("discipline", function () { PetAudio.tone(988, 130, { type: "triangle", peakGain: 0.4 }); }); }
+  function sfxPoopAppear() { PetAudio.tone(220, 80, { type: "sine", endFreq: 140, peakGain: 0.3 }); }
+  function sfxPoopCleaned() { PetAudio.playSample("clean", function () { PetAudio.tone(700, 90, { type: "triangle", endFreq: 900, peakGain: 0.35 }); }); }
+  function sfxBedtimeCall() { PetAudio.tone(300, 500, { type: "sine", endFreq: 200, peakGain: 0.3 }); }
   function sfxBedtimeResolved() {
-    [440, 523, 659].forEach((f, i) => tone(f, 220, { type: "sine", delayMs: i * 150, peakGain: 0.3 }));
+    PetAudio.playSample("bedtime", function () {
+      [440, 523, 659].forEach(function (f, i) { PetAudio.tone(f, 220, { type: "sine", delayMs: i * 150, peakGain: 0.3 }); });
+    });
   }
-  function sfxEvolutionReveal() {
-    [523, 659, 784, 1046, 1318].forEach((f, i) => tone(f, 180, { type: "triangle", delayMs: i * 110, peakGain: 0.5 }));
-  }
-  function sfxGameOver() { tone(440, 500, { type: "sawtooth", endFreq: 200, peakGain: 0.35 }); }
-  function sfxWin() { [523, 659, 784, 1046].forEach((f, i) => tone(f, 140, { type: "triangle", delayMs: i * 100, peakGain: 0.45 })); }
-  function sfxBonusStart() { tone(660, 90, { type: "triangle", peakGain: 0.4 }); }
-  function sfxBonusWin() { [523, 659, 784, 988].forEach((f, i) => tone(f, 110, { type: "triangle", delayMs: i * 80, peakGain: 0.4 })); }
-  function sfxBonusMiss() { tone(260, 220, { type: "sawtooth", endFreq: 160, peakGain: 0.3 }); }
-
-  function sickAmbientStart() {
-    if (!audio.ctx || audio.sickOsc) return;
-    const osc = audio.ctx.createOscillator();
-    osc.type = "sine";
-    osc.frequency.value = 180;
-    const g = audio.ctx.createGain();
-    g.gain.value = 0.08;
-    const lfo = audio.ctx.createOscillator();
-    lfo.type = "sine";
-    lfo.frequency.value = 4;
-    const lfoDepth = audio.ctx.createGain();
-    lfoDepth.gain.value = 0.04;
-    lfo.connect(lfoDepth);
-    lfoDepth.connect(g.gain);
-    osc.connect(g);
-    g.connect(audio.masterGain);
-    osc.start();
-    lfo.start();
-    audio.sickOsc = osc;
-    audio.sickGain = g;
-    audio.sickLfo = lfo;
-  }
-
-  function sickAmbientStop() {
-    if (!audio.sickOsc) return;
-    const now = audio.ctx.currentTime;
-    audio.sickGain.gain.cancelScheduledValues(now);
-    audio.sickGain.gain.setValueAtTime(audio.sickGain.gain.value, now);
-    audio.sickGain.gain.linearRampToValueAtTime(0, now + 0.15);
-    audio.sickOsc.stop(now + 0.2);
-    audio.sickLfo.stop(now + 0.2);
-    audio.sickOsc = null;
-    audio.sickGain = null;
-    audio.sickLfo = null;
-  }
-
-  // ============================================================
-  // LEADERBOARD
-  // ============================================================
-
-  function loadLeaderboard() {
-    try {
-      const raw = localStorage.getItem(LB_KEY);
-      const list = raw ? JSON.parse(raw) : [];
-      return Array.isArray(list) ? list : [];
-    } catch (e) { return []; }
-  }
-
-  function saveLeaderboard(list) {
-    try { localStorage.setItem(LB_KEY, JSON.stringify(list)); } catch (e) { /* storage unavailable */ }
-  }
-
-  function addLeaderboardEntry(entry) {
-    const list = loadLeaderboard();
-    list.push(entry);
-    list.sort((a, b) => b.survivalTime - a.survivalTime);
-    const capped = list.slice(0, LB_MAX);
-    saveLeaderboard(capped);
-    return capped;
-  }
-
-  function formatTime(seconds) {
-    const m = Math.floor(seconds / 60);
-    const s = seconds - m * 60;
-    return m + ":" + (s < 10 ? "0" : "") + s.toFixed(1);
-  }
-
-  function renderLeaderboard() {
-    const list = loadLeaderboard();
-    const el = document.getElementById("leaderboard-list");
-    el.innerHTML = "";
-    if (list.length === 0) {
-      const li = document.createElement("li");
-      li.className = "lb-empty";
-      li.textContent = "no runs yet";
-      el.appendChild(li);
-      return;
-    }
-    list.forEach((entry, i) => {
-      const li = document.createElement("li");
-      const left = document.createElement("span");
-      left.textContent = (i + 1) + ". " + entry.name;
-      const right = document.createElement("span");
-      right.textContent = formatTime(entry.survivalTime) + " " + (entry.form ? FORM_LABELS[entry.form] : "—");
-      li.appendChild(left);
-      li.appendChild(right);
-      el.appendChild(li);
+  function sfxMilestone() {
+    PetAudio.playSample("win", function () {
+      [523, 659, 784, 1046, 1318].forEach(function (f, i) { PetAudio.tone(f, 180, { type: "triangle", delayMs: i * 110, peakGain: 0.5 }); });
     });
   }
 
@@ -1555,16 +906,13 @@
   // SCREEN MANAGEMENT
   // ============================================================
 
-  const screens = {
-    start: document.getElementById("screen-start"),
+  var screens = {
     hatching: document.getElementById("screen-hatching"),
     play: document.getElementById("screen-play"),
-    result: document.getElementById("screen-result"),
   };
 
   function showScreen(name) {
-    state.screen = name;
-    Object.values(screens).forEach((s) => s.classList.remove("active"));
+    Object.keys(screens).forEach(function (k) { screens[k].classList.remove("active"); });
     screens[name].classList.add("active");
   }
 
@@ -1572,94 +920,42 @@
   // DOM REFS
   // ============================================================
 
-  const petWrap = document.getElementById("pet-canvas-wrap");
-  const petStageArea = document.getElementById("pet-stage-area");
-  const foodEl = document.getElementById("food-item");
-  const foodCanvas = document.getElementById("food-canvas");
-  const spongeEl = document.getElementById("sponge-item");
-  const spongeCanvas = document.getElementById("sponge-canvas");
-  const callFlashEl = document.getElementById("call-flash");
-  const comboPopEl = document.getElementById("combo-pop");
-  const approvePopEl = document.getElementById("approve-pop");
-  const pipsHunger = document.getElementById("pips-hunger");
-  const pipsHappy = document.getElementById("pips-happy");
-  const disciplineTag = document.getElementById("discipline-tag");
-  const weightTag = document.getElementById("weight-tag");
-  const timerEl = document.getElementById("timer");
-  const muteBtn = document.getElementById("mute-btn");
-  const nameInput = document.getElementById("name-input");
-  const nameEntry = document.getElementById("name-entry");
-  const verdictText = document.getElementById("verdict-text");
-  const resultMeta = document.getElementById("result-meta");
-  const leaderboardTitle = document.getElementById("leaderboard-title");
-  const bedtimePrompt = document.getElementById("bedtime-prompt");
-  const nightDim = document.getElementById("night-dim");
-  const bonusOverlay = document.getElementById("bonus-overlay");
-  const bonusCanvas = document.getElementById("bonus-canvas");
-  const bonusHint = document.getElementById("bonus-hint");
-  const eggCanvasStart = document.getElementById("egg-canvas-start");
-  const eggCanvasHatch = document.getElementById("egg-canvas-hatch");
-  const hatchCrackView = document.getElementById("hatching-crack-view");
-  const hatchLegendView = document.getElementById("hatching-legend-view");
-  const swatchRow = document.getElementById("swatch-row");
-  const petNameInput = document.getElementById("pet-name-input");
-  const petNameLabel = document.getElementById("pet-name-label");
-  const shell = document.getElementById("shell");
-  const framePicker = document.getElementById("frame-picker");
+  var petWrap = document.getElementById("pet-canvas-wrap");
+  var petStageArea = document.getElementById("pet-stage-area");
+  var foodEl = document.getElementById("food-item");
+  var foodCanvas = document.getElementById("food-canvas");
+  var spongeEl = document.getElementById("sponge-item");
+  var spongeCanvas = document.getElementById("sponge-canvas");
+  var callFlashEl = document.getElementById("call-flash");
+  var comboPopEl = document.getElementById("combo-pop");
+  var approvePopEl = document.getElementById("approve-pop");
+  var pointsFlashEl = document.getElementById("points-flash");
+  var milestonePopEl = document.getElementById("milestone-pop");
+  var pipsHunger = document.getElementById("pips-hunger");
+  var pipsHappy = document.getElementById("pips-happy");
+  var disciplineTag = document.getElementById("discipline-tag");
+  var weightTag = document.getElementById("weight-tag");
+  var pointsTag = document.getElementById("points-tag");
+  var muteBtn = document.getElementById("mute-btn");
+  var plazaBtn = document.getElementById("plaza-btn");
+  var bedtimePrompt = document.getElementById("bedtime-prompt");
+  var nightDim = document.getElementById("night-dim");
+  var beatContinueEl = document.getElementById("beat-continue");
+  var beatContinueText = document.getElementById("beat-continue-text");
+  var eggCanvasHatch = document.getElementById("egg-canvas-hatch");
+  var hatchCrackView = document.getElementById("hatching-crack-view");
+  var petNameLabel = document.getElementById("pet-name-label");
+  var shell = document.getElementById("shell");
 
-  function selectFrame(frameId) {
-    const frame = FRAME_THEMES.find((item) => item.id === frameId) || FRAME_THEMES[0];
-    state.frameId = frame.id;
+  function applyFrame(frameId) {
+    var frame = FRAME_THEMES.find(function (f) { return f.id === frameId; }) || FRAME_THEMES[0];
     shell.dataset.frame = frame.id;
-    framePicker.querySelectorAll(".frame-option").forEach((option) => {
-      const selected = option.dataset.frameId === frame.id;
-      option.setAttribute("aria-checked", String(selected));
-      option.tabIndex = selected ? 0 : -1;
-    });
   }
-
-  FRAME_THEMES.forEach((frame) => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "frame-option";
-    btn.dataset.frameId = frame.id;
-    btn.setAttribute("role", "radio");
-    btn.setAttribute("aria-label", frame.label + " frame");
-    btn.title = frame.label;
-    btn.style.setProperty("--thumb-bg", frame.bg);
-    btn.style.setProperty("--thumb-bezel", frame.bezel);
-    btn.style.setProperty("--thumb-button", frame.button);
-    btn.addEventListener("click", () => selectFrame(frame.id));
-    btn.addEventListener("keydown", (event) => {
-      if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) return;
-      event.preventDefault();
-      const current = FRAME_THEMES.findIndex((item) => item.id === state.frameId);
-      const delta = (event.key === "ArrowLeft" || event.key === "ArrowUp") ? -1 : 1;
-      const next = (current + delta + FRAME_THEMES.length) % FRAME_THEMES.length;
-      selectFrame(FRAME_THEMES[next].id);
-      framePicker.querySelector(`[data-frame-id="${FRAME_THEMES[next].id}"]`).focus();
-    });
-    framePicker.appendChild(btn);
-  });
-  selectFrame(state.frameId);
-
-  swatchRow.innerHTML = "";
-  COLOR_SWATCHES.forEach((hex) => {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "swatch" + (hex === state.petColor ? " selected" : "");
-    btn.style.background = hex;
-    btn.setAttribute("aria-label", "Pick color " + hex);
-    btn.addEventListener("click", () => {
-      state.petColor = hex;
-      swatchRow.querySelectorAll(".swatch").forEach((s) => s.classList.remove("selected"));
-      btn.classList.add("selected");
-    });
-    swatchRow.appendChild(btn);
-  });
+  applyFrame(state.frameId);
+  petNameLabel.textContent = state.petName || "MYSTERY PET";
 
   function drawEgg(canvas) {
-    const ctx = clearCanvas(canvas);
+    var ctx = PetRender.clearCanvas(canvas);
     ctx.fillStyle = "#4A2E55";
     ctx.beginPath();
     ctx.ellipse(canvas.width / 2, canvas.height / 2, canvas.width * 0.42, canvas.height * 0.46, 0, 0, Math.PI * 2);
@@ -1675,34 +971,37 @@
   }
 
   // ============================================================
-  // RUN LIFECYCLE
+  // INTERACTION LIFECYCLE
   // ============================================================
 
-  let foodSpawnPos = null;
-  let spongeSpawnPos = null;
+  var foodSpawnPos = null;
+  var spongeSpawnPos = null;
+  var feedTypesEaten = [];
 
   function placeInstantly(el, left, top) {
     el.style.transition = "none";
     el.style.left = left + "px";
     el.style.top = top + "px";
-    void el.offsetWidth; // flush so the position applies before transitions re-enable
+    void el.offsetWidth;
     el.style.transition = "";
   }
 
   function positionFoodAtSpawn() {
-    const rect = petStageArea.getBoundingClientRect();
+    var rect = petStageArea.getBoundingClientRect();
     foodSpawnPos = { left: rect.width / 2 - 22, top: rect.height - 66 };
     placeInstantly(foodEl, foodSpawnPos.left, foodSpawnPos.top);
   }
 
   function positionSpongeAtSpawn() {
-    const rect = petStageArea.getBoundingClientRect();
+    var rect = petStageArea.getBoundingClientRect();
     spongeSpawnPos = { left: rect.width * 0.72, top: rect.height * 0.18 };
     placeInstantly(spongeEl, spongeSpawnPos.left, spongeSpawnPos.top);
   }
 
   function nextFoodType() {
-    if (state.sick) return "medicine";
+    if (state.beat === "feed" && feedTypesEaten.length === 1) {
+      return feedTypesEaten[0] === "meal" ? "snack" : "meal";
+    }
     return Math.random() < 0.65 ? "meal" : "snack";
   }
 
@@ -1711,76 +1010,19 @@
     drawIcon(foodCanvas, state.foodSlot.type);
   }
 
-  function resetRunState() {
-    state.stats = { hunger: 100, happy: 100 };
-    state.discipline = 0;
-    state.weight = 50;
-    state.sick = false;
-    state.sickSince = null;
-    state.sickUnresolvedEver = false;
-    state.poopPresent = false;
-    state.poopSpawnedAt = null;
-    state.survivalTime = 0;
-    state.growthStage = "baby";
-    state.form = null;
-    state.careAccum = { hungerSum: 0, happySum: 0, samples: 0 };
-    state.endReason = null;
-    state.events = {
-      callActive: false, callDeadline: null,
-      bedtimeActive: false, bedtimeHandled: false, bedtimeDeadline: null,
-      bedtimeFired: false,
-      nightBeatUntil: null,
-    };
-    state.input = { pressStart: null, holding: false, tapTimestamps: [], draggingItemId: null };
-    state.bonusRound = { active: false, birdY: 80, birdVel: 0, pipes: [], elapsed: 0, nextPipeIn: 0 };
-    bonusCooldownUntil = 0;
-    handTrack.pressEngaged = false;
-    handTrack.openDwellStart = null;
-    handTrack.wasPinching = false;
-    handTrack.wasFist = false;
-    handTrack.wasPointing = false;
-    handTrack.history = [];
-
-    nextCallTime = performance.now() + jitter(CALL_MIN_MS, CALL_MAX_MS);
-    nextPoopTime = performance.now() + POOP_FIRST_MS;
-    nextSicknessRollTime = performance.now() + SICKNESS_ROLL_INTERVAL_MS;
-    lastSampleSecond = -1;
-    petExpression = "normal";
-    isBlinking = false;
-
-    petWrap.classList.remove("sick-tint");
-    callFlashEl.classList.remove("show");
-    bedtimePrompt.classList.remove("show");
-    nightDim.classList.remove("show");
-    bonusOverlay.style.display = "none";
-    spongeEl.style.display = "none";
-    spongeEl.classList.remove("cleaned", "dragging");
-    foodEl.classList.remove("eaten", "dragging");
-
-    refreshFoodSlot();
-    positionFoodAtSpawn();
-    positionSpongeAtSpawn();
-
-    petNameLabel.textContent = state.petName || "MYSTERY PET";
-
-    renderMeters();
-    renderHudTags();
-    renderTimer();
-    renderPet();
-  }
-
   function applyDeltas(deltas) {
-    for (const k in deltas) {
+    for (var k in deltas) {
       state.stats[k] = clamp(state.stats[k] + deltas[k], 0, 100);
     }
   }
 
   function renderMeters() {
-    [["hunger", pipsHunger], ["happy", pipsHappy]].forEach(([key, container]) => {
-      const filled = clamp(Math.round(state.stats[key] / 20), 0, 5);
+    [["hunger", pipsHunger], ["happy", pipsHappy]].forEach(function (pair) {
+      var key = pair[0], container = pair[1];
+      var filled = clamp(Math.round(state.stats[key] / 20), 0, 5);
       container.innerHTML = "";
-      for (let i = 0; i < 5; i++) {
-        const c = document.createElement("canvas");
+      for (var i = 0; i < 5; i++) {
+        var c = document.createElement("canvas");
         c.width = 16; c.height = 14;
         drawIcon(c, i < filled ? "heartFilled" : "heartEmpty");
         container.appendChild(c);
@@ -1789,68 +1031,63 @@
   }
 
   function renderHudTags() {
-    disciplineTag.textContent = "DISC " + Math.round(state.discipline);
-    weightTag.textContent = "WEIGHT: " + (state.weight > 75 ? "a bit much" : "healthy");
+    disciplineTag.textContent = "DISC " + Math.round(state.stats.discipline);
+    weightTag.textContent = "WEIGHT: " + (state.stats.weight > 75 ? "a bit much" : "healthy");
+    pointsTag.textContent = record.points.balance + " PTS";
   }
 
-  function renderTimer() {
-    timerEl.textContent = formatTime(state.survivalTime);
+  function popText(el, text) {
+    el.textContent = text;
+    el.classList.remove("show");
+    void el.offsetWidth;
+    el.classList.add("show");
   }
 
-  // ============================================================
-  // GROWTH / EVOLUTION
-  // ============================================================
+  // called once at the end of every interaction round — awards points into
+  // the shared save (replacing the old one-shot computeCareScore/evaluateForm
+  // at Reveal), advances growth stage from cumulative visit count, and pops a
+  // milestone toast + records a leaderboard entry whenever growth/form changes
+  function completeInteraction(location, points, careDelta, reason) {
+    var prevStage = state.growthStage;
+    var prevForm = state.form;
 
-  function evaluateForm() {
-    const avgHunger = state.careAccum.samples > 0 ? state.careAccum.hungerSum / state.careAccum.samples : 100;
-    const avgHappy = state.careAccum.samples > 0 ? state.careAccum.happySum / state.careAccum.samples : 100;
-    const careScore =
-      0.35 * (avgHunger / 100) +
-      0.35 * (avgHappy / 100) +
-      0.20 * (state.discipline / 100) +
-      0.10 * (state.weight <= 75 ? 1 : 0) -
-      (state.sickUnresolvedEver ? 0.15 : 0);
+    record = PetSave.awardPoints(activeKey, points, { location: location, reason: reason, careDelta: careDelta });
+    state.form = record.appearance.form;
 
-    if (careScore >= 0.70) return "glimmerling";
-    if (careScore >= 0.40) return "wobblet";
-    return "grumplet";
-  }
+    var visits = record.visits.home;
+    if (visits >= STAGE_FORM_AT_VISITS) state.growthStage = "form";
+    else if (visits >= STAGE_CHILD_AT_VISITS) state.growthStage = "child";
+    // awardPoints() loads a fresh record from storage, so `record.stats` is
+    // now a different object than `state.stats` — persist() re-syncs it from
+    // the live in-memory state before saving, or this round's hunger/happy/
+    // discipline/weight changes would be silently overwritten with stale data
+    persist();
 
-  function updateGrowthStage() {
-    const t = state.survivalTime;
-    if (t >= BRANCH_POINT_S && state.growthStage !== "form") {
-      state.form = evaluateForm();
-      state.growthStage = "form";
-      sfxEvolutionReveal();
-      triggerBedtime();
-    } else if (t >= CHILD_START_S && state.growthStage === "baby") {
-      state.growthStage = "child";
+    popText(pointsFlashEl, "+" + points + " PTS");
+
+    if (state.growthStage !== prevStage || (state.growthStage === "form" && state.form !== prevForm)) {
+      sfxMilestone();
+      var label = state.growthStage === "form" ? (state.form || "").toUpperCase() : state.growthStage.toUpperCase();
+      popText(milestonePopEl, "GREW UP!\n" + label);
+      milestonePopEl.classList.add("show");
+      PetSave.recordLeaderboardEntry(activeKey, {
+        score: record.points.balance,
+        verdict: "reached " + label,
+      });
     }
-  }
 
-  function sampleCareAccum() {
-    const second = Math.floor(state.survivalTime);
-    if (state.survivalTime < BRANCH_POINT_S && second > lastSampleSecond) {
-      lastSampleSecond = second;
-      state.careAccum.hungerSum += state.stats.hunger;
-      state.careAccum.happySum += state.stats.happy;
-      state.careAccum.samples += 1;
-    }
+    renderHudTags();
+    renderMeters();
+    renderPet();
   }
 
   // ============================================================
-  // DISCIPLINE — attention calls
+  // ATTENTION — scold to resolve
   // ============================================================
 
-  function eventsBlocked() {
-    return state.sick || state.poopPresent || state.events.bedtimeActive || state.events.callActive;
-  }
-
-  function tickAttentionCallScheduler(now) {
-    if (now < nextCallTime) return;
-    if (eventsBlocked()) { nextCallTime = now + 3000; return; }
+  function startAttentionBeat() {
     state.events.callActive = true;
-    state.events.callDeadline = now + CALL_WINDOW_MS;
+    state.events.callDeadline = performance.now() + CALL_WINDOW_MS;
     callFlashEl.classList.add("show");
     sfxDisciplineCall();
   }
@@ -1859,29 +1096,28 @@
     if (state.events.callActive && now >= state.events.callDeadline) {
       state.events.callActive = false;
       callFlashEl.classList.remove("show");
-      nextCallTime = now + jitter(CALL_MIN_MS, CALL_MAX_MS);
+      completeInteraction("home", 5, 0.3, "attention: missed");
+      advanceBeat();
     }
   }
 
   function resolveDisciplineCall() {
-    state.discipline = clamp(state.discipline + DISCIPLINE_GAIN, 0, 100);
+    state.stats.discipline = clamp(state.stats.discipline + DISCIPLINE_GAIN, 0, 100);
     state.events.callActive = false;
     callFlashEl.classList.remove("show");
-    nextCallTime = performance.now() + jitter(CALL_MIN_MS, CALL_MAX_MS);
     sfxDisciplineResolved();
-    renderHudTags();
     popText(approvePopEl, "+DISC");
+    completeInteraction("home", 15, 1, "attention: resolved");
+    advanceBeat();
   }
 
   // ============================================================
-  // POOP
+  // CLEAN — sponge the mess away
   // ============================================================
 
-  function tickPoopScheduler(now) {
-    if (state.poopPresent) return;
-    if (now < nextPoopTime) return;
+  function startCleanBeat() {
     state.poopPresent = true;
-    state.poopSpawnedAt = now;
+    state.poopSpawnedAt = performance.now();
     positionSpongeAtSpawn();
     spongeEl.style.display = "";
     spongeEl.classList.remove("cleaned");
@@ -1889,74 +1125,26 @@
   }
 
   function cleanPoop() {
+    if (state.beat !== "clean") return;
+    var timely = (performance.now() - state.poopSpawnedAt) < POOP_UNCLEANED_HAPPY_THRESHOLD_MS;
     state.poopPresent = false;
-    applyDeltas({ happy: 1 });
-    renderMeters();
+    applyDeltas({ happy: timely ? 3 : 1 });
     sfxPoopCleaned();
     spongeEl.classList.add("cleaned");
-    setTimeout(() => {
+    setTimeout(function () {
       spongeEl.style.display = "none";
       spongeEl.classList.remove("cleaned");
       positionSpongeAtSpawn();
     }, 250);
-    nextPoopTime = performance.now() + jitter(POOP_MIN_MS, POOP_MAX_MS);
+    completeInteraction("home", timely ? 15 : 8, timely ? 1 : 0.6, "cleaned up");
+    advanceBeat();
   }
 
   // ============================================================
-  // SICKNESS
-  // ============================================================
-
-  function rollSickness() {
-    let chance = 0.05;
-    if (state.poopPresent) chance += 0.15;
-    if (state.weight > 75) chance += 0.10;
-    return Math.random() < Math.min(chance, 0.40);
-  }
-
-  function tickSicknessScheduler(now) {
-    if (state.sick) return;
-    if (now < nextSicknessRollTime) return;
-    nextSicknessRollTime = now + SICKNESS_ROLL_INTERVAL_MS;
-    if (rollSickness()) {
-      state.sick = true;
-      state.sickSince = now;
-      petWrap.classList.add("sick-tint");
-      sfxSicknessOnset();
-      sickAmbientStart();
-      refreshFoodSlot();
-    }
-  }
-
-  function checkSicknessProgress(now) {
-    if (!state.sick) return;
-    const elapsed = now - state.sickSince;
-    if (elapsed >= SICKNESS_UNRESOLVED_FLAG_MS) {
-      state.sickUnresolvedEver = true;
-    }
-    if (elapsed >= SICKNESS_FATAL_MS) {
-      triggerLoss("sickness");
-    }
-  }
-
-  function cureSickness() {
-    state.sick = false;
-    state.sickSince = null;
-    applyDeltas({ happy: -SICK_CURE_HAPPY_PENALTY });
-    petWrap.classList.remove("sick-tint");
-    sickAmbientStop();
-    sfxMedicineCured();
-    renderMeters();
-    nextSicknessRollTime = performance.now() + SICKNESS_ROLL_INTERVAL_MS;
-    refreshFoodSlot();
-  }
-
-  // ============================================================
-  // BEDTIME (single scripted event at the ~40s branch point)
+  // BEDTIME
   // ============================================================
 
   function triggerBedtime() {
-    if (state.events.bedtimeFired) return;
-    state.events.bedtimeFired = true;
     state.events.bedtimeActive = true;
     state.events.bedtimeHandled = false;
     state.events.bedtimeDeadline = performance.now() + CALL_WINDOW_MS;
@@ -1972,7 +1160,8 @@
       bedtimePrompt.classList.remove("show");
       petExpression = "normal";
       applyDeltas({ happy: -8 });
-      renderMeters();
+      completeInteraction("home", 5, 0.3, "bedtime: missed");
+      advanceBeat();
     }
   }
 
@@ -1985,72 +1174,60 @@
       state.events.bedtimeHandled = true;
       state.events.bedtimeActive = false;
       bedtimePrompt.classList.remove("show");
-      applyDeltas({ happy: 5, discipline: 5 });
-      renderMeters();
-      renderHudTags();
+      applyDeltas({ happy: 5 });
+      state.stats.discipline = clamp(state.stats.discipline + 5, 0, 100);
       sfxBedtimeResolved();
-      state.events.nightBeatUntil = performance.now() + 3000;
       nightDim.classList.add("show");
-      setTimeout(() => { nightDim.classList.remove("show"); }, 3000);
+      setTimeout(function () { nightDim.classList.remove("show"); }, 3000);
+      completeInteraction("home", 15, 1, "bedtime: caught");
+      advanceBeat();
     }
     petExpression = "normal";
   }
 
   // ============================================================
-  // END CONDITIONS
+  // INTERACTION CONTROLLER — cycles the fixed sequence forever
   // ============================================================
 
-  function popText(el, text) {
-    el.textContent = text;
-    el.classList.remove("show");
-    void el.offsetWidth;
-    el.classList.add("show");
+  function enterBeat(name) {
+    state.beat = name;
+    foodEl.style.display = "none";
+    spongeEl.style.display = "none";
+    beatContinueEl.style.display = "none";
+    switch (name) {
+      case "feed":
+        feedTypesEaten = [];
+        refreshFoodSlot();
+        positionFoodAtSpawn();
+        foodEl.style.display = "";
+        beatContinueText.textContent = "TAP TO CONTINUE";
+        beatContinueEl.style.display = "";
+        break;
+      case "clean":
+        startCleanBeat();
+        break;
+      case "attention":
+        startAttentionBeat();
+        break;
+      case "bedtime":
+        triggerBedtime();
+        break;
+    }
   }
 
-  function checkEndConditions(now) {
-    if (state.stats.hunger <= 0) { triggerLoss("hunger"); return; }
-    if (state.stats.happy <= 0) { triggerLoss("happy"); return; }
-    if (state.survivalTime >= WIN_TIME_S) { triggerWin(); }
+  function advanceBeat() {
+    var next = INTERACTION_SEQUENCE[(INTERACTION_SEQUENCE.indexOf(state.beat) + 1) % INTERACTION_SEQUENCE.length];
+    enterBeat(next);
   }
 
-  function triggerLoss(reason) {
-    sickAmbientStop();
-    sfxGameOver();
-    state.endReason = reason;
-    state.currentVerdict = pickRandom(VERDICTS[reason]);
-    finishRun();
-  }
+  beatContinueEl.addEventListener("pointerdown", function () {
+    if (state.beat !== "feed") return;
+    var quality = feedTypesEaten.length / 2; // 0, 0.5, or 1
+    completeInteraction("home", Math.round(quality * 20), quality, "fed");
+    advanceBeat();
+  });
 
-  function triggerWin() {
-    sickAmbientStop();
-    sfxWin();
-    state.endReason = "win";
-    state.currentVerdict = pickRandom(VERDICTS.win[state.form]);
-    finishRun();
-  }
-
-  function finishRun() {
-    verdictText.textContent = state.currentVerdict;
-    const stageLabel = state.form ? FORM_LABELS[state.form] : STAGE_LABELS[state.growthStage];
-    const nameLabel = state.petName || "your pet";
-    resultMeta.textContent = nameLabel + " the " + stageLabel + " · " + formatTime(state.survivalTime);
-    nameInput.value = "";
-    nameEntry.style.display = "";
-    renderLeaderboard();
-    showScreen("result");
-  }
-
-  function commitScore(name) {
-    addLeaderboardEntry({
-      name: name,
-      survivalTime: state.survivalTime,
-      form: state.form,
-      verdict: state.currentVerdict,
-      timestamp: Date.now(),
-    });
-    renderLeaderboard();
-    nameEntry.style.display = "none";
-  }
+  persist();
 
   // ============================================================
   // INPUT HANDLING — pet tap / hold / scold
@@ -2067,23 +1244,19 @@
     applyDeltas({ happy: TAP_HAPPY_DELTA });
     renderMeters();
 
-    const now = performance.now();
+    var now = performance.now();
     state.input.tapTimestamps.push(now);
-    state.input.tapTimestamps = state.input.tapTimestamps.filter((t) => now - t <= COMBO_WINDOW_MS);
+    state.input.tapTimestamps = state.input.tapTimestamps.filter(function (t) { return now - t <= COMBO_WINDOW_MS; });
     if (state.input.tapTimestamps.length >= COMBO_TAP_COUNT) {
       applyDeltas({ happy: COMBO_HAPPY_BONUS });
       renderMeters();
       sfxCombo();
       popText(comboPopEl, "COMBO!");
       state.input.tapTimestamps = [];
-      if (!eventsBlocked()) startBonusRound();
     }
   }
 
-  // shared by real pointer input and gesture-simulated input (see HAND TRACKING)
   function beginPetPress() {
-    if (state.screen !== "play") return;
-    if (state.bonusRound.active) return;
     if (state.input.draggingItemId) return;
     state.input.pressStart = performance.now();
     state.input.holding = false;
@@ -2092,11 +1265,9 @@
     renderPet();
   }
 
-  petWrap.addEventListener("pointerdown", (e) => {
-    if (state.screen !== "play") return;
-    if (state.bonusRound.active) return;
+  petWrap.addEventListener("pointerdown", function (e) {
     if (state.input.draggingItemId) return;
-    ensureAudioContext();
+    PetAudio.ensureContext();
     e.preventDefault();
     petWrap.setPointerCapture(e.pointerId);
     beginPetPress();
@@ -2116,70 +1287,27 @@
     renderPet();
   }
 
-  petWrap.addEventListener("pointerup", () => {
-    if (state.screen !== "play") return;
-    releasePetPress();
-  });
+  petWrap.addEventListener("pointerup", function () { releasePetPress(); });
 
-  petWrap.addEventListener("pointercancel", () => {
-    if (state.screen !== "play") return;
+  petWrap.addEventListener("pointercancel", function () {
     state.input.pressStart = null;
     state.input.holding = false;
     petExpression = "normal";
-    if (state.input.holding) endSleepResponse();
   });
 
   // ============================================================
-  // INPUT HANDLING — drag (food/medicine, sponge)
+  // INPUT HANDLING — drag (food, sponge)
   // ============================================================
 
-  let dragOffset = { x: 0, y: 0 };
-
-  function setupDrag(el, onDrop, onCancelReturn) {
-    el.addEventListener("pointerdown", (e) => {
-      if (state.screen !== "play") return;
-      ensureAudioContext();
-      e.preventDefault();
-      el.setPointerCapture(e.pointerId);
-      state.input.draggingItemId = el.id;
-      el.classList.add("dragging");
-      const rect = el.getBoundingClientRect();
-      dragOffset.x = e.clientX - (rect.left + rect.width / 2);
-      dragOffset.y = e.clientY - (rect.top + rect.height / 2);
-    });
-
-    el.addEventListener("pointermove", (e) => {
-      if (state.input.draggingItemId !== el.id) return;
-      const stageRect = petStageArea.getBoundingClientRect();
-      const x = e.clientX - dragOffset.x - stageRect.left;
-      const y = e.clientY - dragOffset.y - stageRect.top;
-      el.style.left = x + "px";
-      el.style.top = y + "px";
-    });
-
-    el.addEventListener("pointerup", () => {
-      if (state.input.draggingItemId !== el.id) return;
-      state.input.draggingItemId = null;
-      el.classList.remove("dragging");
-      onDrop(el);
-    });
-
-    el.addEventListener("pointercancel", () => {
-      state.input.draggingItemId = null;
-      el.classList.remove("dragging");
-      onCancelReturn(el);
-    });
-  }
+  var dragOffset = { x: 0, y: 0 };
 
   function mouthZoneCenter() {
-    const rect = petWrap.getBoundingClientRect();
+    var rect = petWrap.getBoundingClientRect();
     return { x: rect.left + rect.width / 2, y: rect.top + rect.height * 0.62, radius: rect.width * 0.16 };
   }
 
-  // generous full-body hit zone — the sponge cleans as soon as it's dragged
-  // over the pet, it doesn't need to land on the dirt pixels precisely
   function petCleanZoneCenter() {
-    const rect = petWrap.getBoundingClientRect();
+    var rect = petWrap.getBoundingClientRect();
     return { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2, radius: rect.width * 0.55 };
   }
 
@@ -2193,68 +1321,97 @@
     spongeEl.style.top = spongeSpawnPos.top + "px";
   }
 
-  // shared by the food-drag drop zone and the gesture pinch action (see HAND TRACKING)
   function resolveFoodEaten() {
-    const type = state.foodSlot.type;
+    if (state.beat !== "feed") return;
+    var type = state.foodSlot.type;
     sfxChomp();
     if (type === "meal") {
       applyDeltas({ hunger: MEAL_HUNGER, happy: MEAL_HAPPY });
     } else if (type === "snack") {
       applyDeltas({ hunger: SNACK_HUNGER, happy: SNACK_HAPPY });
-      state.weight = clamp(state.weight + SNACK_WEIGHT, 0, 100);
+      state.stats.weight = clamp(state.stats.weight + SNACK_WEIGHT, 0, 100);
       renderHudTags();
-    } else if (type === "medicine") {
-      cureSickness();
     }
     renderMeters();
     foodEl.classList.add("eaten");
-    setTimeout(() => {
+
+    if (state.beat === "feed" && feedTypesEaten.indexOf(type) === -1) {
+      feedTypesEaten.push(type);
+    }
+
+    setTimeout(function () {
       foodEl.classList.remove("eaten");
-      refreshFoodSlot();
-      positionFoodAtSpawn();
+      if (state.beat === "feed" && feedTypesEaten.length >= 2) {
+        completeInteraction("home", 20, 1, "fed both");
+        advanceBeat();
+      } else {
+        refreshFoodSlot();
+        positionFoodAtSpawn();
+      }
     }, FOOD_RESPAWN_MS);
   }
 
-  setupDrag(foodEl, () => {
-    const foodRect = foodEl.getBoundingClientRect();
-    const foodCenter = { x: foodRect.left + foodRect.width / 2, y: foodRect.top + foodRect.height / 2 };
-    const mouth = mouthZoneCenter();
-    const dist = Math.hypot(foodCenter.x - mouth.x, foodCenter.y - mouth.y);
-
-    if (dist <= mouth.radius + 14 && state.screen === "play") {
-      resolveFoodEaten();
-    } else {
-      snapFoodBack();
-    }
-  }, snapFoodBack);
-
-  // the sponge cleans mid-drag, the moment it passes over the pet — it
-  // doesn't need to be dropped there like food does at the mouth
-  spongeEl.addEventListener("pointerdown", (e) => {
-    if (state.screen !== "play") return;
-    ensureAudioContext();
+  foodEl.addEventListener("pointerdown", function (e) {
+    PetAudio.ensureContext();
     e.preventDefault();
-    spongeEl.setPointerCapture(e.pointerId);
-    state.input.draggingItemId = spongeEl.id;
-    spongeEl.classList.add("dragging");
-    const rect = spongeEl.getBoundingClientRect();
+    foodEl.setPointerCapture(e.pointerId);
+    state.input.draggingItemId = foodEl.id;
+    foodEl.classList.add("dragging");
+    var rect = foodEl.getBoundingClientRect();
     dragOffset.x = e.clientX - (rect.left + rect.width / 2);
     dragOffset.y = e.clientY - (rect.top + rect.height / 2);
   });
 
-  spongeEl.addEventListener("pointermove", (e) => {
+  foodEl.addEventListener("pointermove", function (e) {
+    if (state.input.draggingItemId !== foodEl.id) return;
+    var stageRect = petStageArea.getBoundingClientRect();
+    var x = e.clientX - dragOffset.x - stageRect.left;
+    var y = e.clientY - dragOffset.y - stageRect.top;
+    foodEl.style.left = x + "px";
+    foodEl.style.top = y + "px";
+  });
+
+  foodEl.addEventListener("pointerup", function () {
+    if (state.input.draggingItemId !== foodEl.id) return;
+    state.input.draggingItemId = null;
+    foodEl.classList.remove("dragging");
+    var foodRect = foodEl.getBoundingClientRect();
+    var foodCenter = { x: foodRect.left + foodRect.width / 2, y: foodRect.top + foodRect.height / 2 };
+    var mouth = mouthZoneCenter();
+    var dist = Math.hypot(foodCenter.x - mouth.x, foodCenter.y - mouth.y);
+    if (dist <= mouth.radius + 14) resolveFoodEaten(); else snapFoodBack();
+  });
+
+  foodEl.addEventListener("pointercancel", function () {
+    state.input.draggingItemId = null;
+    foodEl.classList.remove("dragging");
+    snapFoodBack();
+  });
+
+  spongeEl.addEventListener("pointerdown", function (e) {
+    PetAudio.ensureContext();
+    e.preventDefault();
+    spongeEl.setPointerCapture(e.pointerId);
+    state.input.draggingItemId = spongeEl.id;
+    spongeEl.classList.add("dragging");
+    var rect = spongeEl.getBoundingClientRect();
+    dragOffset.x = e.clientX - (rect.left + rect.width / 2);
+    dragOffset.y = e.clientY - (rect.top + rect.height / 2);
+  });
+
+  spongeEl.addEventListener("pointermove", function (e) {
     if (state.input.draggingItemId !== spongeEl.id) return;
-    const stageRect = petStageArea.getBoundingClientRect();
-    const x = e.clientX - dragOffset.x - stageRect.left;
-    const y = e.clientY - dragOffset.y - stageRect.top;
+    var stageRect = petStageArea.getBoundingClientRect();
+    var x = e.clientX - dragOffset.x - stageRect.left;
+    var y = e.clientY - dragOffset.y - stageRect.top;
     spongeEl.style.left = x + "px";
     spongeEl.style.top = y + "px";
 
-    if (state.poopPresent && state.screen === "play") {
-      const spongeRect = spongeEl.getBoundingClientRect();
-      const spongeCenter = { x: spongeRect.left + spongeRect.width / 2, y: spongeRect.top + spongeRect.height / 2 };
-      const zone = petCleanZoneCenter();
-      const dist = Math.hypot(spongeCenter.x - zone.x, spongeCenter.y - zone.y);
+    if (state.poopPresent) {
+      var spongeRect = spongeEl.getBoundingClientRect();
+      var spongeCenter = { x: spongeRect.left + spongeRect.width / 2, y: spongeRect.top + spongeRect.height / 2 };
+      var zone = petCleanZoneCenter();
+      var dist = Math.hypot(spongeCenter.x - zone.x, spongeCenter.y - zone.y);
       if (dist <= zone.radius) {
         state.input.draggingItemId = null;
         spongeEl.classList.remove("dragging");
@@ -2263,191 +1420,82 @@
     }
   });
 
-  spongeEl.addEventListener("pointerup", () => {
+  spongeEl.addEventListener("pointerup", function () {
     if (state.input.draggingItemId !== spongeEl.id) return;
     state.input.draggingItemId = null;
     spongeEl.classList.remove("dragging");
     snapSpongeBack();
   });
 
-  spongeEl.addEventListener("pointercancel", () => {
+  spongeEl.addEventListener("pointercancel", function () {
     if (state.input.draggingItemId !== spongeEl.id) return;
     state.input.draggingItemId = null;
     spongeEl.classList.remove("dragging");
     snapSpongeBack();
-  });
-
-  // ============================================================
-  // BONUS ROUND — Flappy-style interlude, triggered by landing a combo
-  // ============================================================
-
-  function startBonusRound() {
-    if (state.bonusRound.active) return;
-    if (performance.now() < bonusCooldownUntil) return;
-    const br = state.bonusRound;
-    br.active = true;
-    br.birdY = 80;
-    br.birdVel = 0;
-    br.pipes = [];
-    br.elapsed = 0;
-    br.nextPipeIn = 900;
-    bonusHint.textContent = "BONUS! TAP TO FLAP";
-    bonusOverlay.style.display = "";
-    sfxBonusStart();
-    renderBonusRound();
-  }
-
-  function flapBonusBird() {
-    if (!state.bonusRound.active) return;
-    state.bonusRound.birdVel = BONUS_FLAP_VELOCITY;
-    sfxBounce();
-  }
-
-  function endBonusRound(success) {
-    state.bonusRound.active = false;
-    bonusOverlay.style.display = "none";
-    bonusCooldownUntil = performance.now() + BONUS_COOLDOWN_MS;
-    const bonus = success ? BONUS_SUCCESS_HAPPY : BONUS_FAIL_HAPPY;
-    applyDeltas({ happy: bonus });
-    renderMeters();
-    if (success) sfxBonusWin(); else sfxBonusMiss();
-    popText(comboPopEl, success ? "+" + bonus + " BONUS!" : "NICE TRY +" + bonus);
-  }
-
-  function tickBonusRound(dt) {
-    const br = state.bonusRound;
-    br.elapsed += dt * 1000;
-    br.birdVel += BONUS_GRAVITY * dt;
-    br.birdY += br.birdVel * dt;
-
-    br.nextPipeIn -= dt * 1000;
-    if (br.nextPipeIn <= 0) {
-      br.nextPipeIn = BONUS_PIPE_INTERVAL_MS;
-      br.pipes.push({ x: bonusCanvas.width, gapCenter: jitter(40, bonusCanvas.height - 40) });
-    }
-    br.pipes.forEach((p) => { p.x -= BONUS_PIPE_SPEED * dt; });
-    br.pipes = br.pipes.filter((p) => p.x > -BONUS_PIPE_WIDTH);
-
-    let hit = br.birdY - BONUS_BIRD_R < 0 || br.birdY + BONUS_BIRD_R > bonusCanvas.height;
-    br.pipes.forEach((p) => {
-      if (BONUS_BIRD_X + BONUS_BIRD_R > p.x && BONUS_BIRD_X - BONUS_BIRD_R < p.x + BONUS_PIPE_WIDTH) {
-        if (br.birdY < p.gapCenter - BONUS_PIPE_GAP / 2 || br.birdY > p.gapCenter + BONUS_PIPE_GAP / 2) hit = true;
-      }
-    });
-
-    renderBonusRound();
-
-    if (hit) { endBonusRound(false); return; }
-    if (br.elapsed >= BONUS_DURATION_MS) { endBonusRound(true); }
-  }
-
-  function renderBonusRound() {
-    const ctx = clearCanvas(bonusCanvas);
-    const br = state.bonusRound;
-    ctx.fillStyle = "#CFEFFF";
-    ctx.fillRect(0, 0, bonusCanvas.width, bonusCanvas.height);
-    ctx.fillStyle = "#4DE0C4";
-    br.pipes.forEach((p) => {
-      ctx.fillRect(p.x, 0, BONUS_PIPE_WIDTH, p.gapCenter - BONUS_PIPE_GAP / 2);
-      ctx.fillRect(p.x, p.gapCenter + BONUS_PIPE_GAP / 2, BONUS_PIPE_WIDTH, bonusCanvas.height - (p.gapCenter + BONUS_PIPE_GAP / 2));
-    });
-    ctx.fillStyle = state.petColor;
-    ctx.strokeStyle = "#4A2E55";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.arc(BONUS_BIRD_X, br.birdY, BONUS_BIRD_R, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.stroke();
-  }
-
-  bonusOverlay.addEventListener("pointerdown", (e) => {
-    ensureAudioContext();
-    e.preventDefault();
-    flapBonusBird();
   });
 
   // ============================================================
   // HAND TRACKING — optional additive input layer (webcam gestures)
   //
   // Touch stays the default, reliable input; this only ever runs after the
-  // player opts in on the Start screen, and any failure (no camera, no
-  // internet, model load error) just leaves hand tracking off — it never
-  // blocks or degrades the touch game. Gestures call the exact same action
-  // functions touch uses (resolveFoodEaten, registerPlayTap, beginPetPress/
-  // releasePetPress, resolveDisciplineCall, cleanPoop, flapBonusBird) so
-  // there's one source of truth for what each action does.
-  //
-  // Simplification vs. the brainstormed spatial mapping (pinch-and-carry-
-  // to-mouth, wipe-across-the-poop): with no on-screen crosshair for a
-  // booth player to aim a webcam hand with, gestures here are recognized by
-  // *shape and motion* alone, not by where on screen the hand appears.
+  // player opts in, and any failure (no camera, no internet, model load
+  // error) just leaves hand tracking off — it never blocks or degrades the
+  // touch game. Gestures call the exact same action functions touch uses.
   // ============================================================
 
-  const HAND_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
-  const HAND_VISION_BASE = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+  var HAND_MODEL_URL = "https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task";
+  var HAND_VISION_BASE = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
 
-  const PINCH_RATIO_THRESHOLD = 0.62;
-  const FINGER_EXTENDED_RATIO = 1.15;
-  const OPEN_PALM_MIN_FINGERS = 3;
-  const GESTURE_COOLDOWN_MS = 500;
-  const PINCH_COOLDOWN_MS = 700;
-  const WIPE_COOLDOWN_MS = 500;
-  const FLICK_COOLDOWN_MS = 180;
-  const OPEN_PRESS_MIN_DWELL_MS = 120;
-  const STROKE_MIN_PATH = 0.035;
-  const WIPE_VX_THRESHOLD = 2.4;
-  const FLICK_VY_THRESHOLD = -2.2;
-  const HAND_HISTORY_WINDOW_MS = 400;
+  var PINCH_RATIO_THRESHOLD = 0.62;
+  var FINGER_EXTENDED_RATIO = 1.15;
+  var OPEN_PALM_MIN_FINGERS = 3;
+  var GESTURE_COOLDOWN_MS = 500;
+  var PINCH_COOLDOWN_MS = 700;
+  var WIPE_COOLDOWN_MS = 500;
+  var OPEN_PRESS_MIN_DWELL_MS = 120;
+  var STROKE_MIN_PATH = 0.035;
+  var WIPE_VX_THRESHOLD = 2.4;
+  var HAND_HISTORY_WINDOW_MS = 400;
 
-  const handTrack = {
-    enabled: false,
-    loading: false,
-    video: null,
-    stream: null,
-    landmarker: null,
-    lastVideoTs: -1,
-    history: [],
-    wasPinching: false,
-    wasFist: false,
-    wasPointing: false,
-    pressEngaged: false,
-    openDwellStart: null,
-    lastGestureAt: { feed: 0, play: 0, scold: 0, clean: 0, flap: 0 },
+  var handTrack = {
+    enabled: false, loading: false, video: null, stream: null, landmarker: null,
+    lastVideoTs: -1, history: [], wasPinching: false, wasFist: false, wasPointing: false,
+    pressEngaged: false, openDwellStart: null,
+    lastGestureAt: { feed: 0, play: 0, scold: 0, clean: 0 },
   };
 
-  const handtrackBtn = document.getElementById("handtrack-btn");
-  const handtrackStatus = document.getElementById("handtrack-status");
-  const handtrackPreview = document.getElementById("handtrack-preview");
-  const handtrackOverlay = document.getElementById("handtrack-overlay");
-  const handtrackLabel = document.getElementById("handtrack-label");
+  var handtrackBtn = document.getElementById("handtrack-btn");
+  var handtrackStatus = document.getElementById("handtrack-status");
+  var handtrackPreview = document.getElementById("handtrack-preview");
+  var handtrackOverlay = document.getElementById("handtrack-overlay");
+  var handtrackLabel = document.getElementById("handtrack-label");
 
   function setHandTrackStatus(text) { handtrackStatus.textContent = text; }
   function setGestureLabel(text) { if (handtrackLabel.textContent !== text) handtrackLabel.textContent = text; }
 
-  // classify one hand's 21 landmarks into the shapes gestures are built from
   function classifyHandGesture(landmarks) {
-    const wrist = landmarks[0];
-    const dist2 = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
-    const scale = Math.max(dist2(landmarks[0], landmarks[9]), 0.001);
+    var wrist = landmarks[0];
+    var dist2 = function (a, b) { return Math.hypot(a.x - b.x, a.y - b.y); };
+    var scale = Math.max(dist2(landmarks[0], landmarks[9]), 0.001);
 
-    const fingerJoints = { index: [6, 8], middle: [10, 12], ring: [14, 16], pinky: [18, 20] };
-    const extended = {};
-    Object.keys(fingerJoints).forEach((name) => {
-      const [pip, tip] = fingerJoints[name];
+    var fingerJoints = { index: [6, 8], middle: [10, 12], ring: [14, 16], pinky: [18, 20] };
+    var extended = {};
+    Object.keys(fingerJoints).forEach(function (name) {
+      var pip = fingerJoints[name][0], tip = fingerJoints[name][1];
       extended[name] = dist2(wrist, landmarks[tip]) > dist2(wrist, landmarks[pip]) * FINGER_EXTENDED_RATIO;
     });
-    const opennessCount = Object.values(extended).filter(Boolean).length;
+    var opennessCount = Object.values(extended).filter(Boolean).length;
 
-    const pinchRatio = dist2(landmarks[4], landmarks[8]) / scale;
+    var pinchRatio = dist2(landmarks[4], landmarks[8]) / scale;
 
-    const palm = {
+    var palm = {
       x: (landmarks[0].x + landmarks[5].x + landmarks[9].x + landmarks[13].x + landmarks[17].x) / 5,
       y: (landmarks[0].y + landmarks[5].y + landmarks[9].y + landmarks[13].y + landmarks[17].y) / 5,
     };
 
     return {
-      palm,
-      opennessCount,
+      palm: palm,
+      opennessCount: opennessCount,
       isPinching: pinchRatio < PINCH_RATIO_THRESHOLD,
       isFist: opennessCount === 0,
       isOpenPalm: opennessCount >= OPEN_PALM_MIN_FINGERS,
@@ -2459,7 +1507,7 @@
     if (!handTrack.pressEngaged) return;
     handTrack.pressEngaged = false;
     handTrack.openDwellStart = null;
-    if (state.screen === "play") releasePetPress();
+    releasePetPress();
   }
 
   function onHandResult(landmarks, nowMs) {
@@ -2473,18 +1521,17 @@
       return;
     }
 
-    const g = classifyHandGesture(landmarks);
+    var g = classifyHandGesture(landmarks);
     handTrack.history.push({ t: nowMs, x: g.palm.x, y: g.palm.y });
-    handTrack.history = handTrack.history.filter((s) => nowMs - s.t <= HAND_HISTORY_WINDOW_MS);
+    handTrack.history = handTrack.history.filter(function (s) { return nowMs - s.t <= HAND_HISTORY_WINDOW_MS; });
 
-    let vx = 0, vy = 0, pathLen = 0;
+    var vx = 0, pathLen = 0;
     if (handTrack.history.length >= 2) {
-      const first = handTrack.history[0];
-      const last = handTrack.history[handTrack.history.length - 1];
-      const dt = Math.max((last.t - first.t) / 1000, 0.001);
+      var first = handTrack.history[0];
+      var last = handTrack.history[handTrack.history.length - 1];
+      var dt = Math.max((last.t - first.t) / 1000, 0.001);
       vx = (last.x - first.x) / dt;
-      vy = (last.y - first.y) / dt;
-      for (let i = 1; i < handTrack.history.length; i++) {
+      for (var i = 1; i < handTrack.history.length; i++) {
         pathLen += Math.hypot(
           handTrack.history[i].x - handTrack.history[i - 1].x,
           handTrack.history[i].y - handTrack.history[i - 1].y
@@ -2492,70 +1539,48 @@
       }
     }
 
-    let label = "";
+    var label = "";
 
-    // during the bonus round, only the upward-flick "flap" gesture matters
-    if (state.screen === "play" && state.bonusRound.active) {
-      if (vy < FLICK_VY_THRESHOLD && nowMs - handTrack.lastGestureAt.flap > FLICK_COOLDOWN_MS) {
-        flapBonusBird();
-        handTrack.lastGestureAt.flap = nowMs;
-        label = "FLAP";
-      }
-      setGestureLabel(label);
-      handTrack.wasPinching = g.isPinching;
-      handTrack.wasFist = g.isFist;
-      handTrack.wasPointing = g.isPointing;
-      return;
+    if (g.isPinching && !handTrack.wasPinching && !state.input.draggingItemId &&
+        nowMs - handTrack.lastGestureAt.feed > PINCH_COOLDOWN_MS) {
+      resolveFoodEaten();
+      handTrack.lastGestureAt.feed = nowMs;
+      label = "FEED";
     }
 
-    if (state.screen === "play" && !state.bonusRound.active) {
-      // FEED — a fresh pinch (thumb+index come together)
-      if (g.isPinching && !handTrack.wasPinching && !state.input.draggingItemId &&
-          nowMs - handTrack.lastGestureAt.feed > PINCH_COOLDOWN_MS) {
-        resolveFoodEaten();
-        handTrack.lastGestureAt.feed = nowMs;
-        label = "FEED";
-      }
+    if (!label && g.isFist && !handTrack.wasFist && !handTrack.pressEngaged &&
+        nowMs - handTrack.lastGestureAt.play > GESTURE_COOLDOWN_MS) {
+      registerPlayTap();
+      handTrack.lastGestureAt.play = nowMs;
+      label = "PLAY";
+    }
 
-      // PLAY — a fresh fist (quick clench, not mid open-palm press)
-      if (!label && g.isFist && !handTrack.wasFist && !handTrack.pressEngaged &&
-          nowMs - handTrack.lastGestureAt.play > GESTURE_COOLDOWN_MS) {
-        registerPlayTap();
-        handTrack.lastGestureAt.play = nowMs;
-        label = "PLAY";
-      }
+    if (!label && g.isPointing && !handTrack.wasPointing && state.events.callActive &&
+        nowMs - handTrack.lastGestureAt.scold > GESTURE_COOLDOWN_MS) {
+      resolveDisciplineCall();
+      handTrack.lastGestureAt.scold = nowMs;
+      label = "SCOLD";
+    }
 
-      // DISCIPLINE — a fresh pointing finger, only meaningful during an active call
-      if (!label && g.isPointing && !handTrack.wasPointing && state.events.callActive &&
-          nowMs - handTrack.lastGestureAt.scold > GESTURE_COOLDOWN_MS) {
-        resolveDisciplineCall();
-        handTrack.lastGestureAt.scold = nowMs;
-        label = "SCOLD";
-      }
+    if (!label && state.poopPresent && g.opennessCount >= 2 && Math.abs(vx) > WIPE_VX_THRESHOLD &&
+        nowMs - handTrack.lastGestureAt.clean > WIPE_COOLDOWN_MS) {
+      cleanPoop();
+      handTrack.lastGestureAt.clean = nowMs;
+      label = "CLEAN";
+    }
 
-      // CLEAN — a fast lateral wipe with an open-ish hand, poop present
-      if (!label && state.poopPresent && g.opennessCount >= 2 && Math.abs(vx) > WIPE_VX_THRESHOLD &&
-          nowMs - handTrack.lastGestureAt.clean > WIPE_COOLDOWN_MS) {
-        cleanPoop();
-        handTrack.lastGestureAt.clean = nowMs;
-        label = "CLEAN";
+    if (g.isOpenPalm) {
+      if (handTrack.openDwellStart === null) handTrack.openDwellStart = nowMs;
+      if (!handTrack.pressEngaged &&
+          nowMs - handTrack.openDwellStart >= OPEN_PRESS_MIN_DWELL_MS &&
+          pathLen >= STROKE_MIN_PATH) {
+        handTrack.pressEngaged = true;
+        beginPetPress();
       }
-
-      // SLEEP — open palm held with a little stroking wiggle; reuses the exact
-      // press/hold machinery touch uses, so tap-vs-hold timing stays identical
-      if (g.isOpenPalm) {
-        if (handTrack.openDwellStart === null) handTrack.openDwellStart = nowMs;
-        if (!handTrack.pressEngaged &&
-            nowMs - handTrack.openDwellStart >= OPEN_PRESS_MIN_DWELL_MS &&
-            pathLen >= STROKE_MIN_PATH) {
-          handTrack.pressEngaged = true;
-          beginPetPress();
-        }
-        if (handTrack.pressEngaged && !label) label = "PET";
-      } else {
-        handTrack.openDwellStart = null;
-        endGesturePressIfActive();
-      }
+      if (handTrack.pressEngaged && !label) label = "PET";
+    } else {
+      handTrack.openDwellStart = null;
+      endGesturePressIfActive();
     }
 
     handTrack.wasPinching = g.isPinching;
@@ -2565,11 +1590,11 @@
   }
 
   function drawHandOverlay(landmarks) {
-    const ctx = handtrackOverlay.getContext("2d");
+    var ctx = handtrackOverlay.getContext("2d");
     ctx.clearRect(0, 0, handtrackOverlay.width, handtrackOverlay.height);
     if (!landmarks) return;
     ctx.fillStyle = "#FF6FB5";
-    landmarks.forEach((lm) => {
+    landmarks.forEach(function (lm) {
       ctx.beginPath();
       ctx.arc(lm.x * handtrackOverlay.width, lm.y * handtrackOverlay.height, 2, 0, Math.PI * 2);
       ctx.fill();
@@ -2578,13 +1603,13 @@
 
   function handTrackLoop() {
     if (!handTrack.enabled) return;
-    const video = handTrack.video;
+    var video = handTrack.video;
     if (video && video.readyState >= 2 && video.currentTime !== handTrack.lastVideoTs) {
       handTrack.lastVideoTs = video.currentTime;
-      const nowMs = performance.now();
-      let landmarks = null;
+      var nowMs = performance.now();
+      var landmarks = null;
       try {
-        const result = handTrack.landmarker.detectForVideo(video, nowMs);
+        var result = handTrack.landmarker.detectForVideo(video, nowMs);
         landmarks = result && result.landmarks && result.landmarks[0] ? result.landmarks[0] : null;
       } catch (err) { /* a stray detection failure shouldn't kill the loop */ }
       drawHandOverlay(landmarks);
@@ -2593,77 +1618,69 @@
     requestAnimationFrame(handTrackLoop);
   }
 
-  async function enableHandTracking() {
+  function enableHandTracking() {
     if (handTrack.loading || handTrack.enabled) return;
     handTrack.loading = true;
     setHandTrackStatus("starting camera...");
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: 320, height: 240 }, audio: false,
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "user", width: 320, height: 240 }, audio: false })
+      .then(function (stream) {
+        var video = document.getElementById("handtrack-video");
+        video.srcObject = stream;
+        return video.play().then(function () {
+          setHandTrackStatus("loading hand model...");
+          return import(HAND_VISION_BASE + "/vision_bundle.mjs").then(function (visionModule) {
+            return visionModule.FilesetResolver.forVisionTasks(HAND_VISION_BASE + "/wasm").then(function (filesetResolver) {
+              return visionModule.HandLandmarker.createFromOptions(filesetResolver, {
+                baseOptions: { modelAssetPath: HAND_MODEL_URL, delegate: "GPU" },
+                runningMode: "VIDEO", numHands: 1,
+              }).catch(function () {
+                return visionModule.HandLandmarker.createFromOptions(filesetResolver, {
+                  baseOptions: { modelAssetPath: HAND_MODEL_URL, delegate: "CPU" },
+                  runningMode: "VIDEO", numHands: 1,
+                });
+              });
+            });
+          }).then(function (landmarker) {
+            stream.getTracks().forEach(function (track) { track.onended = disableHandTracking; });
+            handTrack.stream = stream;
+            handTrack.video = video;
+            handTrack.landmarker = landmarker;
+            handTrack.enabled = true;
+            handTrack.loading = false;
+            handtrackPreview.style.display = "";
+            handtrackBtn.textContent = "🖐 HAND TRACKING: ON";
+            setHandTrackStatus("pinch=feed · palm=pet · fist=play · point=scold · swipe=clean");
+            requestAnimationFrame(handTrackLoop);
+          });
+        });
+      })
+      .catch(function (err) {
+        handTrack.loading = false;
+        handTrack.enabled = false;
+        setHandTrackStatus("unavailable (needs camera + internet)");
+        console.warn("Hand tracking unavailable:", err);
       });
-      const video = document.getElementById("handtrack-video");
-      video.srcObject = stream;
-      await video.play();
-
-      setHandTrackStatus("loading hand model...");
-      const visionModule = await import(HAND_VISION_BASE + "/vision_bundle.mjs");
-      const filesetResolver = await visionModule.FilesetResolver.forVisionTasks(HAND_VISION_BASE + "/wasm");
-      let landmarker;
-      try {
-        landmarker = await visionModule.HandLandmarker.createFromOptions(filesetResolver, {
-          baseOptions: { modelAssetPath: HAND_MODEL_URL, delegate: "GPU" },
-          runningMode: "VIDEO",
-          numHands: 1,
-        });
-      } catch (gpuErr) {
-        // some booth hardware won't have GPU delegate support — fall back to CPU
-        landmarker = await visionModule.HandLandmarker.createFromOptions(filesetResolver, {
-          baseOptions: { modelAssetPath: HAND_MODEL_URL, delegate: "CPU" },
-          runningMode: "VIDEO",
-          numHands: 1,
-        });
-      }
-
-      stream.getTracks().forEach((track) => { track.onended = disableHandTracking; });
-
-      handTrack.stream = stream;
-      handTrack.video = video;
-      handTrack.landmarker = landmarker;
-      handTrack.enabled = true;
-      handTrack.loading = false;
-
-      handtrackPreview.style.display = "";
-      handtrackBtn.textContent = "🖐 HAND TRACKING: ON";
-      setHandTrackStatus("pinch=feed · palm=pet · fist=play · point=scold (during a call) · swipe=clean");
-      requestAnimationFrame(handTrackLoop);
-    } catch (err) {
-      handTrack.loading = false;
-      handTrack.enabled = false;
-      setHandTrackStatus("unavailable (needs camera + internet)");
-      console.warn("Hand tracking unavailable:", err);
-    }
   }
 
   function disableHandTracking() {
     handTrack.enabled = false;
     handTrack.loading = false;
     endGesturePressIfActive();
-    if (handTrack.stream) handTrack.stream.getTracks().forEach((t) => { t.onended = null; t.stop(); });
+    if (handTrack.stream) handTrack.stream.getTracks().forEach(function (t) { t.onended = null; t.stop(); });
     handTrack.stream = null;
     handTrack.landmarker = null;
     handtrackPreview.style.display = "none";
-    handtrackBtn.textContent = "🖐 HAND TRACKING (BETA)";
+    handtrackBtn.textContent = "🖐 HAND TRACKING";
     setHandTrackStatus("");
     setGestureLabel("");
   }
 
-  handtrackBtn.addEventListener("click", () => {
-    ensureAudioContext();
-    if (handTrack.enabled) disableHandTracking();
-    else enableHandTracking();
+  handtrackBtn.addEventListener("click", function () {
+    PetAudio.ensureContext();
+    if (handTrack.enabled) disableHandTracking(); else enableHandTracking();
   });
 
-  handtrackPreview.addEventListener("pointerdown", (e) => {
+  handtrackPreview.addEventListener("pointerdown", function (e) {
     e.preventDefault();
     e.stopPropagation();
     disableHandTracking();
@@ -2673,55 +1690,25 @@
   // GAME LOOP
   // ============================================================
 
-  let lastFrameTime = null;
+  function tickBeat(now) {
+    if (state.beat === "attention") checkAttentionCallTimeout(now);
+    if (state.beat === "bedtime") checkBedtimeTimeout(now);
+  }
 
-  function frame(ts) {
-    if (lastFrameTime === null) lastFrameTime = ts;
-    const dt = Math.min((ts - lastFrameTime) / 1000, 0.25);
-    lastFrameTime = ts;
-    const now = performance.now();
-
-    if (state.screen === "play" && state.bonusRound.active) {
-      tickBonusRound(dt);
-    } else if (state.screen === "play") {
-      if (state.input.pressStart !== null && !state.input.holding) {
-        if (now - state.input.pressStart >= HOLD_THRESHOLD_MS) {
-          state.input.holding = true;
-          if (state.events.bedtimeActive) beginSleepResponse();
-        }
-      }
-
-      const deltas = {
-        hunger: -DECAY_PER_SEC.hunger * dt,
-        happy: -DECAY_PER_SEC.happy * dt,
-      };
-      if (state.poopPresent && (now - state.poopSpawnedAt) >= POOP_UNCLEANED_HAPPY_THRESHOLD_MS) {
-        deltas.happy -= POOP_HAPPY_DRAIN_PER_SEC * dt;
-      }
-      applyDeltas(deltas);
-
-      state.survivalTime += dt;
-
+  function frame() {
+    var now = performance.now();
+    if (state.beat === "clean" && state.poopPresent && (now - state.poopSpawnedAt) >= POOP_UNCLEANED_HAPPY_THRESHOLD_MS) {
+      applyDeltas({ happy: -POOP_HAPPY_DRAIN_PER_SEC * 0.016 });
       renderMeters();
-      renderTimer();
-      sampleCareAccum();
-      updateGrowthStage();
-
-      const nightPaused = state.events.nightBeatUntil && now < state.events.nightBeatUntil;
-      if (!nightPaused) {
-        tickAttentionCallScheduler(now);
-        checkAttentionCallTimeout(now);
-        tickPoopScheduler(now);
-        tickSicknessScheduler(now);
-      }
-      checkSicknessProgress(now);
-      if (state.screen !== "play") { requestAnimationFrame(frame); return; }
-      checkBedtimeTimeout(now);
-
-      renderPet();
-      checkEndConditions(now);
     }
-
+    if (state.input.pressStart !== null && !state.input.holding) {
+      if (now - state.input.pressStart >= HOLD_THRESHOLD_MS) {
+        state.input.holding = true;
+        if (state.events.bedtimeActive) beginSleepResponse();
+      }
+    }
+    tickBeat(now);
+    renderPet();
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
@@ -2730,87 +1717,44 @@
   // UI WIRING
   // ============================================================
 
-  let legendAdvanceTimer = null;
-  let legendAdvanced = false;
-
-  function advanceFromLegend() {
-    if (legendAdvanced) return;
-    legendAdvanced = true;
-    if (legendAdvanceTimer) { clearTimeout(legendAdvanceTimer); legendAdvanceTimer = null; }
-    hatchLegendView.removeEventListener("pointerdown", advanceFromLegend);
-    showScreen("play");
-    resetRunState();
-  }
-
-  document.getElementById("hatch-btn").addEventListener("click", () => {
-    ensureAudioContext();
-    state.petName = petNameInput.value.trim().slice(0, 10).toUpperCase();
-
-    hatchCrackView.style.display = "";
-    hatchLegendView.style.display = "none";
-    const eggWrap = hatchCrackView.querySelector(".egg-canvas-wrap");
-    eggWrap.classList.remove("egg-flash");
-    drawEgg(eggCanvasHatch);
-    showScreen("hatching");
-
-    setTimeout(() => eggWrap.classList.add("egg-flash"), 1150);
-    setTimeout(() => {
-      hatchCrackView.style.display = "none";
-      hatchLegendView.style.display = "";
-      document.querySelectorAll(".legend-icon").forEach((c) => drawIcon(c, c.dataset.icon));
-
-      legendAdvanced = false;
-      hatchLegendView.addEventListener("pointerdown", advanceFromLegend);
-      legendAdvanceTimer = setTimeout(advanceFromLegend, LEGEND_FALLBACK_MS);
-    }, 1500);
-  });
-
-  document.getElementById("again-btn").addEventListener("click", () => {
-    resetRunState();
-    showScreen("start");
-  });
-
-  document.getElementById("save-score-btn").addEventListener("click", () => {
-    const raw = nameInput.value.trim().slice(0, 12).toUpperCase();
-    commitScore(raw || "ANON");
-  });
-
-  document.getElementById("skip-score-btn").addEventListener("click", () => {
-    commitScore("ANON");
-  });
-
-  muteBtn.addEventListener("click", () => {
-    const next = !state.audio.muted;
-    ensureAudioContext();
-    setMuted(next);
+  muteBtn.addEventListener("click", function () {
+    var next = !PetAudio.isMuted();
+    PetAudio.ensureContext();
+    PetAudio.setMuted(next);
     muteBtn.textContent = next ? "M" : "S";
     muteBtn.setAttribute("aria-pressed", String(next));
   });
 
-  // Staff-only leaderboard reset: long-press the leaderboard title.
-  let clearTimer = null;
-  function startClearTimer() {
-    clearTimer = setTimeout(() => {
-      if (window.confirm("Clear the leaderboard? (staff only)")) {
-        saveLeaderboard([]);
-        renderLeaderboard();
-      }
-    }, 1500);
-  }
-  function cancelClearTimer() { if (clearTimer) { clearTimeout(clearTimer); clearTimer = null; } }
-  leaderboardTitle.addEventListener("pointerdown", startClearTimer);
-  leaderboardTitle.addEventListener("pointerup", cancelClearTimer);
-  leaderboardTitle.addEventListener("pointerleave", cancelClearTimer);
+  plazaBtn.addEventListener("click", function () {
+    persist();
+    location.href = "index.html";
+  });
 
   // ============================================================
   // INIT
   // ============================================================
 
-  drawEgg(eggCanvasStart);
   drawIcon(spongeCanvas, "sponge");
-  resetRunState();
-  renderLeaderboard();
-  showScreen("start");
+  positionFoodAtSpawn();
+  positionSpongeAtSpawn();
+  renderMeters();
+  renderHudTags();
+  renderPet();
+
+  var isFirstVisit = record.visits.home === 0;
+  if (isFirstVisit) {
+    showScreen("hatching");
+    var eggWrap = hatchCrackView.querySelector(".egg-canvas-wrap");
+    drawEgg(eggCanvasHatch);
+    setTimeout(function () { eggWrap.classList.add("egg-flash"); }, 900);
+    setTimeout(function () {
+      showScreen("play");
+      enterBeat(INTERACTION_SEQUENCE[0]);
+    }, 1500);
+  } else {
+    showScreen("play");
+    enterBeat(INTERACTION_SEQUENCE[0]);
+  }
 })();
 </script>
 </body>

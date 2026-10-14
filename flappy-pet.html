@@ -3,22 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Flappy Pet</title>
+<title>Flappy Sky — Tamagotchi Plaza</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐦</text></svg>">
+<link rel="stylesheet" href="css/pet-tokens.css">
 <style>
-  @font-face {
-    font-family: "Press Start 2P";
-    src: url("fonts/PressStart2P-Regular.ttf") format("truetype");
-    font-display: swap;
-  }
-  :root {
-    --shell-pink:#FFD6E8; --shell-lavender:#E3D4FF; --shell-blue:#CFEFFF;
-    --cream:#FFF8F2; --accent:#FF5FA2; --gold:#FFD873; --ink:#4A2E55;
-    --screen-bg:#EAFBFF; --px-pink:#FF6FB5; --px-gold:#FFCB3D;
-    --px-purple:#B98AFF; --px-mint:#4DE0C4; --px-outline:#4A2E55;
-    --font-shell:"Baloo 2","Trebuchet MS","Comic Sans MS",cursive,sans-serif;
-    --font-screen:"Press Start 2P",monospace;
-  }
   *,*::before,*::after{box-sizing:border-box}
   html,body{margin:0;padding:0;height:100%;overflow:hidden}
   body{font-family:var(--font-shell);color:var(--ink);background:var(--cream);display:flex;align-items:center;justify-content:center}
@@ -60,20 +48,6 @@
   .px-btn-ghost{background:var(--screen-bg)}
   .px-btn:focus-visible{outline:3px solid var(--px-purple);outline-offset:2px}
 
-  /* pet pick */
-  #screen-pick{padding:10px 8px;justify-content:flex-start}
-  .pick-header{font-size:.52rem;margin:0 0 8px}
-  .pet-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;width:100%;margin-bottom:10px}
-  .pet-card{
-    display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 2px;
-    border:2px solid var(--px-outline);border-radius:8px;background:white;
-    cursor:pointer;touch-action:manipulation;font-size:.28rem;line-height:1.3;
-  }
-  .pet-card .pe{font-size:1.25rem}
-  .pet-card:hover,.pet-card:focus-visible{background:#FFF5B0}
-  .pet-card.selected{background:var(--px-gold);border-color:var(--px-pink);outline:3px solid var(--px-purple)}
-  .pet-card:active{transform:translateY(1px)}
-
   /* game screen */
   #screen-game{padding:0;justify-content:flex-start}
   #game-hud{
@@ -84,7 +58,7 @@
   #game-canvas{width:100%;height:100%;display:block}
 
   /* menu pet bounce */
-  #menu-pet{font-size:3rem;animation:petFly 1.4s ease-in-out infinite}
+  #menu-pet-canvas{animation:petFly 1.4s ease-in-out infinite}
   @keyframes petFly{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-12px) rotate(8deg)}}
 
   /* result */
@@ -93,7 +67,7 @@
   .stat-row{display:flex;justify-content:space-between;width:100%;max-width:200px;font-size:.42rem;padding:5px 0;border-bottom:1px dashed rgba(74,46,85,.25)}
   .stat-row:last-of-type{border-bottom:none}
   .new-best{color:var(--px-pink);font-size:.38rem;margin-top:4px}
-  .btn-row{display:flex;gap:8px;margin-top:10px}
+  .btn-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;justify-content:center}
 
   @media(min-width:900px) and (min-height:800px){
     #shell{width:min(90vw,560px);height:min(92vh,860px);padding:30px 26px 22px}
@@ -104,30 +78,22 @@
 </head>
 <body>
 <div id="shell">
-  <div class="shell-nameplate">✧ Flappy Pet ✧</div>
+  <div class="shell-nameplate">✧ Flappy Sky ✧</div>
   <div id="lcd-screen">
 
     <!-- MENU -->
     <div id="screen-menu" class="screen active">
-      <div id="menu-pet">🐦</div>
-      <p class="px-title">FLAPPY<br>PET</p>
+      <canvas id="menu-pet-canvas" width="64" height="64"></canvas>
+      <p class="px-title">FLAPPY<br>SKY</p>
       <p class="px-body">Tap to flap!<br>Dodge the pipes.</p>
       <button class="px-btn" id="btn-play">▶ PLAY</button>
       <p class="px-small">SPACE · tap · click</p>
-    </div>
-
-    <!-- PET PICK -->
-    <div id="screen-pick" class="screen">
-      <p class="pick-header">PICK YOUR PET</p>
-      <div class="pet-grid" id="pet-grid"></div>
-      <button class="px-btn" id="btn-start">FLY! ▶</button>
     </div>
 
     <!-- GAME -->
     <div id="screen-game" class="screen">
       <div id="game-hud">
         <span id="hud-score">0</span>
-        <span id="hud-pet">🐦</span>
         <span id="hud-best">BEST: 0</span>
       </div>
       <div id="game-canvas-wrap">
@@ -141,11 +107,11 @@
       <p class="px-title">GAME OVER</p>
       <div class="stat-row"><span>SCORE</span><span id="over-score">0</span></div>
       <div class="stat-row"><span>BEST</span><span id="over-best">0</span></div>
-      <div class="stat-row"><span>COINS</span><span id="over-coins">+0</span></div>
+      <div class="stat-row"><span>POINTS</span><span id="over-points">+0</span></div>
       <p class="new-best" id="new-best" style="display:none">🏆 NEW BEST!</p>
       <div class="btn-row">
         <button class="px-btn" id="btn-retry">↺ RETRY</button>
-        <button class="px-btn px-btn-ghost" id="btn-menu">MENU</button>
+        <button class="px-btn px-btn-ghost" id="btn-plaza">🏙️ PLAZA</button>
       </div>
     </div>
 
@@ -155,61 +121,65 @@
   </div>
 </div>
 
+<script src="js/pet-save.js"></script>
+<script src="js/vendor/howler.min.js"></script>
+<script src="js/pet-audio.js"></script>
+<script src="js/pet-render.js"></script>
+<script src="js/vendor/three.min.js"></script>
+<script src="js/pet-render-3d.js"></script>
 <script>
 (function(){
 'use strict';
 
-const PETS=[
-  {emoji:'🐶',name:'DOG'},{emoji:'🐱',name:'CAT'},{emoji:'🐰',name:'RABBIT'},
-  {emoji:'🐸',name:'FROG'},{emoji:'🐣',name:'CHICK'},{emoji:'🐻',name:'BEAR'},
-  {emoji:'🐼',name:'PANDA'},{emoji:'🦊',name:'FOX'},{emoji:'🐯',name:'TIGER'},
-  {emoji:'🦁',name:'LION'},{emoji:'🐧',name:'PENGUIN'},{emoji:'🐨',name:'KOALA'},
-  {emoji:'🦆',name:'DUCK'},{emoji:'🦄',name:'UNICORN'},{emoji:'🐢',name:'TURTLE'},
-];
+// ── Active pet — this location never runs without a save loaded via the Plaza ──
+var activeKey = sessionStorage.getItem("active-pet-key");
+var record = activeKey ? PetSave.load(activeKey) : null;
+if (!record) { location.href = "index.html"; return; }
 
-// ── Audio ──────────────────────────────────────────────────────────────────────
-let AC=null;
-function getAC(){
-  if(!AC) AC=new(window.AudioContext||window.webkitAudioContext)();
-  if(AC.state==='suspended') AC.resume();
-  return AC;
+function equippedCosmetics(){ return Object.values(record.appearance.cosmetics.equipped).filter(Boolean); }
+
+// pre-render the player's real persistent pet once (appearance doesn't change
+// mid-round) — the flying sprite is drawn from this offscreen canvas instead
+// of the old per-round emoji pick. Real 3D voxel model when available
+// (forDrawImageReadback:true sets preserveDrawingBuffer so the drawImage()
+// compositing below actually sees the rendered frame instead of a blank one);
+// falls back to the flat pixel-art render if WebGL isn't available.
+var petSpriteCanvas = document.createElement('canvas');
+petSpriteCanvas.width = 64; petSpriteCanvas.height = 64;
+function renderPetSprite(){
+  var opts = {
+    stage: record.appearance.growthStage,
+    form: record.appearance.form,
+    baseColor: record.appearance.petColor,
+    cosmetics: equippedCosmetics(),
+  };
+  var used3D = typeof PetRender3D !== 'undefined' && PetRender3D.isAvailable() &&
+    PetRender3D.renderToCanvas(petSpriteCanvas, Object.assign({ forDrawImageReadback: true }, opts));
+  if (!used3D) PetRender.renderPet(petSpriteCanvas, opts);
 }
-function tone(freq,type,dur,vol,delay=0){
-  try{
-    const a=getAC(),o=a.createOscillator(),g=a.createGain();
-    o.connect(g);g.connect(a.destination);
-    o.type=type; o.frequency.setValueAtTime(freq,a.currentTime+delay);
-    g.gain.setValueAtTime(vol,a.currentTime+delay);
-    g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+delay+dur);
-    o.start(a.currentTime+delay); o.stop(a.currentTime+delay+dur+.02);
-  }catch(_){}
-}
-function sfxFlap(){ tone(380,'square',.07,.15); }
-function sfxPoint(){ tone(660,'triangle',.12,.2); tone(880,'triangle',.1,.2,.08); }
+renderPetSprite();
+
+// ── Audio (shared) ──────────────────────────────────────────────────────────────
+function sfxFlap(){ PetAudio.playSample('flap', function(){ PetAudio.tone(380,90,{type:'square',peakGain:.15}); }); }
+function sfxPoint(){ PetAudio.tone(660,120,{type:'triangle',peakGain:.2}); PetAudio.tone(880,100,{type:'triangle',peakGain:.2,delayMs:80}); }
 function sfxDie(){
-  tone(300,'sawtooth',.06,.3);
-  tone(200,'sawtooth',.12,.3,.06);
-  tone(100,'sawtooth',.25,.3,.16);
+  PetAudio.tone(300,60,{type:'sawtooth',peakGain:.3});
+  PetAudio.tone(200,120,{type:'sawtooth',peakGain:.3,delayMs:60});
+  PetAudio.tone(100,250,{type:'sawtooth',peakGain:.3,delayMs:160});
 }
-function sfxMilestone(){ // every 10 points
-  [[523,.0],[784,.12],[1047,.24]].forEach(([f,d])=>tone(f,'square',.15,.28,d));
-}
+function sfxMilestone(){ PetAudio.playSample('win', function(){ [[523,0],[784,120],[1047,240]].forEach(function(pair){ PetAudio.tone(pair[0],150,{type:'square',peakGain:.28,delayMs:pair[1]}); }); }); }
 
 // ── State ──────────────────────────────────────────────────────────────────────
-let chosenPet=PETS[0];
 let gs=null; // game state
 
 // ── DOM ────────────────────────────────────────────────────────────────────────
 const screens={
   menu:  document.getElementById('screen-menu'),
-  pick:  document.getElementById('screen-pick'),
   game:  document.getElementById('screen-game'),
   over:  document.getElementById('screen-over'),
 };
-const menuPet    = document.getElementById('menu-pet');
-const petGrid    = document.getElementById('pet-grid');
+const menuPetCanvas = document.getElementById('menu-pet-canvas');
 const hudScore   = document.getElementById('hud-score');
-const hudPet     = document.getElementById('hud-pet');
 const hudBest    = document.getElementById('hud-best');
 const canvas     = document.getElementById('game-canvas');
 const canvasWrap = document.getElementById('game-canvas-wrap');
@@ -219,40 +189,30 @@ function showScreen(n){Object.values(screens).forEach(s=>s.classList.remove('act
 function getBest(){return parseInt(localStorage.getItem('flappy_best')||'0',10)}
 function setBest(v){try{localStorage.setItem('flappy_best',v)}catch(_){}}
 
+(function renderMenuPet(){
+  var opts = {
+    stage: record.appearance.growthStage,
+    form: record.appearance.form,
+    baseColor: record.appearance.petColor,
+    cosmetics: equippedCosmetics(),
+  };
+  var used3D = typeof PetRender3D !== 'undefined' && PetRender3D.isAvailable() && PetRender3D.renderToCanvas(menuPetCanvas, opts);
+  if (!used3D) PetRender.renderPet(menuPetCanvas, opts);
+})();
+
 // ── Menu ───────────────────────────────────────────────────────────────────────
 document.getElementById('btn-play').addEventListener('click',()=>{
-  buildGrid(); showScreen('pick');
-});
-document.getElementById('btn-menu').addEventListener('click',()=>{
-  menuPet.textContent=chosenPet.emoji; showScreen('menu');
-});
-
-// ── Pet pick ───────────────────────────────────────────────────────────────────
-function buildGrid(){
-  petGrid.innerHTML='';
-  PETS.forEach((pet,i)=>{
-    const btn=document.createElement('button');
-    btn.className='pet-card'+(pet===chosenPet?' selected':'');
-    btn.innerHTML=`<span class="pe">${pet.emoji}</span>${pet.name}`;
-    btn.addEventListener('click',()=>{
-      chosenPet=pet;
-      Array.from(petGrid.children).forEach(c=>c.classList.remove('selected'));
-      btn.classList.add('selected');
-    });
-    petGrid.appendChild(btn);
-  });
-}
-
-document.getElementById('btn-start').addEventListener('click',()=>{
-  hudPet.textContent=chosenPet.emoji;
   hudBest.textContent='BEST: '+getBest();
-  menuPet.textContent=chosenPet.emoji;
   showScreen('game');
   requestAnimationFrame(()=>{
     resizeCanvas();
     initGame();
     requestAnimationFrame(loop);
   });
+});
+
+document.getElementById('btn-plaza').addEventListener('click',()=>{
+  location.href='index.html';
 });
 
 document.getElementById('btn-retry').addEventListener('click',()=>{
@@ -321,7 +281,7 @@ function initClouds(W,H){
 // ── Flap ───────────────────────────────────────────────────────────────────────
 function flap(){
   if(!gs||gs.pet.dead) return;
-  getAC(); // unlock audio
+  PetAudio.ensureContext(); // unlock audio
   if(!gs.started){ gs.started=true; gs.frame=0; } // reset frame so first pipe spawns at a full interval
   gs.pet.vy=FLAP_VEL;
   gs.pet.flapFrame=10;
@@ -491,14 +451,16 @@ function draw(){
     const fScale=1+p.flapFrame/10*.15;
     ctx.scale(fScale,1/fScale);
   }
-  ctx.font=`${PET_R*2.1}px serif`;
-  ctx.textAlign='center';
-  ctx.textBaseline='middle';
   if(p.dead){
+    ctx.font=`${PET_R*2.1}px serif`;
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
     ctx.globalAlpha=0.7;
     ctx.fillText('💥',0,0);
+    ctx.globalAlpha=1;
   } else {
-    ctx.fillText(chosenPet.emoji,0,0);
+    const s=PET_R*2.4;
+    ctx.drawImage(petSpriteCanvas, -s/2, -s/2, s, s);
   }
   ctx.restore();
   ctx.globalAlpha=1;
@@ -574,16 +536,23 @@ function showGameOver(){
   const isNew=score>prev;
   if(isNew) setBest(score);
   const best=isNew?score:prev;
-  const coins=score*5;
 
-  document.getElementById('over-pet').textContent=chosenPet.emoji;
+  // pay into the shared persistent pet: 2 points per pipe cleared, plus a
+  // care signal scaled against a "good run" benchmark of 20 pipes — a
+  // first-pass tuning constant, same as the rest of this project's numbers
+  const points = score*2;
+  const careDelta = Math.max(0, Math.min(1, score/20));
+  record = PetSave.awardPoints(activeKey, points, { location:'sky', reason:'flappy score '+score, careDelta });
+
   document.getElementById('over-score').textContent=score;
   document.getElementById('over-best').textContent=best;
-  document.getElementById('over-coins').textContent='+'+coins;
+  document.getElementById('over-points').textContent='+'+points;
   const nb=document.getElementById('new-best');
   nb.style.display=isNew?'block':'none';
   hudBest.textContent='BEST: '+best;
   showScreen('over');
+
+  sessionStorage.setItem('pet-plaza-flash', JSON.stringify({ location:'sky', points, note:'flappy score '+score }));
 }
 
 })();

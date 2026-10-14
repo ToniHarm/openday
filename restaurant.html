@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Restaurant — Tamagotchi Plaza</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍕</text></svg>">
+<link rel="stylesheet" href="css/pet-tokens.css">
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden}
+  body{font-family:var(--font-shell);color:var(--ink);background:var(--cream);display:flex;align-items:center;justify-content:center}
+
+  #shell{
+    position:relative;width:min(94vw,480px);height:min(94vh,780px);
+    background:linear-gradient(160deg,var(--shell-pink),var(--shell-lavender) 55%,var(--shell-blue));
+    border-radius:46% 46% 40% 40%/30% 30% 24% 24%;
+    box-shadow:10px 10px 0 rgba(74,46,85,.28),0 0 0 6px rgba(255,255,255,.35) inset;
+    display:flex;flex-direction:column;align-items:center;padding:26px 20px 18px;isolation:isolate;
+  }
+  .shell-nameplate{
+    font-family:var(--font-shell);font-weight:700;font-size:1rem;letter-spacing:.04em;
+    color:var(--ink);text-align:center;margin-bottom:12px;text-shadow:1px 1px 0 rgba(255,255,255,.6);
+  }
+  #lcd-screen{
+    position:relative;flex:0 1 570px;min-height:0;width:min(78%,360px);
+    background:var(--screen-bg);border-radius:18px;
+    box-shadow:0 0 0 8px var(--ink),inset 0 0 14px rgba(74,46,85,.25);overflow:hidden;
+  }
+  .abc-buttons{display:flex;gap:22px;margin-top:16px}
+  .abc-btn{
+    width:34px;height:34px;border-radius:50%;background:var(--accent);
+    box-shadow:0 4px 0 rgba(74,46,85,.3);display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-shell);font-weight:700;font-size:.75rem;color:white;user-select:none;
+  }
+
+  .screen{display:none;position:absolute;inset:0;flex-direction:column;align-items:center;justify-content:center;padding:16px;text-align:center;font-family:var(--font-screen);color:var(--px-outline)}
+  .screen.active{display:flex}
+  .px-title{font-size:.85rem;line-height:1.6;margin:0 0 10px}
+  .px-body{font-size:.5rem;line-height:2;margin-bottom:12px}
+  .px-small{font-size:.4rem;line-height:1.8;margin-top:8px;opacity:.75}
+  .px-btn{
+    font-family:var(--font-screen);font-size:.58rem;padding:10px 16px;min-height:44px;min-width:44px;
+    border-radius:10px;border:3px solid var(--px-outline);background:var(--px-gold);
+    color:var(--px-outline);cursor:pointer;touch-action:manipulation;
+  }
+  .px-btn:active{transform:translateY(2px)}
+  .px-btn-ghost{background:var(--screen-bg)}
+  .px-btn:focus-visible{outline:3px solid var(--px-purple);outline-offset:2px}
+  #menu-emoji{font-size:3rem;margin-bottom:6px;animation:menuBounce 1.4s ease-in-out infinite}
+  @keyframes menuBounce{0%,100%{transform:translateY(0) rotate(-6deg)}50%{transform:translateY(-8px) rotate(6deg)}}
+
+  /* game screen */
+  #screen-game{padding:8px;justify-content:flex-start}
+  #game-hud{width:100%;display:flex;justify-content:space-between;align-items:center;font-size:.42rem;margin-bottom:6px}
+
+  .order-ticket{
+    width:100%;background:white;border:3px solid var(--px-outline);border-radius:12px;
+    padding:8px 10px;display:flex;align-items:center;gap:10px;margin-bottom:8px;
+  }
+  #customer-canvas{width:40px;height:40px;flex-shrink:0}
+  .order-info{flex:1;text-align:left}
+  .order-req{display:flex;gap:4px;margin-bottom:4px}
+  .order-req span{font-size:1.1rem}
+  .order-timer-bar{height:6px;border-radius:4px;background:#eee;overflow:hidden;border:1px solid var(--px-outline)}
+  .order-timer-fill{height:100%;background:var(--px-mint);transition:width .1s linear,background .2s}
+  .order-timer-fill.danger{background:var(--px-pink)}
+
+  #pizza-area{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;position:relative;width:100%}
+  #pizza-base{
+    width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,#FFE0A3 0%,#F0C878 75%,#D8A85C 100%);
+    border:4px solid var(--px-outline);display:flex;flex-wrap:wrap;align-items:center;justify-content:center;
+    align-content:center;gap:2px;padding:14px;font-size:1.4rem;
+  }
+  #pizza-empty-label{font-size:.4rem;color:var(--px-outline);opacity:.6}
+  .serve-flash{
+    position:absolute;top:10%;left:50%;transform:translate(-50%,-50%) scale(.6);
+    font-family:var(--font-screen);font-size:.7rem;color:var(--px-outline);
+    background:var(--cream);border:3px solid var(--px-outline);border-radius:12px;padding:8px 14px;
+    opacity:0;pointer-events:none;white-space:nowrap;z-index:10;
+  }
+  .serve-flash.show{animation:servePop 1s ease forwards}
+  @keyframes servePop{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}
+    20%{opacity:1;transform:translate(-50%,-50%) scale(1.08)}
+    80%{opacity:1}
+    100%{opacity:0;transform:translate(-50%,-60%) scale(1)}
+  }
+
+  #topping-tray{width:100%;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:8px 0}
+  .topping-btn{
+    display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;
+    border:2px solid var(--px-outline);border-radius:10px;background:white;
+    cursor:pointer;touch-action:manipulation;font-size:.32rem;line-height:1.3;
+  }
+  .topping-btn .te{font-size:1.4rem}
+  .topping-btn.active{background:var(--px-gold);border-color:var(--px-pink);outline:2px solid var(--px-purple)}
+  .topping-btn:active{transform:translateY(1px)}
+
+  #serve-btn{width:100%;font-size:.65rem;padding:12px}
+
+  /* game over */
+  .stat-row{display:flex;justify-content:space-between;width:100%;max-width:220px;font-size:.42rem;padding:5px 0;border-bottom:1px dashed rgba(74,46,85,.25)}
+  .stat-row:last-of-type{border-bottom:none}
+  .btn-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;justify-content:center}
+
+  @media(min-width:900px) and (min-height:800px){
+    #shell{width:min(90vw,560px);height:min(92vh,860px);padding:30px 26px 22px}
+    #lcd-screen{width:min(80%,420px);flex-basis:640px}
+  }
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+</style>
+</head>
+<body>
+<div id="shell">
+  <div class="shell-nameplate">✧ Restaurant ✧</div>
+  <div id="lcd-screen">
+
+    <!-- MENU -->
+    <div id="screen-menu" class="screen active">
+      <div id="menu-emoji">🍕</div>
+      <p class="px-title">RESTAURANT</p>
+      <p class="px-body">Read each order &amp;<br>tap the right toppings!<br><br>Match toppings exactly<br>for a big tip.</p>
+      <button class="px-btn" id="btn-play">▶ OPEN UP</button>
+    </div>
+
+    <!-- GAME -->
+    <div id="screen-game" class="screen">
+      <div id="game-hud">
+        <span id="hud-served">ORDERS 0</span>
+        <span id="hud-timer">60s</span>
+        <span id="hud-points">0 PTS</span>
+      </div>
+
+      <div class="order-ticket">
+        <canvas id="customer-canvas" width="40" height="40"></canvas>
+        <div class="order-info">
+          <div class="order-req" id="order-req"></div>
+          <div class="order-timer-bar"><div class="order-timer-fill" id="order-timer-fill"></div></div>
+        </div>
+      </div>
+
+      <div id="pizza-area">
+        <div id="pizza-base"><span id="pizza-empty-label">plain</span></div>
+        <div class="serve-flash" id="serve-flash">+0</div>
+      </div>
+
+      <div id="topping-tray"></div>
+      <button class="px-btn" id="serve-btn">🍽️ SERVE!</button>
+    </div>
+
+    <!-- GAME OVER -->
+    <div id="screen-over" class="screen">
+      <div style="font-size:2.2rem;margin-bottom:6px;">🧑‍🍳</div>
+      <p class="px-title">SHOP'S CLOSED!</p>
+      <div class="stat-row"><span>ORDERS SERVED</span><span id="over-served">0</span></div>
+      <div class="stat-row"><span>AVG MATCH</span><span id="over-match">0%</span></div>
+      <div class="stat-row"><span>POINTS</span><span id="over-points">+0</span></div>
+      <div class="btn-row">
+        <button class="px-btn" id="btn-retry">↺ RETRY</button>
+        <button class="px-btn px-btn-ghost" id="btn-plaza">🏙️ PLAZA</button>
+      </div>
+    </div>
+
+  </div>
+  <div class="abc-buttons">
+    <div class="abc-btn">A</div><div class="abc-btn">B</div><div class="abc-btn">C</div>
+  </div>
+</div>
+
+<script src="js/pet-save.js"></script>
+<script src="js/vendor/howler.min.js"></script>
+<script src="js/pet-audio.js"></script>
+<script src="js/pet-render.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  // ── Active pet — this location never runs without a save loaded via the Plaza ──
+  var activeKey = sessionStorage.getItem("active-pet-key");
+  var record = activeKey ? PetSave.load(activeKey) : null;
+  if (!record) { location.href = "index.html"; return; }
+
+  var TOPPINGS = [
+    { id: "mush", emoji: "🍄", name: "MUSHROOM" },
+    { id: "pep", emoji: "🫑", name: "PEPPER" },
+    { id: "pine", emoji: "🍍", name: "PINEAPPLE" },
+    { id: "bacon", emoji: "🥓", name: "BACON" },
+    { id: "olive", emoji: "🫒", name: "OLIVE" },
+    { id: "chili", emoji: "🌶️", name: "CHILI" },
+  ];
+  var TOPPING_BY_ID = {};
+  TOPPINGS.forEach(function (t) { TOPPING_BY_ID[t.id] = t; });
+
+  var CUSTOMERS = ["🐱", "🐶", "🦊", "🐰", "🐸", "🐻", "🐼", "🦁", "🐧", "🐢"];
+
+  var ROUND_TIME_S = 60;
+  var ORDER_TIME_S = 14;
+
+  function sfxServeGood() { PetAudio.playSample("serveGood", function () { [523, 659, 784, 1046].forEach(function (f, i) { PetAudio.tone(f, 120, { type: "triangle", delayMs: i * 80, peakGain: 0.4 }); }); }); }
+  function sfxServeOk() { PetAudio.tone(600, 120, { type: "triangle", peakGain: 0.35 }); }
+  function sfxServeBad() { PetAudio.playSample("error", function () { PetAudio.tone(220, 200, { type: "sawtooth", endFreq: 140, peakGain: 0.3 }); }); }
+  function sfxTick() { PetAudio.tone(700, 60, { type: "square", peakGain: 0.15 }); }
+  function sfxTap() { PetAudio.playSample("select", function () { PetAudio.tone(440, 50, { type: "square", peakGain: 0.15 }); }); }
+
+  var screens = {
+    menu: document.getElementById("screen-menu"),
+    game: document.getElementById("screen-game"),
+    over: document.getElementById("screen-over"),
+  };
+  function showScreen(n) { Object.values(screens).forEach(function (s) { s.classList.remove("active"); }); screens[n].classList.add("active"); }
+
+  var customerCanvas = document.getElementById("customer-canvas");
+  var orderReqEl = document.getElementById("order-req");
+  var orderTimerFill = document.getElementById("order-timer-fill");
+  var pizzaBase = document.getElementById("pizza-base");
+  var pizzaEmptyLabel = document.getElementById("pizza-empty-label");
+  var toppingTray = document.getElementById("topping-tray");
+  var hudServed = document.getElementById("hud-served");
+  var hudTimer = document.getElementById("hud-timer");
+  var hudPoints = document.getElementById("hud-points");
+  var serveFlash = document.getElementById("serve-flash");
+
+  var gs = null;
+
+  function buildToppingTray() {
+    toppingTray.innerHTML = "";
+    TOPPINGS.forEach(function (t) {
+      var btn = document.createElement("button");
+      btn.className = "topping-btn";
+      btn.dataset.id = t.id;
+      btn.innerHTML = '<span class="te">' + t.emoji + '</span>' + t.name;
+      btn.addEventListener("click", function () { toggleTopping(t.id); });
+      toppingTray.appendChild(btn);
+    });
+  }
+  buildToppingTray();
+
+  function toggleTopping(id) {
+    if (!gs || !gs.active) return;
+    PetAudio.ensureContext();
+    sfxTap();
+    if (gs.pizza.has(id)) gs.pizza.delete(id); else gs.pizza.add(id);
+    renderPizza();
+  }
+
+  function renderPizza() {
+    pizzaBase.querySelectorAll(".topping-emoji").forEach(function (el) { el.remove(); });
+    pizzaEmptyLabel.style.display = gs.pizza.size === 0 ? "" : "none";
+    gs.pizza.forEach(function (id) {
+      var span = document.createElement("span");
+      span.className = "topping-emoji";
+      span.textContent = TOPPING_BY_ID[id].emoji;
+      pizzaBase.appendChild(span);
+    });
+    toppingTray.querySelectorAll(".topping-btn").forEach(function (btn) {
+      btn.classList.toggle("active", gs.pizza.has(btn.dataset.id));
+    });
+  }
+
+  function randomOrder(prevIds) {
+    var count = Math.random() < 0.35 ? 1 : Math.random() < 0.75 ? 2 : 3;
+    var pool = TOPPINGS.map(function (t) { return t.id; });
+    var picked = [];
+    while (picked.length < count && pool.length) {
+      var idx = Math.floor(Math.random() * pool.length);
+      picked.push(pool.splice(idx, 1)[0]);
+    }
+    var key = picked.slice().sort().join(",");
+    if (prevIds && key === prevIds && pool.length) return randomOrder(prevIds);
+    return picked;
+  }
+
+  function nextOrder() {
+    var prevKey = gs.order ? gs.order.required.slice().sort().join(",") : null;
+    var required = randomOrder(prevKey);
+    gs.order = { required: required, startedAt: performance.now() };
+    gs.pizza = new Set();
+    renderPizza();
+
+    orderReqEl.innerHTML = "";
+    required.forEach(function (id) {
+      var span = document.createElement("span");
+      span.textContent = TOPPING_BY_ID[id].emoji;
+      orderReqEl.appendChild(span);
+    });
+
+    var customer = CUSTOMERS[Math.floor(Math.random() * CUSTOMERS.length)];
+    var cctx = customerCanvas.getContext("2d");
+    cctx.clearRect(0, 0, 40, 40);
+    cctx.font = "30px serif";
+    cctx.textAlign = "center";
+    cctx.textBaseline = "middle";
+    cctx.fillText(customer, 20, 22);
+  }
+
+  function matchRatio(pizzaSet, required) {
+    var reqSet = new Set(required);
+    var union = new Set([...pizzaSet, ...reqSet]);
+    if (union.size === 0) return 1;
+    var intersect = 0;
+    union.forEach(function (id) { if (pizzaSet.has(id) && reqSet.has(id)) intersect++; });
+    return intersect / union.size;
+  }
+
+  function popServeFlash(text) {
+    serveFlash.textContent = text;
+    serveFlash.classList.remove("show");
+    void serveFlash.offsetWidth;
+    serveFlash.classList.add("show");
+  }
+
+  function serveOrder(timedOut) {
+    if (!gs || !gs.active) return;
+    var ratio = timedOut ? 0 : matchRatio(gs.pizza, gs.order.required);
+    var pts = timedOut ? 0 : Math.round(ratio * 20) + (ratio === 1 ? 5 : 0);
+    gs.ordersServed++;
+    gs.totalMatch += ratio;
+    gs.points += pts;
+    hudPoints.textContent = gs.points + " PTS";
+    hudServed.textContent = "ORDERS " + gs.ordersServed;
+
+    if (timedOut) { sfxServeBad(); popServeFlash("MISSED!"); }
+    else if (ratio === 1) { sfxServeGood(); popServeFlash("PERFECT! +" + pts); }
+    else if (ratio >= 0.5) { sfxServeOk(); popServeFlash("OK +" + pts); }
+    else { sfxServeBad(); popServeFlash("MISSED +" + pts); }
+
+    if (gs.active) nextOrder();
+  }
+
+  document.getElementById("serve-btn").addEventListener("click", function () {
+    PetAudio.ensureContext();
+    serveOrder(false);
+  });
+
+  function tick() {
+    if (!gs || !gs.active) return;
+    var now = performance.now();
+
+    var roundLeft = Math.max(0, Math.ceil((gs.roundEnd - now) / 1000));
+    hudTimer.textContent = roundLeft + "s";
+    if (roundLeft <= 0) { endRound(); return; }
+
+    var orderElapsed = now - gs.order.startedAt;
+    var orderPct = Math.max(0, 1 - orderElapsed / (ORDER_TIME_S * 1000));
+    orderTimerFill.style.width = (orderPct * 100) + "%";
+    orderTimerFill.classList.toggle("danger", orderPct < 0.3);
+    if (orderPct <= 0 && !gs.orderTimedOutHandled) {
+      gs.orderTimedOutHandled = true;
+      serveOrder(true);
+    }
+    if (orderPct > 0) gs.orderTimedOutHandled = false;
+
+    requestAnimationFrame(tick);
+  }
+
+  function startGame() {
+    gs = { active: true, ordersServed: 0, totalMatch: 0, points: 0, pizza: new Set(), order: null, orderTimedOutHandled: false, roundEnd: performance.now() + ROUND_TIME_S * 1000 };
+    hudServed.textContent = "ORDERS 0";
+    hudPoints.textContent = "0 PTS";
+    hudTimer.textContent = ROUND_TIME_S + "s";
+    showScreen("game");
+    nextOrder();
+    requestAnimationFrame(tick);
+  }
+
+  function endRound() {
+    gs.active = false;
+    var avgMatch = gs.ordersServed ? gs.totalMatch / gs.ordersServed : 0;
+    var careDelta = avgMatch;
+    record = PetSave.awardPoints(activeKey, gs.points, { location: "restaurant", reason: gs.ordersServed + " orders served", careDelta: careDelta });
+
+    document.getElementById("over-served").textContent = gs.ordersServed;
+    document.getElementById("over-match").textContent = Math.round(avgMatch * 100) + "%";
+    document.getElementById("over-points").textContent = "+" + gs.points;
+    showScreen("over");
+
+    sessionStorage.setItem("pet-plaza-flash", JSON.stringify({ location: "restaurant", points: gs.points, note: gs.ordersServed + " orders served" }));
+  }
+
+  document.getElementById("btn-play").addEventListener("click", function () { PetAudio.ensureContext(); startGame(); });
+  document.getElementById("btn-retry").addEventListener("click", function () { startGame(); });
+  document.getElementById("btn-plaza").addEventListener("click", function () { location.href = "index.html"; });
+})();
+</script>
+</body>
+</html>

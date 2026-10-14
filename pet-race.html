@@ -3,22 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Pet Race</title>
+<title>Racetrack — Tamagotchi Plaza</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏆</text></svg>">
+<link rel="stylesheet" href="css/pet-tokens.css">
 <style>
-  @font-face {
-    font-family: "Press Start 2P";
-    src: url("fonts/PressStart2P-Regular.ttf") format("truetype");
-    font-display: swap;
-  }
-  :root {
-    --shell-pink:#FFD6E8; --shell-lavender:#E3D4FF; --shell-blue:#CFEFFF;
-    --cream:#FFF8F2; --accent:#FF5FA2; --gold:#FFD873; --ink:#4A2E55;
-    --screen-bg:#EAFBFF; --px-pink:#FF6FB5; --px-gold:#FFCB3D;
-    --px-purple:#B98AFF; --px-mint:#4DE0C4; --px-outline:#4A2E55;
-    --font-shell:"Baloo 2","Trebuchet MS","Comic Sans MS",cursive,sans-serif;
-    --font-screen:"Press Start 2P",monospace;
-  }
   *,*::before,*::after{box-sizing:border-box}
   html,body{margin:0;padding:0;height:100%;overflow:hidden}
   body{font-family:var(--font-shell);color:var(--ink);background:var(--cream);display:flex;align-items:center;justify-content:center}
@@ -65,15 +53,12 @@
   #screen-menu .trophy{font-size:3rem;margin-bottom:6px;animation:troTilt 2s ease-in-out infinite}
   @keyframes troTilt{0%,100%{transform:rotate(-8deg)}50%{transform:rotate(8deg)}}
   .mode-btns{display:flex;flex-direction:column;gap:10px;width:100%;max-width:200px;margin-top:4px}
+  #menu-pet-canvas{margin-bottom:2px}
 
   /* pet pick */
   #screen-pick{padding:10px 8px;justify-content:flex-start}
   .pick-header{font-size:.52rem;margin:0 0 6px}
   .pick-sub{font-size:.36rem;margin:0 0 6px;opacity:.75}
-  .player-chips{display:flex;gap:6px;margin-bottom:8px;font-size:.38rem}
-  .p-chip{padding:4px 8px;border-radius:20px;border:2px solid var(--px-outline);background:white}
-  .p-chip.filled{background:var(--px-gold)}
-  .p-chip.active{background:var(--px-purple);color:white}
   .pet-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;width:100%;margin-bottom:8px}
   .pet-card{
     display:flex;flex-direction:column;align-items:center;gap:1px;padding:4px 2px;
@@ -88,7 +73,7 @@
 
   /* countdown */
   #screen-countdown{gap:6px}
-  #countdown-pets{font-size:2.2rem;margin-bottom:4px}
+  #countdown-pets{display:flex;align-items:center;justify-content:center;gap:8px;font-size:1.6rem;margin-bottom:4px}
   #countdown-num{font-size:3rem;color:var(--px-pink);animation:countPop .4s ease}
   @keyframes countPop{0%{transform:scale(1.6);opacity:.5}100%{transform:scale(1);opacity:1}}
 
@@ -121,11 +106,12 @@
 
   /* result */
   #screen-result .winner-emoji{font-size:3.2rem;margin-bottom:4px;animation:winBounce .5s ease infinite alternate}
+  #screen-result canvas.winner-emoji{animation:winBounce .5s ease infinite alternate}
   @keyframes winBounce{0%{transform:scale(1)}100%{transform:scale(1.15)}}
   .result-row{display:flex;justify-content:space-between;width:100%;max-width:200px;font-size:.4rem;padding:5px 0;border-bottom:1px dashed rgba(74,46,85,.25)}
   .result-row:last-of-type{border-bottom:none}
   .result-reward{font-size:.45rem;color:var(--px-pink);margin:8px 0;line-height:2}
-  .btn-row{display:flex;gap:8px;margin-top:8px}
+  .btn-row{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;justify-content:center}
 
   @media(min-width:900px) and (min-height:800px){
     #shell{width:min(90vw,560px);height:min(92vh,860px);padding:30px 26px 22px}
@@ -136,33 +122,29 @@
 </head>
 <body>
 <div id="shell">
-  <div class="shell-nameplate">✧ Pet Race ✧</div>
+  <div class="shell-nameplate">✧ Racetrack ✧</div>
   <div id="lcd-screen">
 
     <!-- MENU -->
     <div id="screen-menu" class="screen active">
-      <div class="trophy">🏆</div>
-      <p class="px-title">PET RACE</p>
-      <p class="px-body">Pick your pet &amp; race<br>to the finish line!<br><br>🔥 Tap FAST for TURBO!</p>
+      <canvas id="menu-pet-canvas" width="56" height="56"></canvas>
+      <p class="px-title">RACETRACK</p>
+      <p class="px-body">Race to the finish line!<br><br>🔥 Tap FAST for TURBO!</p>
       <div class="mode-btns">
         <button class="px-btn" id="btn-2p">👥 2 PLAYERS</button>
         <button class="px-btn px-btn-ghost" id="btn-cpu">🤖 VS CPU</button>
       </div>
       <p class="px-small">
-        P1: Q A Z / SPACE (left keys)<br>
-        P2: P L M / ENTER (right keys)<br>
+        P1 (you): Q A Z / SPACE (left keys)<br>
+        P2 (friend): P L M / ENTER (right keys)<br>
         or TAP left / right on screen
       </p>
     </div>
 
-    <!-- PET PICK -->
+    <!-- PET PICK (opponent only — P1 is always your own pet) -->
     <div id="screen-pick" class="screen">
-      <p class="pick-header" id="pick-header">PICK YOUR PET</p>
-      <div class="player-chips" id="player-chips">
-        <div class="p-chip active" id="chip-p1">P1 ?</div>
-        <div class="p-chip"        id="chip-p2">P2 ?</div>
-      </div>
-      <p class="pick-sub" id="pick-sub">P1 — choose a pet</p>
+      <p class="pick-header" id="pick-header">PICK YOUR FRIEND'S PET</p>
+      <p class="pick-sub" id="pick-sub">P2 — choose a pet</p>
       <div class="pet-grid" id="pet-grid"></div>
       <div class="pick-done-row">
         <button class="px-btn"             id="btn-pick-ok">OK ▶</button>
@@ -172,7 +154,11 @@
 
     <!-- COUNTDOWN -->
     <div id="screen-countdown" class="screen">
-      <div id="countdown-pets"></div>
+      <div id="countdown-pets">
+        <canvas id="countdown-p1-canvas" width="48" height="48"></canvas>
+        <span>VS</span>
+        <span id="countdown-p2-emoji"></span>
+      </div>
       <p class="px-small">get ready…</p>
       <div id="countdown-num">3</div>
     </div>
@@ -201,15 +187,17 @@
 
     <!-- RESULT -->
     <div id="screen-result" class="screen">
-      <div class="winner-emoji" id="result-winner-emoji">🏆</div>
+      <span class="winner-emoji" id="result-winner-emoji">🏆</span>
+      <canvas class="winner-emoji" id="result-winner-pet-canvas" width="64" height="64" style="display:none;"></canvas>
       <p class="px-title" id="result-title">WINNER!</p>
       <div class="result-row"><span>WINNER</span><span id="res-winner">—</span></div>
       <div class="result-row"><span>P1 TAPS</span><span id="res-p1-taps">0</span></div>
       <div class="result-row"><span>P2 TAPS</span><span id="res-p2-taps">0</span></div>
-      <div class="result-reward" id="result-reward">+20 coins 😊</div>
+      <div class="result-row"><span>POINTS</span><span id="res-points">+0</span></div>
+      <div class="result-reward" id="result-reward">+20 pts 😊</div>
       <div class="btn-row">
         <button class="px-btn"             id="btn-rematch">↺ REMATCH</button>
-        <button class="px-btn px-btn-ghost" id="btn-res-menu">MENU</button>
+        <button class="px-btn px-btn-ghost" id="btn-plaza">🏙️ PLAZA</button>
       </div>
     </div>
 
@@ -219,9 +207,43 @@
   </div>
 </div>
 
+<script src="js/pet-save.js"></script>
+<script src="js/vendor/howler.min.js"></script>
+<script src="js/pet-audio.js"></script>
+<script src="js/pet-render.js"></script>
+<script src="js/vendor/three.min.js"></script>
+<script src="js/pet-render-3d.js"></script>
 <script>
 (function(){
 'use strict';
+
+// ── Active pet — this location never runs without a save loaded via the Plaza ──
+var activeKey = sessionStorage.getItem("active-pet-key");
+var record = activeKey ? PetSave.load(activeKey) : null;
+if (!record) { location.href = "index.html"; return; }
+
+function equippedCosmetics(){ return Object.values(record.appearance.cosmetics.equipped).filter(Boolean); }
+
+// real 3D voxel model when available (forDrawImageReadback keeps the drawing
+// buffer so drawImage() compositing elsewhere actually sees the frame — set
+// it only for canvases read that way, not ones displayed directly); falls
+// back to the flat pixel-art render if WebGL isn't available.
+function renderPetSmart(canvas, extraOpts){
+  var opts = Object.assign({
+    stage: record.appearance.growthStage,
+    form: record.appearance.form,
+    baseColor: record.appearance.petColor,
+    cosmetics: equippedCosmetics(),
+  }, extraOpts || {});
+  var used3D = typeof PetRender3D !== 'undefined' && PetRender3D.isAvailable() && PetRender3D.renderToCanvas(canvas, opts);
+  if (!used3D) PetRender.renderPet(canvas, opts);
+}
+
+// pre-render the player's real persistent pet once — P1 always races as this
+// pet; only the opponent (P2/CPU) still uses the fun ephemeral emoji picker
+var p1SpriteCanvas = document.createElement('canvas');
+p1SpriteCanvas.width = 64; p1SpriteCanvas.height = 64;
+renderPetSmart(p1SpriteCanvas, { forDrawImageReadback: true });
 
 const PETS=[
   {emoji:'🐶',name:'DOG'},
@@ -241,48 +263,39 @@ const PETS=[
   {emoji:'🐢',name:'TURTLE'},
 ];
 
-// ── Audio ──────────────────────────────────────────────────────────────────────
-let AC=null;
-function ac(){
-  if(!AC) AC=new(window.AudioContext||window.webkitAudioContext)();
-  if(AC.state==='suspended') AC.resume();
-  return AC;
-}
-function tone(freq,type,dur,vol,delay=0){
-  try{
-    const a=ac(),o=a.createOscillator(),g=a.createGain();
-    o.connect(g);g.connect(a.destination);
-    o.type=type; o.frequency.setValueAtTime(freq,a.currentTime+delay);
-    g.gain.setValueAtTime(vol,a.currentTime+delay);
-    g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+delay+dur);
-    o.start(a.currentTime+delay); o.stop(a.currentTime+delay+dur+.01);
-  }catch(_){}
-}
+// ── Audio (shared) ──────────────────────────────────────────────────────────────
 function sfxMash(player,isTurbo){
   const base=player==='p1'?480:380;
   const freq=isTurbo?base*1.6:base+(Math.random()*40-20);
   const vol=isTurbo?.3:.14;
-  tone(freq,'square',.05,vol);
+  var tone=function(){ PetAudio.tone(freq,50,{type:'square',peakGain:vol}); };
+  // real sample only for P1's own taps (a human's own mashing) — P2/CPU
+  // keeps the synthesized tone so the two players still sound distinct
+  if(player==='p1') PetAudio.playSample('mash',tone); else tone();
 }
 function sfxTurbo(){
-  tone(600,'sawtooth',.04,.2);
-  tone(900,'square',.08,.25,.05);
+  PetAudio.playSample('turbo', function(){
+    PetAudio.tone(600,40,{type:'sawtooth',peakGain:.2});
+    PetAudio.tone(900,80,{type:'square',peakGain:.25,delayMs:50});
+  });
 }
 function sfxCountdown(n){
-  tone(n===0?880:330,'triangle',n===0?.3:.12,.3);
+  PetAudio.tone(n===0?880:330,n===0?300:120,{type:'triangle',peakGain:.3});
 }
 function sfxWin(){
-  [[523,.0],[659,.13],[784,.26],[1047,.42],[1318,.58]].forEach(([f,d])=>tone(f,'square',.18,.3,d));
+  PetAudio.playSample('win', function(){
+    [[523,0],[659,130],[784,260],[1047,420],[1318,580]].forEach(function(pair){ PetAudio.tone(pair[0],180,{type:'square',peakGain:.3,delayMs:pair[1]}); });
+  });
 }
 function sfxTie(){
-  tone(440,'triangle',.3,.2); tone(440,'triangle',.3,.2,.35);
+  PetAudio.tone(440,300,{type:'triangle',peakGain:.2}); PetAudio.tone(440,300,{type:'triangle',peakGain:.2,delayMs:350});
 }
 function sfxNeckAndNeck(){
-  tone(700,'triangle',.08,.18); tone(700,'triangle',.08,.18,.12);
+  PetAudio.tone(700,80,{type:'triangle',peakGain:.18}); PetAudio.tone(700,80,{type:'triangle',peakGain:.18,delayMs:120});
 }
 
 // ── State ──────────────────────────────────────────────────────────────────────
-let mode='2p', pickStep=0, picks=[null,null], race=null;
+let mode='2p', opponentPick=null, race=null;
 
 // ── DOM ────────────────────────────────────────────────────────────────────────
 const screens={
@@ -293,12 +306,8 @@ const screens={
   result:document.getElementById('screen-result'),
 };
 const petGrid=document.getElementById('pet-grid');
-const pickHeader=document.getElementById('pick-header');
-const pickSub=document.getElementById('pick-sub');
-const chipP1=document.getElementById('chip-p1');
-const chipP2=document.getElementById('chip-p2');
-const playerChips=document.getElementById('player-chips');
-const countdownPets=document.getElementById('countdown-pets');
+const countdownP1Canvas=document.getElementById('countdown-p1-canvas');
+const countdownP2Emoji=document.getElementById('countdown-p2-emoji');
 const countdownNum=document.getElementById('countdown-num');
 const hudP1Label=document.getElementById('hud-p1-label');
 const hudP2Label=document.getElementById('hud-p2-label');
@@ -310,6 +319,9 @@ const raceWrap=document.getElementById('race-canvas-wrap');
 const rctx=raceCanvas.getContext('2d');
 const mashP1Btn=document.getElementById('mash-p1-btn');
 const mashP2Btn=document.getElementById('mash-p2-btn');
+const menuPetCanvas=document.getElementById('menu-pet-canvas');
+
+renderPetSmart(menuPetCanvas);
 
 function showScreen(name){
   Object.values(screens).forEach(s=>s.classList.remove('active'));
@@ -319,69 +331,44 @@ function rand(a,b){return a+Math.random()*(b-a)}
 
 // ── Menu ───────────────────────────────────────────────────────────────────────
 document.getElementById('btn-2p').addEventListener('click',()=>{mode='2p';beginPick()});
-document.getElementById('btn-cpu').addEventListener('click',()=>{mode='cpu';beginPick()});
+document.getElementById('btn-cpu').addEventListener('click',()=>{
+  mode='cpu';
+  opponentPick=Math.floor(Math.random()*PETS.length);
+  beginCountdown();
+});
 
-// ── Pet pick ───────────────────────────────────────────────────────────────────
+// ── Opponent pet pick (2P mode only — P1 is always your own pet) ───────────────
 function buildPetGrid(){
   petGrid.innerHTML='';
   PETS.forEach((pet,i)=>{
     const btn=document.createElement('button');
-    btn.className='pet-card';
+    btn.className='pet-card'+(opponentPick===i?' selected':'');
     btn.innerHTML=`<span class="pet-emoji">${pet.emoji}</span>${pet.name}`;
     btn.addEventListener('click',()=>selectPet(i));
     petGrid.appendChild(btn);
   });
 }
-function beginPick(){picks=[null,null];pickStep=0;buildPetGrid();refreshPickUI();showScreen('pick')}
-function refreshPickUI(){
-  if(mode==='cpu'){
-    playerChips.style.display='none';
-    pickHeader.textContent='PICK YOUR PET';
-    pickSub.textContent='P1 — choose a pet';
-  } else {
-    playerChips.style.display='flex';
-    pickHeader.textContent=pickStep===0?'P1 PICK PET':'P2 PICK PET';
-    pickSub.textContent=`P${pickStep+1} — choose a pet`;
-  }
-  chipP1.className='p-chip'+(picks[0]!==null?' filled':'')+(pickStep===0?' active':'');
-  chipP2.className='p-chip'+(picks[1]!==null?' filled':'')+(pickStep===1?' active':'');
-  chipP1.textContent=picks[0]!==null?`P1 ${PETS[picks[0]].emoji}`:'P1 ?';
-  chipP2.textContent=picks[1]!==null?`P2 ${PETS[picks[1]].emoji}`:'P2 ?';
-  Array.from(petGrid.children).forEach((c,i)=>c.classList.toggle('selected',picks[pickStep]===i));
-}
+function beginPick(){opponentPick=null;buildPetGrid();showScreen('pick')}
 function selectPet(idx){
-  picks[pickStep]=idx;
+  opponentPick=idx;
   Array.from(petGrid.children).forEach((c,i)=>c.classList.toggle('selected',i===idx));
-  chipP1.textContent=picks[0]!==null?`P1 ${PETS[picks[0]].emoji}`:'P1 ?';
-  chipP2.textContent=picks[1]!==null?`P2 ${PETS[picks[1]].emoji}`:'P2 ?';
-  chipP1.className='p-chip'+(picks[0]!==null?' filled':'')+(pickStep===0?' active':'');
-  chipP2.className='p-chip'+(picks[1]!==null?' filled':'')+(pickStep===1?' active':'');
 }
 document.getElementById('btn-pick-ok').addEventListener('click',()=>{
-  if(picks[pickStep]===null) return;
-  if(mode==='cpu'){
-    let cpu; do{cpu=Math.floor(Math.random()*PETS.length)}while(cpu===picks[0]&&PETS.length>1);
-    picks[1]=cpu; beginCountdown();
-  } else if(pickStep===0){
-    pickStep=1; picks[1]=null;
-    Array.from(petGrid.children).forEach(c=>c.classList.remove('selected'));
-    refreshPickUI();
-  } else {
-    beginCountdown();
-  }
+  if(opponentPick===null) return;
+  beginCountdown();
 });
 document.getElementById('btn-pick-back').addEventListener('click',()=>{
-  if(pickStep===1&&mode==='2p'){pickStep=0;refreshPickUI();}
-  else showScreen('menu');
+  showScreen('menu');
 });
 
 // ── Countdown ──────────────────────────────────────────────────────────────────
 function beginCountdown(){
-  countdownPets.textContent=`${PETS[picks[0]].emoji}  VS  ${PETS[picks[1]].emoji}`;
-  hudP1Label.textContent=`${PETS[picks[0]].emoji} P1`;
-  hudP2Label.textContent=mode==='cpu'?`${PETS[picks[1]].emoji} CPU`:`${PETS[picks[1]].emoji} P2`;
-  mashP1Btn.textContent=`${PETS[picks[0]].emoji} P1 TAP!`;
-  mashP2Btn.textContent=mode==='cpu'?`${PETS[picks[1]].emoji} CPU`:`${PETS[picks[1]].emoji} P2 TAP!`;
+  renderPetSmart(countdownP1Canvas);
+  countdownP2Emoji.textContent=PETS[opponentPick].emoji;
+  hudP1Label.textContent='P1 (you)';
+  hudP2Label.textContent=mode==='cpu'?`${PETS[opponentPick].emoji} CPU`:`${PETS[opponentPick].emoji} P2`;
+  mashP1Btn.textContent='P1 TAP!';
+  mashP2Btn.textContent=mode==='cpu'?`${PETS[opponentPick].emoji} CPU`:`${PETS[opponentPick].emoji} P2 TAP!`;
   mashP2Btn.disabled=mode==='cpu';
   showScreen('countdown');
   let n=3;
@@ -529,13 +516,14 @@ window.addEventListener('keydown',e=>{
   if(P2_KEYS.has(e.code)){e.preventDefault();if(mode!=='cpu')mash('p2')}
 });
 window.addEventListener('keyup',e=>{keysDown[e.code]=false});
-mashP1Btn.addEventListener('pointerdown',e=>{e.preventDefault();mash('p1')});
-mashP2Btn.addEventListener('pointerdown',e=>{e.preventDefault();if(mode!=='cpu')mash('p2')});
+mashP1Btn.addEventListener('pointerdown',e=>{e.preventDefault();PetAudio.ensureContext();mash('p1')});
+mashP2Btn.addEventListener('pointerdown',e=>{e.preventDefault();PetAudio.ensureContext();if(mode!=='cpu')mash('p2')});
 
 // canvas split-tap: left half = P1, right half = P2
 raceCanvas.addEventListener('pointerdown',e=>{
   if(!race||!race.running) return;
   e.preventDefault();
+  PetAudio.ensureContext();
   const rect=raceCanvas.getBoundingClientRect();
   const cx=(e.clientX-rect.left)*(raceCanvas.width/rect.width);
   if(cx<raceCanvas.width/2) mash('p1');
@@ -672,7 +660,7 @@ function drawRace(){
       rctx.globalAlpha=1;
     }
 
-    // pet emoji
+    // pet
     const bounce=p.bounceFrame>0?-8:0;
     const bob=Math.sin(race.frame*.4+i*Math.PI)*3;
     const lean=isTurbo?.2:0;
@@ -682,16 +670,26 @@ function drawRace(){
     rctx.translate(petX,cy+bounce+bob);
     rctx.rotate(lean);
     rctx.scale(scale,scale);
-    rctx.font=`${emojiS}px serif`;
-    rctx.textAlign='center';
-    rctx.textBaseline='middle';
 
-    if(p.finished&&race.winner){
-      rctx.fillText(PETS[picks[i]].emoji,0,0);
-      rctx.font='14px serif';
-      rctx.fillText('🎉',emojiS*.6,-emojiS*.5);
+    if(i===0){
+      // P1 — your real persistent pet, pre-rendered pixel sprite
+      const s=emojiS*1.15;
+      rctx.drawImage(p1SpriteCanvas,-s/2,-s/2,s,s);
+      if(p.finished&&race.winner){
+        rctx.font='14px serif';
+        rctx.textAlign='center'; rctx.textBaseline='middle';
+        rctx.fillText('🎉',s*.5,-s*.4);
+      }
     } else {
-      rctx.fillText(PETS[picks[i]].emoji,0,0);
+      // P2/CPU — the ephemeral opponent pet, still an emoji pick
+      rctx.font=`${emojiS}px serif`;
+      rctx.textAlign='center';
+      rctx.textBaseline='middle';
+      rctx.fillText(PETS[opponentPick].emoji,0,0);
+      if(p.finished&&race.winner){
+        rctx.font='14px serif';
+        rctx.fillText('🎉',emojiS*.6,-emojiS*.5);
+      }
     }
     rctx.restore();
 
@@ -792,13 +790,11 @@ function drawRace(){
   // winner banner
   if(race.winner){
     const p2label=mode==='cpu'?'CPU':'P2';
-    let bannerText,bannerEmoji;
+    let bannerText;
     if(race.winner==='tie'){
-      bannerEmoji='🤝'; bannerText="IT'S A TIE!";
+      bannerText="IT'S A TIE!";
     } else {
-      const wi=race.winner==='p1'?0:1;
       const wl=race.winner==='p1'?'P1':p2label;
-      bannerEmoji=PETS[picks[wi]].emoji;
       bannerText=`${wl} WINS!`;
     }
     // backdrop
@@ -808,44 +804,76 @@ function drawRace(){
     rctx.fillRect(0,H/2-48,W,4);
     rctx.fillRect(0,H/2+44,W,4);
 
-    rctx.textAlign='center';
-    rctx.textBaseline='middle';
-    rctx.font=`${32}px serif`;
-    rctx.fillText(bannerEmoji,W/2-52,H/2);
+    if(race.winner==='p1'){
+      const s=48;
+      rctx.drawImage(p1SpriteCanvas,W/2-52-s/2,H/2-s/2,s,s);
+    } else if(race.winner!=='tie'){
+      rctx.textAlign='center';
+      rctx.textBaseline='middle';
+      rctx.font=`${32}px serif`;
+      rctx.fillText(PETS[opponentPick].emoji,W/2-52,H/2);
+    } else {
+      rctx.textAlign='center';
+      rctx.textBaseline='middle';
+      rctx.font=`${32}px serif`;
+      rctx.fillText('🤝',W/2-52,H/2);
+    }
 
     rctx.fillStyle='#FF5FA2';
     rctx.font='bold 14px "Press Start 2P",monospace';
+    rctx.textAlign='center';
     rctx.fillText(bannerText,W/2+12,H/2-12);
 
     rctx.fillStyle='#4A2E55';
     rctx.font='7px "Press Start 2P",monospace';
-    rctx.fillText('🏆 +20 coins   😊 +happiness',W/2+12,H/2+10);
+    rctx.fillText('🏆 racing for points!',W/2+12,H/2+10);
   }
 }
 
 // ── Result ─────────────────────────────────────────────────────────────────────
 function showResult(){
   const p2label=mode==='cpu'?'CPU':'P2';
+  const emojiEl=document.getElementById('result-winner-emoji');
+  const petCanvasEl=document.getElementById('result-winner-pet-canvas');
+
+  // race outcome pays points into the shared save regardless of who wins —
+  // matches this project's no-fail philosophy (a loss still nets something)
+  let points, careDelta, verdict;
   if(race.winner==='tie'){
-    document.getElementById('result-winner-emoji').textContent='🤝';
+    points=15; careDelta=0.6; verdict='tied a race';
+    emojiEl.style.display=''; petCanvasEl.style.display='none';
+    emojiEl.textContent='🤝';
     document.getElementById('result-title').textContent="IT'S A TIE!";
     document.getElementById('res-winner').textContent='TIE!';
-    document.getElementById('result-reward').textContent='+10 coins each 😄';
+    document.getElementById('result-reward').textContent='+15 pts each 😄';
+  } else if(race.winner==='p1'){
+    points=25; careDelta=1; verdict='won a race';
+    emojiEl.style.display='none'; petCanvasEl.style.display='';
+    renderPetSmart(petCanvasEl);
+    document.getElementById('result-title').textContent='P1 WINS!';
+    document.getElementById('res-winner').textContent='P1 (you)';
+    document.getElementById('result-reward').textContent='+25 pts 😊';
   } else {
-    const wi=race.winner==='p1'?0:1;
-    const wl=race.winner==='p1'?'P1':p2label;
-    document.getElementById('result-winner-emoji').textContent=PETS[picks[wi]].emoji;
-    document.getElementById('result-title').textContent=`${wl} WINS!`;
-    document.getElementById('res-winner').textContent=`${PETS[picks[wi]].emoji} ${wl}`;
-    document.getElementById('result-reward').textContent='+20 coins 😊 +happiness';
+    points=10; careDelta=0.4; verdict='lost a race';
+    emojiEl.style.display=''; petCanvasEl.style.display='none';
+    emojiEl.textContent=PETS[opponentPick].emoji;
+    document.getElementById('result-title').textContent=`${p2label} WINS!`;
+    document.getElementById('res-winner').textContent=p2label;
+    document.getElementById('result-reward').textContent='+10 pts — good try!';
   }
+
+  record = PetSave.awardPoints(activeKey, points, { location:'racetrack', reason:verdict, careDelta });
+  document.getElementById('res-points').textContent='+'+points;
+
   document.getElementById('res-p1-taps').textContent=race.p1.taps;
   document.getElementById('res-p2-taps').textContent=`${race.p2.taps}${mode==='cpu'?' (cpu)':''}`;
   showScreen('result');
+
+  sessionStorage.setItem('pet-plaza-flash', JSON.stringify({ location:'racetrack', points, note:verdict }));
 }
 
 document.getElementById('btn-rematch').addEventListener('click',beginCountdown);
-document.getElementById('btn-res-menu').addEventListener('click',()=>{race=null;showScreen('menu')});
+document.getElementById('btn-plaza').addEventListener('click',()=>{location.href='index.html'});
 
 window.addEventListener('resize',()=>{
   if(!screens.race.classList.contains('active')||!race) return;

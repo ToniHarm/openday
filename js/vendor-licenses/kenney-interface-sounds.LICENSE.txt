@@ -1,0 +1,22 @@
+Interface Sounds (1.0)
+by Kenney (www.kenney.nl)
+
+Vendored files: sounds/*.wav — renamed for this project's own sound-id
+naming scheme (chomp.wav, flap.wav, mash.wav, turbo.wav, win.wav, clean.wav,
+serve-good.wav, error.wav, laugh.wav, select.wav, discipline.wav, bedtime.wav)
+from Kenney's original files (glass_001, select_003, pluck_001/002,
+confirmation_001/002, scratch_002, error_003, bong_001, select_001/005,
+glass_003 respectively).
+
+Fetched from https://github.com/Calinou/kenney-interface-sounds
+(a repackaging of Kenney's original "Interface Sounds" pack, files unchanged)
+
+License: Creative Commons Zero (CC0)
+http://creativecommons.org/publicdomain/zero/1.0/
+
+This content is free to use in personal, educational and commercial projects,
+with no attribution required. Credited here anyway, per Kenney's request.
+
+Kenney: https://kenney.nl
+Kenney's Interface Sounds pack: https://kenney.nl/assets/interface-sounds
+Donate: http://support.kenney.nl

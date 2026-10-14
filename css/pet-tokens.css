@@ -1,0 +1,28 @@
+@font-face {
+  font-family: "Press Start 2P";
+  src: url("../fonts/PressStart2P-Regular.ttf") format("truetype");
+  font-display: swap;
+}
+
+:root {
+  /* shell palette — the plastic toy body, outside the screen */
+  --shell-pink: #FFD6E8;
+  --shell-lavender: #E3D4FF;
+  --shell-blue: #CFEFFF;
+  --cream: #FFF8F2;
+  --accent: #FF5FA2;
+  --gold: #FFD873;
+  --ink: #4A2E55;
+
+  /* screen / pixel palette — punchier, matches real color-LCD sprites */
+  --screen-bg: #EAFBFF;
+  --px-pink: #FF6FB5;
+  --px-gold: #FFCB3D;
+  --px-purple: #B98AFF;
+  --px-mint: #4DE0C4;
+  --px-outline: #4A2E55;
+  --px-white: #FFFFFF;
+
+  --font-shell: "Baloo 2", "Trebuchet MS", "Comic Sans MS", cursive, sans-serif;
+  --font-screen: "Press Start 2P", monospace;
+}

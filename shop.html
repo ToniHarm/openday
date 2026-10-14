@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Shop — Tamagotchi Plaza</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎀</text></svg>">
+<link rel="stylesheet" href="css/pet-tokens.css">
+<style>
+  *,*::before,*::after{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%;overflow:hidden}
+  body{font-family:var(--font-shell);color:var(--ink);background:var(--cream);display:flex;align-items:center;justify-content:center}
+
+  #shell{
+    position:relative;width:min(94vw,480px);height:min(94vh,780px);
+    background:linear-gradient(160deg,var(--shell-pink),var(--shell-lavender) 55%,var(--shell-blue));
+    border-radius:46% 46% 40% 40%/30% 30% 24% 24%;
+    box-shadow:10px 10px 0 rgba(74,46,85,.28),0 0 0 6px rgba(255,255,255,.35) inset;
+    display:flex;flex-direction:column;align-items:center;padding:26px 20px 18px;isolation:isolate;
+  }
+  .shell-nameplate{
+    font-family:var(--font-shell);font-weight:700;font-size:1rem;letter-spacing:.04em;
+    color:var(--ink);text-align:center;margin-bottom:12px;text-shadow:1px 1px 0 rgba(255,255,255,.6);
+  }
+  #lcd-screen{
+    position:relative;flex:0 1 570px;min-height:0;width:min(78%,360px);
+    background:var(--screen-bg);border-radius:18px;
+    box-shadow:0 0 0 8px var(--ink),inset 0 0 14px rgba(74,46,85,.25);overflow:hidden;
+    display:flex;flex-direction:column;
+  }
+  .abc-buttons{display:flex;gap:22px;margin-top:16px}
+  .abc-btn{
+    width:34px;height:34px;border-radius:50%;background:var(--accent);
+    box-shadow:0 4px 0 rgba(74,46,85,.3);display:flex;align-items:center;justify-content:center;
+    font-family:var(--font-shell);font-weight:700;font-size:.75rem;color:white;user-select:none;
+  }
+
+  #shop-hud{
+    display:flex;justify-content:space-between;align-items:center;
+    padding:10px 12px;font-family:var(--font-screen);font-size:.5rem;
+    border-bottom:3px solid var(--ink);flex-shrink:0;
+  }
+  #shop-points{background:var(--gold);border:2px solid var(--ink);border-radius:14px;padding:6px 10px}
+  .plaza-btn{
+    font-size:.9rem;min-width:38px;min-height:38px;border-radius:8px;
+    border:2px solid var(--ink);background:white;cursor:pointer;touch-action:manipulation;
+  }
+
+  #pet-preview-wrap{display:flex;flex-direction:column;align-items:center;padding:10px 0 6px;flex-shrink:0}
+  #pet-preview-canvas{width:100px;height:100px}
+  #pet-preview-label{font-family:var(--font-screen);font-size:.45rem;text-align:center;margin-top:2px}
+
+  #item-grid{
+    flex:1;min-height:0;overflow-y:auto;display:grid;
+    grid-template-columns:1fr 1fr;gap:8px;padding:8px 10px 14px;
+  }
+  .item-card{
+    background:white;border:3px solid var(--ink);border-radius:14px;
+    padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:3px;
+    cursor:pointer;touch-action:manipulation;font-family:var(--font-shell);
+  }
+  .item-card:active{transform:translateY(2px)}
+  .item-emoji{font-size:1.8rem}
+  .item-name{font-family:var(--font-screen);font-size:.4rem;text-align:center;line-height:1.5}
+  .item-status{
+    font-family:var(--font-screen);font-size:.38rem;padding:3px 8px;border-radius:10px;
+    border:2px solid var(--ink);margin-top:2px;white-space:nowrap;
+  }
+  .status-buy{background:var(--px-gold)}
+  .status-equip{background:var(--screen-bg)}
+  .status-equipped{background:var(--px-mint)}
+  .status-locked{background:#ddd;opacity:.7}
+
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    font-family:var(--font-screen);font-size:.55rem;background:var(--ink);color:white;
+    padding:10px 16px;border-radius:12px;opacity:0;pointer-events:none;
+    transition:opacity .25s,transform .25s;z-index:50;text-align:center;max-width:80vw;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  @media(min-width:900px) and (min-height:800px){
+    #shell{width:min(90vw,560px);height:min(92vh,860px);padding:30px 26px 22px}
+    #lcd-screen{width:min(80%,420px);flex-basis:640px}
+  }
+</style>
+</head>
+<body>
+<div id="shell">
+  <div class="shell-nameplate">✧ Shop ✧</div>
+  <div id="lcd-screen">
+    <div id="shop-hud">
+      <span id="shop-points">0 PTS</span>
+      <button class="plaza-btn" id="plaza-btn" aria-label="Return to Plaza">🏙️</button>
+    </div>
+    <div id="pet-preview-wrap">
+      <canvas id="pet-preview-canvas" width="120" height="120"></canvas>
+      <p id="pet-preview-label">tap an item to try it on</p>
+    </div>
+    <div id="item-grid"></div>
+  </div>
+  <div class="abc-buttons">
+    <div class="abc-btn">A</div><div class="abc-btn">B</div><div class="abc-btn">C</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="js/pet-save.js"></script>
+<script src="js/pet-render.js"></script>
+<script src="js/vendor/three.min.js"></script>
+<script src="js/pet-render-3d.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var activeKey = sessionStorage.getItem("active-pet-key");
+  var record = activeKey ? PetSave.load(activeKey) : null;
+  if (!record) { location.href = "index.html"; return; }
+
+  var previewCanvas = document.getElementById("pet-preview-canvas");
+  var previewLabel = document.getElementById("pet-preview-label");
+  var pointsEl = document.getElementById("shop-points");
+  var gridEl = document.getElementById("item-grid");
+  var toastEl = document.getElementById("toast");
+  var toastTimer = null;
+
+  function showToast(text) {
+    toastEl.textContent = text;
+    toastEl.classList.add("show");
+    if (toastTimer) clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 2200);
+  }
+
+  function equippedIds() {
+    return Object.values(record.appearance.cosmetics.equipped).filter(Boolean);
+  }
+
+  // real 3D voxel preview when available (rotating slowly so it reads as
+  // genuinely 3D, not just a static render); falls back to the flat pixel-art
+  // canvas if WebGL isn't available on this device
+  var use3D = typeof PetRender3D !== "undefined" && PetRender3D.isAvailable();
+  var rotation = 0;
+  var rotateTimer = null;
+
+  function renderPreview() {
+    var petOpts = {
+      stage: record.appearance.growthStage,
+      form: record.appearance.form,
+      baseColor: record.appearance.petColor,
+      cosmetics: equippedIds(),
+    };
+    if (use3D) {
+      petOpts.rotationY = rotation;
+      var ok = PetRender3D.renderToCanvas(previewCanvas, petOpts);
+      if (!ok) { use3D = false; stopRotation(); PetRender.renderPet(previewCanvas, petOpts); }
+    } else {
+      PetRender.renderPet(previewCanvas, petOpts);
+    }
+    pointsEl.textContent = record.points.balance + " PTS";
+  }
+
+  function startRotation() {
+    if (!use3D || rotateTimer) return;
+    rotateTimer = setInterval(function () {
+      rotation += 0.06;
+      renderPreview();
+    }, 125); // ~8fps — plenty smooth for a slow idle spin, cheap on a booth laptop
+  }
+  function stopRotation() {
+    if (rotateTimer) { clearInterval(rotateTimer); rotateTimer = null; }
+  }
+
+  function renderGrid() {
+    gridEl.innerHTML = "";
+    PetRender.COSMETIC_CATALOG.forEach(function (item) {
+      var owned = record.appearance.cosmetics.owned.indexOf(item.id) !== -1;
+      var equipped = record.appearance.cosmetics.equipped[item.slot] === item.id;
+      var card = document.createElement("button");
+      card.className = "item-card";
+      var statusHtml;
+      if (equipped) statusHtml = '<span class="item-status status-equipped">EQUIPPED</span>';
+      else if (owned) statusHtml = '<span class="item-status status-equip">EQUIP</span>';
+      else if (record.points.balance >= item.cost) statusHtml = '<span class="item-status status-buy">' + item.cost + ' PTS</span>';
+      else statusHtml = '<span class="item-status status-locked">' + item.cost + ' PTS</span>';
+      card.innerHTML =
+        '<span class="item-emoji">' + item.emoji + '</span>' +
+        '<span class="item-name">' + item.name + '</span>' +
+        statusHtml;
+      card.addEventListener("click", function () { handleTap(item, owned, equipped); });
+      gridEl.appendChild(card);
+    });
+  }
+
+  function handleTap(item, owned, equipped) {
+    if (equipped) {
+      record.appearance.cosmetics.equipped[item.slot] = null;
+      PetSave.save(record);
+      showToast("took off " + item.name.toLowerCase());
+    } else if (owned) {
+      record.appearance.cosmetics.equipped[item.slot] = item.id;
+      PetSave.save(record);
+      showToast("wearing " + item.name.toLowerCase() + "!");
+    } else {
+      var result = PetSave.spendPoints(activeKey, item.cost, { reason: "bought " + item.name.toLowerCase() });
+      if (!result.ok) {
+        showToast("not enough points — need " + item.cost);
+        return;
+      }
+      record = result.record;
+      record.appearance.cosmetics.owned.push(item.id);
+      record.appearance.cosmetics.equipped[item.slot] = item.id;
+      PetSave.save(record);
+      showToast("bought & wearing " + item.name.toLowerCase() + "!");
+    }
+    renderPreview();
+    renderGrid();
+  }
+
+  document.getElementById("plaza-btn").addEventListener("click", function () {
+    location.href = "index.html";
+  });
+
+  renderPreview();
+  renderGrid();
+  startRotation();
+})();
+</script>
+</body>
+</html>

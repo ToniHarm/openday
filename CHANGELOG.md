@@ -2,6 +2,76 @@
 
 All notable changes to the `tamagotchi-speedrun.html` booth game are logged here.
 
+## 2026-09-30 — Redesign: mini-games as the spine, pet-care as framing
+
+A deliberate reframe, not a tweak: talking through how the mini-games (the
+embedded bonus round, plus the separate Don't Laugh game) fit the booth, it
+became clear the old real-time survival sim was the wrong shape for walk-up
+students — a failed run mid-crowd feels bad, and stacking mini-games onto a
+decay clock only made that worse. Full design writeup in
+`tamagotchi-speedrun-updates.md`'s history / the session's plan doc.
+
+**Changed — the whole run structure**
+- Survival/fail states are gone entirely: no more continuous hunger/happy
+  decay, no sickness mechanic, no way to lose a run.
+- A run is now a fixed sequence of six short, no-fail "beats," each reusing
+  an existing gesture mechanic: **Feed** (drag food, twice) → **Flappy**
+  (the existing bonus-round mini-game, now the main event instead of a
+  combo-triggered bonus) → **Clean** (sponge the mess) → **Don't Laugh
+  invite** (optional — "PLAY WITH A FRIEND" or "SKIP") → **Attention**
+  (scold to resolve a call) → **Bedtime** (hold to sleep) → **Reveal**.
+- The adult-form evolution (Glimmerling/Wobblet/Grumplet) is now decided by a
+  composite score from each beat's discrete outcome (feed quality, happy at
+  reveal, discipline, Flappy success, Don't Laugh result) instead of
+  continuous stat sampling — same 0.70/0.40 threshold shape as before.
+- **Leaderboard now ranks by a 0-100 care score** ("87 PTS · GLIMMERLING")
+  instead of survival time, since there's no clock to race anymore.
+- **Don't Laugh handoff**: choosing "PLAY WITH A FRIEND" on the invite beat
+  navigates to `dont-laugh.html?from=speedrun` with run state stashed in
+  `sessionStorage`; Don't Laugh's results screen gets a new "🐣 BACK TO PET"
+  button (shown only when launched this way) that hands the laugh result
+  back and returns to `tamagotchi-speedrun.html?resume=1`, resuming right at
+  the Attention beat.
+- Hand tracking (opt-in webcam gestures) needed no changes to its own code —
+  it only ever called the same touch-input action functions, which kept
+  their names/signatures. Added an explicit beat guard to `resolveFoodEaten()`
+  and `cleanPoop()` so a stray gesture outside their beat can't fire them
+  (they previously relied on the food/sponge items just not being visible,
+  which touch respects but a direct gesture call doesn't).
+
+**Fixed — pre-existing bugs found while rewriting this code** (predate this
+session, likely from an earlier branch merge; unrelated to the redesign but
+found because this pass touched the surrounding code)
+- The live file would not run in a browser at all: `ICON_GRIDS.heartEmpty`'s
+  `rows` array, `ICON_GRIDS`'s closing braces, and the `drawGrid()` function
+  declaration line had gone missing, and `clearCanvas()` was missing its
+  `clearRect()` call (canvases were never actually cleared before redraw).
+  All restored.
+- The sponge-cleaning icon (`ICON_GRIDS.sponge`) had been lost in a merge —
+  the sponge item referenced it but the entry didn't exist, throwing on
+  load. Re-added.
+- `endSleepResponse()`'s discipline bonus for catching bedtime
+  (`applyDeltas({ happy: 5, discipline: 5 })`) silently did nothing —
+  `applyDeltas` only touches `state.stats`, and `discipline` lives on
+  `state.discipline` directly. Fixed to update it directly.
+
+**Verified**
+- `test-sprites.ps1` and `test-frame-picker.ps1` both still pass unchanged.
+- A scripted full play-through (touch input, via Playwright) completes
+  start-to-reveal with zero console errors.
+- A scripted full handoff round-trip (Speedrun → Don't Laugh bot mode →
+  back) completes correctly, resuming at the Attention beat with prior
+  state intact.
+
+**Known limitations / open items**
+- The composite score's weighting (0.30/0.25/0.20/0.15/0.10) and a skipped
+  Don't Laugh scoring a neutral 0.5 rather than renormalizing the other
+  weights are first-pass choices pending playtesting, same as the rest of
+  this game's tuning.
+- No real-hardware pass yet for the new beat flow specifically (the
+  hand-tracking gesture gating was reasoned through and unit-verified, but
+  not tried with a real camera against the new beat sequence).
+
 ## 2026-09-24 — Hand tracking (webcam gestures, additive)
 
 The remaining item from `tamagotchi-speedrun-updates.md`, built after confirming scope:
